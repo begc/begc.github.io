@@ -2,7 +2,7 @@
 
 layout: '../../layouts/MarkdownPost.astro'
 title: 'nacos 访问策略'
-pubDate: 2023-05-10
+pubDate: 2026-04-22
 description: 'nacos 访问策略配置'
 author: 'zhourj'
 cover:

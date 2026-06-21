@@ -1,7 +1,7 @@
 ---
 layout: '../../layouts/MarkdownPost.astro'
 title: 'Centos 9 Stream 安装 mysql 8'
-pubDate: 2023-04-03
+pubDate: 2025-11-05
 description: '学习搭建mysql 8'
 cover:
     url: 'https://p.ipic.vip/et8ed5.jpg'

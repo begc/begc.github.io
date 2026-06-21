@@ -1,7 +1,7 @@
 ---
 layout: '../../layouts/MarkdownPost.astro'
 title: 'HADOOP_MapReduce理论学习'
-pubDate: 2023-03-30
+pubDate: 2025-09-23
 description: ' 通过搭建 MapReduce，学习 MapReduce 架构与源码'
 cover:
     url: 'https://p.ipic.vip/nfbxie.jpg'

@@ -1,7 +1,7 @@
 ---
 layout: '../../layouts/MarkdownPost.astro'
 title: 'Centos7 iptables 设置策略'
-pubDate: 2023-03-20
+pubDate: 2025-07-09
 description: ' 通过对iptables的策略设置进行指定ip地址或指定端口的访问'
 author: 'zhourj'
 cover:

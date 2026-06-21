@@ -1,7 +1,7 @@
 ---
 layout: '../../layouts/MarkdownPost.astro'
 title: 'KAFKA组件搭建'
-pubDate: 2023-05-11
+pubDate: 2026-06-10
 description: '学习搭建KAFKA'
 cover:
     url: 'https://p.ipic.vip/g094hk.jpg'

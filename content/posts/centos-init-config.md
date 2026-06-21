@@ -2,7 +2,7 @@
 
 layout: '../../layouts/MarkdownPost.astro'
 title: 'Centos9 Stream 开局配置'
-pubDate: 2023-03-06
+pubDate: 2025-03-06
 description: '体验 CentOs9以及进行基础配置'
 author: 'zhourj'
 cover:

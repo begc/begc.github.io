@@ -1,7 +1,7 @@
 ---
 layout: '../../layouts/MarkdownPost.astro'
 title: 'HADOOP理论学习'
-pubDate: 2023-03-08
+pubDate: 2025-05-18
 description: '学习搭建hadoop_hdfs'
 cover:
     url: 'https://p.ipic.vip/i7jtoj.png'

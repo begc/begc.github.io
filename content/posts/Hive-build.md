@@ -2,7 +2,7 @@
 
 layout: '../../layouts/MarkdownPost.astro'
 title: 'Hive搭建'
-pubDate: 2023-04-03
+pubDate: 2025-12-18
 description: 'hive 搭建学习'
 author: 'zhourj'
 cover:

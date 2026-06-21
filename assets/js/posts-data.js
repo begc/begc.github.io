@@ -4,7 +4,7 @@ window.BLOG_POSTS = [
     "file": "content/posts/kafka-build.md",
     "title": "KAFKA组件搭建",
     "description": "学习搭建KAFKA",
-    "date": "2023-05-11",
+    "date": "2026-06-10",
     "author": "begc",
     "tags": [
       "linux",
@@ -20,7 +20,7 @@ window.BLOG_POSTS = [
     "file": "content/posts/nacosAccessPolicy.md",
     "title": "nacos 访问策略",
     "description": "nacos 访问策略配置",
-    "date": "2023-05-10",
+    "date": "2026-04-22",
     "author": "zhourj",
     "tags": [
       "Centos",
@@ -37,7 +37,7 @@ window.BLOG_POSTS = [
     "file": "content/posts/memoryOverflowTroubleshooting.md",
     "title": "内存溢出排查步骤",
     "description": "内存溢出排查",
-    "date": "2023-05-10",
+    "date": "2026-03-14",
     "author": "zhourj",
     "tags": [
       "Centos",
@@ -54,7 +54,7 @@ window.BLOG_POSTS = [
     "file": "content/posts/hivetheorystudy.md",
     "title": "Hive 理论研究学习",
     "description": " 学习hive理论",
-    "date": "2023-04-07",
+    "date": "2026-01-20",
     "author": " zhourj",
     "tags": [
       "源码研究",
@@ -67,27 +67,11 @@ window.BLOG_POSTS = [
     "readMinutes": 55
   },
   {
-    "slug": "install-mysql8-arch",
-    "file": "content/posts/install-mysql8-arch.md",
-    "title": "Centos 9 Stream 安装 mysql 8",
-    "description": "学习搭建mysql 8",
-    "date": "2023-04-03",
-    "author": "begc",
-    "tags": [
-      "hadoop",
-      "节点搭建"
-    ],
-    "category": "大数据工程",
-    "cover": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80",
-    "featured": false,
-    "readMinutes": 1
-  },
-  {
     "slug": "Hive-build",
     "file": "content/posts/Hive-build.md",
     "title": "Hive搭建",
     "description": "hive 搭建学习",
-    "date": "2023-04-03",
+    "date": "2025-12-18",
     "author": "zhourj",
     "tags": [
       "Centos",
@@ -100,11 +84,27 @@ window.BLOG_POSTS = [
     "readMinutes": 2
   },
   {
+    "slug": "install-mysql8-arch",
+    "file": "content/posts/install-mysql8-arch.md",
+    "title": "Centos 9 Stream 安装 mysql 8",
+    "description": "学习搭建mysql 8",
+    "date": "2025-11-05",
+    "author": "begc",
+    "tags": [
+      "hadoop",
+      "节点搭建"
+    ],
+    "category": "大数据工程",
+    "cover": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80",
+    "featured": false,
+    "readMinutes": 1
+  },
+  {
     "slug": "hadoopMapReduceTheoryStudy",
     "file": "content/posts/hadoopMapReduceTheoryStudy.md",
     "title": "HADOOP_MapReduce理论学习",
     "description": " 通过搭建 MapReduce，学习 MapReduce 架构与源码",
-    "date": "2023-03-30",
+    "date": "2025-09-23",
     "author": "begc",
     "tags": [
       "hadoop",
@@ -121,7 +121,7 @@ window.BLOG_POSTS = [
     "file": "content/posts/mapreduce-build.md",
     "title": "HADOOP_MapReduce搭建",
     "description": "学习搭建hadoop_mapreduce",
-    "date": "2023-03-29",
+    "date": "2025-08-16",
     "author": "begc",
     "tags": [
       "hadoop",
@@ -137,7 +137,7 @@ window.BLOG_POSTS = [
     "file": "content/posts/centos-iptablesconfig.md",
     "title": "Centos7 iptables 设置策略",
     "description": " 通过对iptables的策略设置进行指定ip地址或指定端口的访问",
-    "date": "2023-03-20",
+    "date": "2025-07-09",
     "author": "zhourj",
     "tags": [
       "源码研究",
@@ -150,27 +150,11 @@ window.BLOG_POSTS = [
     "readMinutes": 1
   },
   {
-    "slug": "hadoop-build",
-    "file": "content/posts/hadoop-build.md",
-    "title": "HADOOP_HDFS搭建",
-    "description": "学习搭建hadoop_hdfs",
-    "date": "2023-03-08",
-    "author": "begc",
-    "tags": [
-      "hadoop",
-      "节点搭建"
-    ],
-    "category": "大数据工程",
-    "cover": "https://images.unsplash.com/photo-1518779578993-ec3579fee39f?auto=format&fit=crop&w=1200&q=80",
-    "featured": false,
-    "readMinutes": 5
-  },
-  {
     "slug": "hadoopTheoryStudy",
     "file": "content/posts/hadoopTheoryStudy.md",
     "title": "HADOOP理论学习",
     "description": "学习搭建hadoop_hdfs",
-    "date": "2023-03-08",
+    "date": "2025-05-18",
     "author": "begc",
     "tags": [
       "源码研究",
@@ -183,11 +167,27 @@ window.BLOG_POSTS = [
     "readMinutes": 14
   },
   {
+    "slug": "hadoop-build",
+    "file": "content/posts/hadoop-build.md",
+    "title": "HADOOP_HDFS搭建",
+    "description": "学习搭建hadoop_hdfs",
+    "date": "2025-04-12",
+    "author": "begc",
+    "tags": [
+      "hadoop",
+      "节点搭建"
+    ],
+    "category": "大数据工程",
+    "cover": "https://images.unsplash.com/photo-1518779578993-ec3579fee39f?auto=format&fit=crop&w=1200&q=80",
+    "featured": false,
+    "readMinutes": 5
+  },
+  {
     "slug": "centos-init-config",
     "file": "content/posts/centos-init-config.md",
     "title": "Centos9 Stream 开局配置",
     "description": "体验 CentOs9以及进行基础配置",
-    "date": "2023-03-06",
+    "date": "2025-03-06",
     "author": "zhourj",
     "tags": [
       "Centos",
@@ -204,7 +204,7 @@ window.BLOG_POSTS = [
     "file": "content/posts/golang.md",
     "title": "Golang net/http & HTTP Serve 源码分析",
     "description": "很多Go web框架都通过封装 net/http 来实现核心功能，因此学习 net/http 是研究 Gin等框架的基础。",
-    "date": "2022-06-01",
+    "date": "2025-01-18",
     "author": "Austin",
     "tags": [
       "源码研究",
@@ -216,22 +216,5 @@ window.BLOG_POSTS = [
     "cover": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=1200&q=80",
     "featured": false,
     "readMinutes": 7
-  },
-  {
-    "slug": "apple-introduces-the-new-homepod-with-breakthrough-sound-and-intelligence",
-    "file": "content/posts/apple-introduces-the-new-homepod-with-breakthrough-sound-and-intelligence.md",
-    "title": "Apple 推出新款 HomePod，带来突破性音质与智能体验",
-    "description": "呈现出类拔萃的音质、增强的 Siri 功能以及安全放心的智能家居体验",
-    "date": "2022-03-25",
-    "author": "Apple Newsroom",
-    "tags": [
-      "新闻稿",
-      "Apple",
-      "HomePod"
-    ],
-    "category": "观察记录",
-    "cover": "https://images.unsplash.com/photo-1545454675-3531b543be5d?auto=format&fit=crop&w=1200&q=80",
-    "featured": true,
-    "readMinutes": 8
   }
 ];

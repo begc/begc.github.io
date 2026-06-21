@@ -1,7 +1,7 @@
 ---
 layout: '../../layouts/MarkdownPost.astro'
 title: 'HADOOP_HDFS搭建'
-pubDate: 2023-03-08
+pubDate: 2025-04-12
 description: '学习搭建hadoop_hdfs'
 cover:
     url: 'https://p.ipic.vip/i7jtoj.png'
