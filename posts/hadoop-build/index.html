@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="description" content="学习搭建hadoop_hdfs"/>
+  <meta name="author" content="begc"/>
+  <meta name="robots" content="index,follow,max-image-preview:large"/>
+  <link rel="canonical" href="https://begc.github.io/posts/hadoop-build/"/>
+  <meta property="og:type" content="article"/>
+  <meta property="og:site_name" content="RuiJie Notes"/>
+  <meta property="og:title" content="HADOOP_HDFS搭建"/>
+  <meta property="og:description" content="学习搭建hadoop_hdfs"/>
+  <meta property="og:url" content="https://begc.github.io/posts/hadoop-build/"/>
+  <meta property="og:image" content="https://images.unsplash.com/photo-1518779578993-ec3579fee39f?auto=format&amp;fit=crop&amp;w=1200&amp;q=80"/>
+  <meta property="article:published_time" content="2023-03-08"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="HADOOP_HDFS搭建"/>
+  <meta name="twitter:description" content="学习搭建hadoop_hdfs"/>
+  <meta name="twitter:image" content="https://images.unsplash.com/photo-1518779578993-ec3579fee39f?auto=format&amp;fit=crop&amp;w=1200&amp;q=80"/>
+  <title>HADOOP_HDFS搭建 · RuiJie Notes</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin/>
+  <link rel="stylesheet" href="../../assets/css/site.css?v=20260619-11"/>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"HADOOP_HDFS搭建","description":"学习搭建hadoop_hdfs","datePublished":"2023-03-08","dateModified":"2023-03-08","author":{"@type":"Person","name":"begc"},"publisher":{"@type":"Person","name":"begc"},"mainEntityOfPage":"https://begc.github.io/posts/hadoop-build/","image":"https://images.unsplash.com/photo-1518779578993-ec3579fee39f?auto=format&fit=crop&w=1200&q=80"}</script>
+</head>
+<body data-page="post">
+  <a class="skip-link" href="#main">跳到正文</a>
+  <div class="read-progress" aria-hidden="true"></div>
+  <nav class="site-nav" aria-label="主导航">
+    <div class="nav-inner">
+      <a class="brand" href="../../index.html" aria-label="RuiJie Notes 首页">
+        <span class="brand-mark">bg</span>
+        <span class="brand-text">
+          <span class="brand-name">RuiJie Notes</span>
+          <span class="brand-sub">Big Data · Linux · Source</span>
+        </span>
+      </a>
+      <button class="icon-button nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-label="打开菜单"><i data-lucide="menu"></i></button>
+      <div class="nav-panel">
+        <div class="nav-links">
+          <a class="nav-link" data-page="home" href="../../index.html">首页</a>
+          <a class="nav-link" data-page="posts" href="../../posts.html">文章</a>
+          <a class="nav-link" data-page="tags" href="../../tags.html">专题</a>
+          <a class="nav-link" data-page="about" href="../../about.html">关于</a>
+        </div>
+        <div class="nav-actions">
+          <a class="icon-link" href="https://github.com/begc" target="_blank" rel="noopener" aria-label="GitHub"><i data-lucide="github"></i></a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="page-main" id="main">
+    <div class="detail-shell">
+      <aside class="toc-wrap">
+        <span class="toc-label">目录</span>
+        <nav class="toc" id="toc" aria-label="文章目录"><a class="depth-2" href="#在搭建之前-可以先看我博客当中的centos-stream9的搭建步骤-完成集群的基础配置-设置需要四个节点">在搭建之前，可以先看我博客当中的centos stream9的搭建步骤，完成集群的基础配置,设置需要四个节点。</a><a class="depth-3" href="#一-搭建伪分布式hadoop-所有角色设在一个节点">一、搭建伪分布式hadoop(所有角色设在一个节点)</a><a class="depth-4" href="#1-在集群中-首先创建新的文件目录">1. 在集群中，首先创建新的文件目录</a><a class="depth-4" href="#2-从sftp上传hadoop-jar包-并解压到bigdata-目录下">2. 从sftp上传hadoop jar包，并解压到bigdata 目录下</a><a class="depth-4" href="#3-修改环境变量">3.修改环境变量</a><a class="depth-4" href="#4-配置hadoop的角色">4.配置hadoop的角色</a><a class="depth-4" href="#5-初始化并启动">5.初始化并启动</a><a class="depth-4" href="#6-更改电脑-hosts-文件-配置与服务器相同的ip地址与hostname做对应">6.更改电脑 hosts 文件，配置与服务器相同的ip地址与hostname做对应</a><a class="depth-4" href="#7-打开-http-node01-50070">7.打开 http://node01:50070</a><a class="depth-4" href="#8-简单使用">8.简单使用</a><a class="depth-3" href="#二-搭建完全分布式集群hadoop-全部角色在一个节点">二、搭建完全分布式集群hadoop(全部角色在一个节点)</a><a class="depth-4" href="#1-角色重新规划">1.角色重新规划</a><a class="depth-3" href="#三-搭建高可用模式-hadoop-ha-模式">三、搭建高可用模式 hadoop(HA 模式)</a><a class="depth-4" href="#1-ha模式下-有一个问题-你的nn是2台-在某一时刻-谁是active呢-client是只能连接active-修改配置文件并给每一套都分发-scp">1.HA模式下：有一个问题，你的NN是2台？在某一时刻，谁是Active呢？client是只能连接Active。修改配置文件并给每一套都分发(scp ...)</a><a class="depth-4" href="#2-流程">2. 流程。</a><a class="depth-4" href="#3-实操">3. 实操。</a><a class="depth-3" href="#四-用户-hdfs权限">四、用户 HDFS权限</a><a class="depth-4" href="#1-理论">1.理论</a><a class="depth-4" href="#2-实操">2.实操</a><a class="depth-4" href="#3-用户权限认证">3.用户权限认证</a><a class="depth-3" href="#五-idea-实操">五、IDEA 实操</a></nav>
+      </aside>
+
+      <article class="article">
+        <header class="article-header reveal">
+          <span class="eyebrow">hadoop · 节点搭建</span>
+          <h1 class="article-title">HADOOP_HDFS搭建</h1>
+          <p class="article-description">学习搭建hadoop_hdfs</p>
+          <div class="post-meta-line">
+            <span>begc</span>
+            <span class="dot"></span>
+            <span>2023.03.08</span>
+            <span class="dot"></span>
+            <span>5 min read</span>
+            <span class="dot"></span>
+            <span>大数据工程</span>
+          </div>
+          <figure class="article-cover">
+            <img src="https://images.unsplash.com/photo-1518779578993-ec3579fee39f?auto=format&amp;fit=crop&amp;w=1200&amp;q=80" alt="HADOOP_HDFS搭建" loading="eager" decoding="async"/>
+          </figure>
+        </header>
+
+        <div class="markdown-body article-body reveal">
+<p>2023-03-08 16:57</p>
+<h2 id="在搭建之前-可以先看我博客当中的centos-stream9的搭建步骤-完成集群的基础配置-设置需要四个节点">在搭建之前，可以先看我博客当中的centos stream9的搭建步骤，完成集群的基础配置,设置需要四个节点。</h2>
+<h3 id="一-搭建伪分布式hadoop-所有角色设在一个节点">一、搭建伪分布式hadoop(所有角色设在一个节点)</h3>
+<h4 id="1-在集群中-首先创建新的文件目录">1. 在集群中，首先创建新的文件目录</h4>
+<pre data-lang="xml"><code>mkdir /opt/bigdata</code></pre>
+<p><img src="../../assets/img/article-image-unavailable.svg" alt="创建目录如下 |inline" loading="lazy" decoding="async"/></p>
+<h4 id="2-从sftp上传hadoop-jar包-并解压到bigdata-目录下">2. 从sftp上传hadoop jar包，并解压到bigdata 目录下</h4>
+<pre data-lang="xml"><code>tar -xf hadoop-2.6.5.tar.gz</code></pre>
+<p><img src="../../assets/img/article-image-unavailable.svg" alt="解压后如下图 |inline" loading="lazy" decoding="async"/></p>
+<h4 id="3-修改环境变量">3.修改环境变量</h4>
+<pre data-lang="xml"><code>vim /etc/profile	
+export  JAVA_HOME=/usr/java/default
+export  HADOOP_HOME=/opt/bigdata/hadoop-2.6.5
+export PATH=$PATH:$JAVA_HOME/bin:$HADOOP_HOME/bin:$HADOOP_HOME/sbin
+source /etc/profile</code></pre>
+<h4 id="4-配置hadoop的角色">4.配置hadoop的角色</h4>
+<p>4.1 必须给hadoop配置javahome要不ssh过去找不到</p>
+<pre data-lang="xml"><code>cd $HADOOP_HOME/etc/hadoop
+vim hadoop-env.sh
+export JAVA_HOME=/usr/java/default</code></pre>
+<p><img src="../../assets/img/article-image-unavailable.svg" alt="修改配置环境 |inline" loading="lazy" decoding="async"/></p>
+<p>4.2  给出NN角色在哪里启动以及datanode和 secondarynode 地址</p>
+<pre data-lang="xml"><code>vim core-site.xml
+		&lt;property&gt;
+			&lt;name&gt;fs.defaultFS&lt;/name&gt;
+			&lt;value&gt;hdfs://node01:9000&lt;/value&gt;
+		&lt;/property&gt;
+		配置hdfs  副本数为1.。。。
+vim hdfs-site.xml
+		&lt;property&gt;
+			&lt;name&gt;dfs.replication&lt;/name&gt;
+			&lt;value&gt;1&lt;/value&gt;
+		&lt;/property&gt;
+	给出存放数据的地址，hdfs映射本地的路径，是一个文件管理系统
+		&lt;property&gt;
+			&lt;name&gt;dfs.namenode.name.dir&lt;/name&gt;
+			&lt;value&gt;/var/bigdata/hadoop/local/dfs/name&lt;/value&gt;
+		&lt;/property&gt;
+		&lt;property&gt;
+			&lt;name&gt;dfs.datanode.data.dir&lt;/name&gt;
+			&lt;value&gt;/var/bigdata/hadoop/local/dfs/data&lt;/value&gt;
+		&lt;/property&gt;
+		&lt;property&gt;
+			&lt;name&gt;dfs.namenode.secondary.http-address&lt;/name&gt;
+			&lt;value&gt;node01:50090&lt;/value&gt;
+		&lt;/property&gt;
+		&lt;property&gt;
+			&lt;name&gt;dfs.namenode.checkpoint.dir&lt;/name&gt;
+			&lt;value&gt;/var/bigdata/hadoop/local/dfs/secondary&lt;/value&gt;
+		&lt;/property&gt;</code></pre>
+<p>以上的配置信息可参考官网 <a href="https://hadoop.apache.org/docs/stable/hadoop-project-dist/hadoop-common/SingleCluster.html" target="_blank" rel="noopener">单节点配置hadoop信息</a></p>
+<p>4.3 配置 DN 这个角色在哪里启动</p>
+<pre data-lang="xml"><code>	vim slaves
+		node01</code></pre>
+<h4 id="5-初始化并启动">5.初始化并启动</h4>
+<pre data-lang="xml"><code>hdfs namenode -format  
+		创建目录
+		并初始化一个空的fsimage
+start-dfs.sh
+		第一次：datanode和secondary角色会初始化创建自己的数据目录</code></pre>
+<p><img src="../../assets/img/article-image-unavailable.svg" alt="去目录下查看 |inline" loading="lazy" decoding="async"/></p>
+<h4 id="6-更改电脑-hosts-文件-配置与服务器相同的ip地址与hostname做对应">6.更改电脑 hosts 文件，配置与服务器相同的ip地址与hostname做对应</h4>
+<pre data-lang="xml"><code>vim /etc/hosts
+node01 10.211.55.101
+node02 10.211.55.102
+node03 10.211.55.103
+node04 10.211.55.104</code></pre>
+<h4 id="7-打开-http-node01-50070">7.打开 http://node01:50070</h4>
+<p><img src="../../assets/img/article-image-unavailable.svg" alt="如下界面则为成功 |inline" loading="lazy" decoding="async"/></p>
+<h4 id="8-简单使用">8.简单使用</h4>
+<pre data-lang="xml"><code>hdfs dfs -mkdir /bigdata
+hdfs dfs -mkdir  -p  /user/root</code></pre>
+<h3 id="二-搭建完全分布式集群hadoop-全部角色在一个节点">二、搭建完全分布式集群hadoop(全部角色在一个节点)</h3>
+<h4 id="1-角色重新规划">1.角色重新规划</h4>
+<pre data-lang="xml"><code>stop-dfs.sh</code></pre>
+<p>1.1为什么要配置免密？ 启动start-dfs.sh：在哪里启动，那台就要对别人公开自己的公钥 1.2 配置部署</p>
+<pre data-lang="xml"><code>	node01:
+		cd $HADOOP/etc/hadoop
+		vim core-site.xml    不需要改
+		vim hdfs-site.xml
+			&lt;property&gt;
+				&lt;name&gt;dfs.replication&lt;/name&gt;
+				&lt;value&gt;2&lt;/value&gt;
+			&lt;/property&gt;
+			&lt;property&gt;
+				&lt;name&gt;dfs.namenode.name.dir&lt;/name&gt;
+				&lt;value&gt;/var/bigdata/hadoop/full/dfs/name&lt;/value&gt;
+			&lt;/property&gt;
+			&lt;property&gt;
+				&lt;name&gt;dfs.datanode.data.dir&lt;/name&gt;
+				&lt;value&gt;/var/bigdata/hadoop/full/dfs/data&lt;/value&gt;
+			&lt;/property&gt;
+			&lt;property&gt;
+				&lt;name&gt;dfs.namenode.secondary.http-address&lt;/name&gt;
+				&lt;value&gt;node02:50090&lt;/value&gt;
+			&lt;/property&gt;
+			&lt;property&gt;
+				&lt;name&gt;dfs.namenode.checkpoint.dir&lt;/name&gt;
+				&lt;value&gt;/var/bigdata/hadoop/full/dfs/secondary&lt;/value&gt;
+			&lt;/property&gt;</code></pre>
+<p>1.3配置datanode启动节点</p>
+<pre data-lang="xml"><code>	vi slaves
+			node02
+			node03
+			node04</code></pre>
+<p>1.4 将数据分发至其余节点</p>
+<pre data-lang="xml"><code>			cd /opt
+			scp -r ./bigdata/  node02:`pwd`
+			scp -r ./bigdata/  node03:`pwd`
+			scp -r ./bigdata/  node04:`pwd`</code></pre>
+<p>1.5 格式化启动</p>
+<pre data-lang="xml"><code>			hdfs namenode -format
+			start-dfs.sh</code></pre>
+<h3 id="三-搭建高可用模式-hadoop-ha-模式">三、搭建高可用模式 hadoop(HA 模式)</h3>
+<h4 id="1-ha模式下-有一个问题-你的nn是2台-在某一时刻-谁是active呢-client是只能连接active-修改配置文件并给每一套都分发-scp">1.HA模式下：有一个问题，你的NN是2台？在某一时刻，谁是Active呢？client是只能连接Active。修改配置文件并给每一套都分发(scp ...)</h4>
+<pre data-lang="xml"><code>core-site.xml
+	&lt;property&gt;
+		&lt;name&gt;fs.defaultFS&lt;/name&gt;
+		&lt;value&gt;hdfs://mycluster&lt;/value&gt;
+	&lt;/property&gt;
+
+	&lt;property&gt;
+		&lt;name&gt;ha.zookeeper.quorum&lt;/name&gt;
+		&lt;value&gt;node02:2181,node03:2181,node04:2181&lt;/value&gt;
+	&lt;/property&gt;
+hdfs-site.xml
+	#以下是  一对多，逻辑到物理节点的映射
+	&lt;property&gt;
+		&lt;name&gt;dfs.nameservices&lt;/name&gt;
+		&lt;value&gt;mycluster&lt;/value&gt;
+	&lt;/property&gt;
+	&lt;property&gt;
+		&lt;name&gt;dfs.ha.namenodes.mycluster&lt;/name&gt;
+		&lt;value&gt;nn1,nn2&lt;/value&gt;
+	&lt;/property&gt;
+	&lt;property&gt;
+		&lt;name&gt;dfs.namenode.rpc-address.mycluster.nn1&lt;/name&gt;
+		&lt;value&gt;node01:8020&lt;/value&gt;
+	&lt;/property&gt;
+	&lt;property&gt;
+		&lt;name&gt;dfs.namenode.rpc-address.mycluster.nn2&lt;/name&gt;
+		&lt;value&gt;node02:8020&lt;/value&gt;
+	&lt;/property&gt;
+	&lt;property&gt;
+		&lt;name&gt;dfs.namenode.http-address.mycluster.nn1&lt;/name&gt;
+		&lt;value&gt;node01:50070&lt;/value&gt;
+	&lt;/property&gt;
+	&lt;property&gt;
+		&lt;name&gt;dfs.namenode.http-address.mycluster.nn2&lt;/name&gt;
+		&lt;value&gt;node02:50070&lt;/value&gt;
+	&lt;/property&gt;
+
+		#以下是JN在哪里启动，数据存那个磁盘
+	&lt;property&gt;
+		&lt;name&gt;dfs.namenode.shared.edits.dir&lt;/name&gt;
+		&lt;value&gt;qjournal://node01:8485;node02:8485;node03:8485/mycluster&lt;/value&gt;
+	&lt;/property&gt;
+	&lt;property&gt;
+		&lt;name&gt;dfs.journalnode.edits.dir&lt;/name&gt;
+		&lt;value&gt;/var/bigdata/hadoop/ha/dfs/jn&lt;/value&gt;
+	&lt;/property&gt;
+		
+	#HA角色切换的代理类和实现方法，我们用的ssh免密
+	&lt;property&gt;
+		&lt;name&gt;dfs.client.failover.proxy.provider.mycluster&lt;/name&gt;
+		&lt;value&gt;org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider&lt;/value&gt;
+	&lt;/property&gt;
+	&lt;property&gt;
+		&lt;name&gt;dfs.ha.fencing.methods&lt;/name&gt;
+		&lt;value&gt;sshfence&lt;/value&gt;
+	&lt;/property&gt;
+	&lt;property&gt;
+		&lt;name&gt;dfs.ha.fencing.ssh.private-key-files&lt;/name&gt;
+		&lt;value&gt;/root/.ssh/id_dsa&lt;/value&gt;
+	&lt;/property&gt;
+		
+	#开启自动化： 启动zkfc
+	&lt;property&gt;
+		&lt;name&gt;dfs.ha.automatic-failover.enabled&lt;/name&gt;
+		&lt;value&gt;true&lt;/value&gt;
+	&lt;/property&gt;</code></pre>
+<p><img src="../../assets/img/article-image-unavailable.svg" alt="core-site.xml修改 |inline" loading="lazy" decoding="async"/> <img src="../../assets/img/article-image-unavailable.svg" alt="hdfs-site.xml |inline" loading="lazy" decoding="async"/> <img src="../../assets/img/article-image-unavailable.svg" alt="hdfs-site.xml-2 |inline" loading="lazy" decoding="async"/> 以上配置信息可在官网查看 <a href="https://hadoop.apache.org/docs/stable/hadoop-project-dist/hadoop-hdfs/HDFSHighAvailabilityWithQJM.html" target="_blank" rel="noopener">HDFS High Availability Using the Quorum Journal Manager</a></p>
+<h4 id="2-流程">2. 流程。</h4>
+<p>2.1 基础设施 2.1.1 ssh 免密 1）启动start-dfs.sh脚本的机器需要将公钥分发给别的节点 2）在HA模式下，每一个NN身边会启动ZKFC，ZKFC会用免密的方式控制自己和其他NN节点的NN状态 2.1.2 应用搭建</p>
+<ol><li>HA 依赖 ZK  搭建ZK集群</li></ol>
+<p>2）修改hadoop的配置文件，并集群同步 2.1.3 初始化启动 1）先启动JN   hadoop-daemon.sh start journalnode 2）选择一个NN 做格式化：hdfs namenode -format&lt;只有第一次搭建做，以后不用做&gt; 3)启动这个格式化的NN,以备另外一台同步 hadoop-daemon.sh start namenode 4)在另外一台机器中： hdfs namenode -bootstrapStandby 5)格式化zk：   hdfs zkfc  -formatZK  &lt;只有第一次搭建做，以后不用做&gt;</p>
+<ol><li>start-dfs.sh</li></ol>
+<h4 id="3-实操">3. 实操。</h4>
+<p>3.1 停止之前的集群 3.2 免密：node01,node02</p>
+<pre data-lang="xml"><code>		node02: 
+			cd ~/.ssh
+			ssh-keygen -t dsa -P &#039;&#039; -f ./id_dsa
+			cat id_dsa.pub &gt;&gt; authorized_keys
+			scp ./id_dsa.pub  node01:`pwd`/node02.pub
+		node01:
+			cd ~/.ssh
+			cat node02.pub &gt;&gt; authorized_keys</code></pre>
+<p>3.3 zookeeper 集群搭建，需要jdk，部署在2,3,4</p>
+<pre data-lang="xml"><code>		node02:
+			tar xf zook....tar.gz
+			mv zoo...    /opt/bigdata
+			cd /opt/bigdata/zoo....
+			cd conf
+			cp zoo_sample.cfg  zoo.cfg
+			vi zoo.cfg
+				datadir=/var/bigdata/hadoop/zk
+				server.1=node02:2888:3888
+				server.2=node03:2888:3888
+				server.3=node04:2888:3888
+			mkdir /var/bigdata/hadoop/zk
+			echo 1 &gt;  /var/bigdata/hadoop/zk/myid 
+			vi /etc/profile
+			export ZOOKEEPER_HOME=/opt/bigdata/zookeeper-3.4.6
+			export PATH=$PATH:$JAVA_HOME/bin:$HADOOP_HOME/bin:$HADOOP_HOME/sbin:$ZOOKEEPER_HOME/bin
+			. /etc/profile
+			cd /opt/bigdata
+			scp -r ./zookeeper-3.4.6  node03:`pwd`
+			scp -r ./zookeeper-3.4.6  node04:`pwd`
+		node03:
+			mkdir /var/bigdata/hadoop/zk
+			echo 2 &gt;  /var/bigdata/hadoop/zk/myid
+			*环境变量
+			. /etc/profile
+		node04:
+			mkdir /var/bigdata/hadoop/zk
+			echo 3 &gt;  /var/bigdata/hadoop/zk/myid
+			*环境变量
+			. /etc/profile
+
+		node02~node04:
+			zkServer.sh start</code></pre>
+<p>3.4 初始化 1）先启动JN   hadoop-daemon.sh start journalnode 2）选择一个NN 做格式化：hdfs namenode -format&lt;只有第一次搭建做，以后不用做&gt; 3)启动这个格式化的NN ，以备另外一台同步  hadoop-daemon.sh start namenode 4)在另外一台机器中： hdfs namenode -bootstrapStandby 5)格式化zk：   hdfs zkfc  -formatZK &lt;只有第一次搭建做，以后不用做&gt;</p>
+<ol><li>start-dfs.sh</li></ol>
+<p>3.5使用验证： 1）去看jn的日志和目录变化： 2）node04 zkCli.sh ls / 启动之后可以看到锁： get  /hadoop-	ha/mycluster/ActiveStandbyElectorLock 3）杀死namenode 杀死zkfc kill -9  xxx a)杀死active NN b)杀死active NN身边的zkfc c)shutdown activeNN 主机的网卡 ： ifconfig eth0 down 2节点一直阻塞降级 如果恢复1上的网卡   ifconfig eth0 up 最终 2编程active <img src="../../assets/img/article-image-unavailable.svg" alt="node01 |inline" loading="lazy" decoding="async"/> <img src="../../assets/img/article-image-unavailable.svg" alt="node0 |inline" loading="lazy" decoding="async"/></p>
+<h3 id="四-用户-hdfs权限">四、用户 HDFS权限</h3>
+<h4 id="1-理论">1.理论</h4>
+<p>hdfs是一个文件系统 类unix、linux 有用户概念 hdfs没有相关命令和接口去创建用户 信任客户端 &lt;- 默认情况使用的 操作系统提供的用户 扩展 kerberos LDAP  继承第三方用户认证系统 有超级用户的概念 linux系统中超级用户：root hdfs系统中超级用户： 是namenode进程的启动用户 有权限概念 hdfs的权限是自己控制的 来自于hdfs的超级用户</p>
+<h4 id="2-实操">2.实操</h4>
+<p>切换我们用root搭建的HDFS  用god这个用户来启动</p>
+<pre data-lang="xml"><code>	node01~node04:
+		*)stop-dfs.sh
+		1)添加用户：root
+			useradd god
+			passwd god
+		2）讲资源与用户绑定（a,安装部署程序；b,数据存放的目录）
+			chown -R god  src
+			chown -R god /opt/bigdata/hadoop-2.6.5
+			chown -R god /var/bigdata/hadoop
+		3）切换到god去启动  start-dfs.sh  &lt; 需要免密
+			给god做免密
+			*我们是HA模式：免密的2中场景都要做的
+			ssh localhost   &gt;&gt; 为了拿到.ssh
+			node01~node02:
+				cd /home/god/.ssh
+				ssh-keygen -t rsa -P &#039;&#039; -f  ./id_rsa
+			node01:
+				ssh-copy-id -i id_rsa node01
+				ssh-copy-id -i id_rsa node02
+				ssh-copy-id -i id_rsa node03
+				ssh-copy-id -i id_rsa node04
+			node02
+				cd /home/god/.ssh
+				ssh-copy-id -i id_rsa node01
+				ssh-copy-id -i id_rsa node02
+		4)hdfs-site.xml
+			&lt;property&gt;
+			  &lt;name&gt;dfs.ha.fencing.ssh.private-key-files&lt;/name&gt;
+			  &lt;value&gt;/home/god/.ssh/id_rsa&lt;/value&gt;
+			&lt;/property&gt;
+
+			分发给node02~04
+		5)god  :  start-dfs.sh</code></pre>
+<h4 id="3-用户权限认证">3.用户权限认证</h4>
+<pre data-lang="xml"><code>	node01:
+		su god
+		hdfs dfs -mkdir   /temp
+		hdfs dfs -chown god:ooxx  /temp
+		hdfs dfs -chmod 770 /temp
+	node04:
+		root:
+			useradd good
+			groupadd ooxx
+			usermod -a -G ooxx good
+			id good
+		su good
+			hdfs dfs -mkdir /temp/abc  &lt;失败
+			hdfs groups 
+				good:        &lt;因为hdfs已经启动了，不知道你操作系统又偷偷摸摸创建了用户和组
+	*node01:
+		root:
+			useradd good
+			groupadd ooxx
+			usermod -a -G ooxx good
+		su god 
+			hdfs dfsadmin -refreshUserToGroupsMappings
+	node04:
+		good:
+			hdfs groups 
+				good : good ooxx
+
+	结论：默认hdfs依赖操作系统上的用户和组</code></pre>
+<h3 id="五-idea-实操">五、IDEA 实操</h3>
+<p><img src="../../assets/img/article-image-unavailable.svg" alt="POM文件 |inline" loading="lazy" decoding="async"/></p>
+<p>服务器上传两个配置文件，data.txt是自己写的。 <img src="../../assets/img/article-image-unavailable.svg" alt="上传文件 |inline" loading="lazy" decoding="async"/></p>
+<p><img src="../../assets/img/article-image-unavailable.svg" alt="java文件 |inline" loading="lazy" decoding="async"/></p>
+        </div>
+      </article>
+
+      <aside class="article-side">
+        <div class="side-panel reveal">
+          <p class="side-panel-title">标签</p>
+          <div class="tag-list"><a class="tag-pill" href="../../posts.html?tag=hadoop">hadoop</a><a class="tag-pill" href="../../posts.html?tag=%E8%8A%82%E7%82%B9%E6%90%AD%E5%BB%BA">节点搭建</a></div>
+        </div>
+      </aside>
+
+      <footer class="article-footer reveal">
+        <a class="button" href="../../posts.html">返回文章列表</a>
+        <button class="button" type="button" data-share="https://begc.github.io/posts/hadoop-build/">复制链接</button>
+      </footer>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <span>© 2026 RuiJie Notes</span>
+      <div class="footer-links">
+        <a href="../../index.html">首页</a>
+        <a href="../../posts.html">文章</a>
+        <a href="../../tags.html">专题</a>
+      </div>
+    </div>
+  </footer>
+  <div class="toast" id="toast" role="status"></div>
+  <script src="../../assets/js/site.js?v=20260619-11"></script>
+</body>
+</html>

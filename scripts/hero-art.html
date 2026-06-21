@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Hero Art</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: #07120d; }
+  body { font-family: Georgia, serif; }
+  .scene {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background:
+      radial-gradient(circle at 48% 18%, rgba(236, 246, 206, 0.28), transparent 16%),
+      radial-gradient(circle at 76% 82%, rgba(88, 150, 87, 0.35), transparent 23%),
+      linear-gradient(180deg, #0a1c13 0%, #0c2a1c 42%, #07150f 100%);
+  }
+  .scene.hover {
+    background:
+      radial-gradient(circle at 50% 24%, rgba(248, 248, 216, 0.38), transparent 18%),
+      radial-gradient(circle at 22% 88%, rgba(103, 168, 91, 0.24), transparent 24%),
+      linear-gradient(180deg, #0b2118 0%, #123825 47%, #07150f 100%);
+  }
+  svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .grain {
+    position: absolute; inset: 0;
+    opacity: 0.12;
+    mix-blend-mode: soft-light;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.78' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)' opacity='.7'/%3E%3C/svg%3E");
+  }
+  .book {
+    position: absolute;
+    left: 50%;
+    bottom: 7%;
+    width: 30vw;
+    height: 10vw;
+    transform: translateX(-50%) perspective(800px) rotateX(48deg);
+    opacity: 0.86;
+    filter: drop-shadow(0 22px 40px rgba(0,0,0,.5));
+  }
+  .page {
+    position: absolute;
+    top: 0;
+    width: 50%;
+    height: 100%;
+    background:
+      linear-gradient(90deg, rgba(255,255,255,.18), rgba(255,255,255,.03)),
+      linear-gradient(180deg, #e7dfc2, #bda979);
+    border: 1px solid rgba(253, 244, 203, .22);
+  }
+  .page.left { left: 0; border-radius: 9px 0 0 18px; transform: skewY(6deg); }
+  .page.right { right: 0; border-radius: 0 9px 18px 0; transform: skewY(-6deg); }
+  .page::before, .page::after {
+    content: "";
+    position: absolute;
+    right: 14%;
+    left: 14%;
+    height: 1px;
+    background: rgba(40, 55, 37, .22);
+  }
+  .page::before { top: 36%; box-shadow: 0 1.2vw 0 rgba(40,55,37,.18), 0 2.4vw 0 rgba(40,55,37,.12); }
+  .page::after { top: 72%; }
+  .glow {
+    position: absolute;
+    left: 50%;
+    bottom: 10%;
+    width: 44vw;
+    height: 22vw;
+    transform: translateX(-50%);
+    background: radial-gradient(ellipse, rgba(238, 222, 144, .36), rgba(111, 151, 93, .18) 38%, transparent 70%);
+    filter: blur(18px);
+  }
+  .scene.hover .glow { background: radial-gradient(ellipse, rgba(255, 239, 166, .48), rgba(134, 176, 102, .22) 42%, transparent 72%); }
+</style>
+</head>
+<body>
+<div class="scene" id="scene">
+  <svg viewBox="0 0 2400 1400" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <defs>
+      <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#173a28"/>
+        <stop offset=".52" stop-color="#0d2a1d"/>
+        <stop offset="1" stop-color="#07140e"/>
+      </linearGradient>
+      <radialGradient id="mist" cx="50%" cy="22%" r="62%">
+        <stop offset="0" stop-color="#e9f1c8" stop-opacity=".34"/>
+        <stop offset=".42" stop-color="#83a87b" stop-opacity=".14"/>
+        <stop offset="1" stop-color="#07140e" stop-opacity="0"/>
+      </radialGradient>
+      <filter id="soft"><feGaussianBlur stdDeviation="18"/></filter>
+      <filter id="rough">
+        <feTurbulence baseFrequency="0.012 0.028" numOctaves="4" seed="8"/>
+        <feDisplacementMap in="SourceGraphic" scale="28"/>
+      </filter>
+      <linearGradient id="beam" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#fff7c9" stop-opacity=".62"/>
+        <stop offset=".38" stop-color="#d6e8ae" stop-opacity=".2"/>
+        <stop offset="1" stop-color="#c3e9a3" stop-opacity="0"/>
+      </linearGradient>
+      <linearGradient id="stone" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#6f765d"/>
+        <stop offset=".48" stop-color="#3d4a3c"/>
+        <stop offset="1" stop-color="#1e2b22"/>
+      </linearGradient>
+    </defs>
+    <rect width="2400" height="1400" fill="url(#sky)"/>
+    <rect width="2400" height="1400" fill="url(#mist)"/>
+    <g opacity=".56" filter="url(#soft)">
+      <path d="M1080 -40 1320 -40 820 1200 650 1200Z" fill="url(#beam)"/>
+      <path d="M1310 -60 1490 -60 1070 1180 930 1180Z" fill="url(#beam)" opacity=".74"/>
+      <path d="M1540 -60 1680 -60 1280 1260 1180 1260Z" fill="url(#beam)" opacity=".52"/>
+    </g>
+    <g opacity=".33">
+      <path d="M0 720 C270 560 420 560 650 708 C850 842 1060 788 1240 690 C1530 532 1850 560 2400 730 L2400 1400 L0 1400Z" fill="#13331f"/>
+      <path d="M0 800 C300 650 540 690 790 830 C1030 966 1215 900 1450 790 C1700 672 1960 710 2400 842 L2400 1400 L0 1400Z" fill="#0d2418"/>
+    </g>
+    <g opacity=".74" filter="url(#rough)">
+      <path d="M0 360 C120 310 190 330 270 380 C370 260 500 270 615 420 C715 350 820 370 905 448 C1020 360 1178 370 1268 500 C1390 390 1550 430 1640 535 C1770 420 1935 450 2030 560 C2140 510 2255 540 2400 640 L2400 0 L0 0Z" fill="#102719"/>
+    </g>
+    <g opacity=".96">
+      <path d="M210 1410 C244 1092 256 730 214 430" stroke="#0a160f" stroke-width="54" fill="none"/>
+      <path d="M214 520 C320 430 388 330 450 210" stroke="#0a160f" stroke-width="30" fill="none"/>
+      <path d="M230 620 C124 555 78 485 28 410" stroke="#0a160f" stroke-width="24" fill="none"/>
+      <path d="M2140 1410 C2114 1078 2120 770 2184 394" stroke="#08130d" stroke-width="66" fill="none"/>
+      <path d="M2164 510 C2040 424 1970 334 1904 210" stroke="#08130d" stroke-width="32" fill="none"/>
+      <path d="M1980 1410 C1962 1110 1964 860 2018 544" stroke="#09150e" stroke-width="44" fill="none"/>
+      <path d="M540 1410 C522 1130 530 875 598 600" stroke="#0a160f" stroke-width="38" fill="none"/>
+      <path d="M1820 1410 C1808 1110 1816 882 1860 614" stroke="#0a160f" stroke-width="34" fill="none"/>
+    </g>
+    <g opacity=".55">
+      <path d="M760 1080 C710 870 770 705 905 590 C1016 494 1180 455 1318 525 C1500 618 1542 852 1462 1080 L1350 1080 C1410 906 1378 750 1268 694 C1162 640 1050 668 970 744 C888 822 870 944 914 1080Z" fill="url(#stone)"/>
+      <path d="M790 1074 C724 852 790 666 940 548 C1106 418 1308 448 1440 586 C1586 738 1602 920 1512 1074" fill="none" stroke="#758066" stroke-width="78" opacity=".28"/>
+    </g>
+    <g opacity=".7">
+      <ellipse cx="280" cy="1125" rx="520" ry="160" fill="#153d24" filter="url(#soft)"/>
+      <ellipse cx="2085" cy="1140" rx="500" ry="170" fill="#153d24" filter="url(#soft)"/>
+      <path d="M0 1190 C190 1100 380 1094 565 1190 C760 1292 950 1238 1110 1162 C1268 1088 1440 1090 1622 1188 C1836 1304 2072 1258 2400 1164 L2400 1400 L0 1400Z" fill="#0e2b1a"/>
+      <path d="M0 1270 C300 1200 465 1276 660 1328 C850 1378 1010 1288 1200 1244 C1420 1192 1630 1290 1810 1328 C2020 1372 2210 1270 2400 1220 L2400 1400 L0 1400Z" fill="#07140d"/>
+    </g>
+    <g opacity=".44" fill="#80b15e">
+      <ellipse cx="236" cy="1200" rx="88" ry="22" transform="rotate(-22 236 1200)"/>
+      <ellipse cx="338" cy="1170" rx="70" ry="18" transform="rotate(26 338 1170)"/>
+      <ellipse cx="2020" cy="1190" rx="96" ry="24" transform="rotate(20 2020 1190)"/>
+      <ellipse cx="2140" cy="1220" rx="76" ry="20" transform="rotate(-28 2140 1220)"/>
+      <ellipse cx="1760" cy="1160" rx="54" ry="14" transform="rotate(18 1760 1160)"/>
+    </g>
+  </svg>
+  <div class="glow"></div>
+  <div class="book"><span class="page left"></span><span class="page right"></span></div>
+  <div class="grain"></div>
+</div>
+<script>
+  var params = new URLSearchParams(location.search);
+  if (params.get("mode") === "hover") {
+    document.getElementById("scene").classList.add("hover");
+  }
+</script>
+</body>
+</html>

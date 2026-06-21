@@ -1,0 +1,507 @@
+
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>阿白 · 技术博客</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Viaoda+Libre&family=Imprima&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --ink:    #09090a;
+  --paper:  #e6e2d8;
+  --muted:  #6a6860;
+  --dim:    #3a3830;
+  --amber:  oklch(76% 0.16 72);
+  --amber2: oklch(62% 0.13 72);
+  --fd: 'Viaoda Libre', 'Iowan Old Style', Georgia, serif;
+  --fb: 'Imprima', system-ui, sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: auto; }
+body {
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--fb);
+  overflow-x: hidden;
+  height: 520vh; /* slow ritual needs more room */
+}
+
+/* ── sticky stage ── */
+#stage {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ── ink wash background ── */
+#bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: var(--ink);
+}
+
+#ink-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+  z-index: 1;
+  opacity: 0;transition: opacity 2s ease 0.5s;
+}
+#ink-svg.show { opacity: 1; }
+
+/* grain */
+#grain {
+  position: absolute;
+  inset: 0; z-index: 2;
+  opacity: 0.06;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='320'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='320' height='320' filter='url(%23g)'/%3E%3C/svg%3E");
+  background-size: 320px;
+  pointer-events: none;
+}
+
+/* parallax layers */
+.plx { position: absolute; inset: -9% -9%; width: 118%; height: 118%; will-change: transform; pointer-events: none; }
+
+/* ── curtains ── */
+#curtains {
+  position: absolute; inset: 0;
+  z-index: 10; display: flex;
+  pointer-events: none;
+}
+.curtain {
+  position: relative;
+  width: 50%; height: 100%;
+  overflow: hidden;
+  will-change: transform;
+}
+
+/* Base fabric: aged xuan paper, warm dark */
+.c-base {
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg,
+    oklch(12% 0.018 72) 0%,
+    oklch(14% 0.022 72) 25%,
+    oklch(11% 0.016 72) 55%,
+    oklch(13% 0.02 72)  80%,
+    oklch(11% 0.015 72) 100%
+  );
+}
+
+/* Fold highlight system: 5 folds per curtain, alternating light/shadow */
+.c-folds {
+  position: absolute; inset: 0;
+  background:
+    /* fold 1 */
+    linear-gradient(90deg, transparent 7%,  oklch(100% 0 0 / 0.055) 7.3%,  transparent 7.9%) ,
+    linear-gradient(90deg, transparent 7.9%,oklch(0% 0 0 / 0.09) 8.5%,     transparent 9.2%) ,
+    /* fold 2 */
+    linear-gradient(90deg, transparent 21%, oklch(100% 0 0 / 0.04) 21.4%,  transparent 22%) ,
+    linear-gradient(90deg, transparent 22%, oklch(0% 0 0 / 0.07) 22.8%,    transparent 23.6%),
+    /* fold 3 */
+    linear-gradient(90deg, transparent 38%, oklch(100% 0 0 / 0.06) 38.4%,  transparent 39%) ,
+    linear-gradient(90deg, transparent 39%, oklch(0% 0 0 / 0.08) 39.9%,    transparent 41%) ,
+    /* fold 4 */
+    linear-gradient(90deg, transparent 57%, oklch(100% 0 0 / 0.045)57.4%, transparent 58%) ,
+    linear-gradient(90deg, transparent 58%, oklch(0% 0 0 / 0.07) 58.9%,    transparent 60%) ,
+    /* fold 5 */
+    linear-gradient(90deg, transparent 76%, oklch(100% 0 0 / 0.05) 76.3%,  transparent 77%) ,
+    linear-gradient(90deg, transparent 77%, oklch(0% 0 0 / 0.06) 77.8%,    transparent 79%);
+}
+
+/* Paper fiber noise */
+.c-noise {
+  position: absolute; inset: 0; opacity: 0.09;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='540'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.48 0.12' numOctaves='5' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='540' filter='url(%23p)'/%3E%3C/svg%3E");
+  background-size: 180px 540px;
+}
+
+/* Soft ambient light across fabric surface */
+.c-light {
+  position: absolute; inset: 0;
+  pointer-events: none;
+}
+#curtain-l .c-light {
+  background: linear-gradient(90deg,
+    oklch(100% 0 0 / 0.04) 0%,
+    oklch(100% 0 0 / 0.01) 50%,
+    transparent 100%
+  );
+}
+#curtain-r .c-light {
+  background: linear-gradient(270deg,
+    oklch(100% 0 0 / 0.04) 0%,
+    oklch(100% 0 0 / 0.01) 50%,
+    transparent 100%
+  );
+}
+
+/* Inner edge depth shadow */
+.c-shadow {
+  position: absolute; top: 0; bottom: 0;
+  width: 120px;
+}
+#curtain-l .c-shadow { right: 0; background: linear-gradient(90deg, transparent, oklch(0% 0 0 / 0.55)); }
+#curtain-r .c-shadow { left: 0;  background: linear-gradient(270deg, transparent, oklch(0% 0 0 / 0.55)); }
+
+/* ── amber seam ── */
+#seam {
+  position: absolute; top: 0; bottom: 0;
+  left: 50%; width: 1px;
+  transform: translateX(-50%);z-index: 11;
+  background: var(--amber);
+  box-shadow: 0 0 8px 2px oklch(76% 0.16 72 / 0.7),0 0 24px 4px oklch(76% 0.16 72 / 0.25);
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+
+/* ── hero ── */
+#hero {
+  position: absolute; inset: 0; z-index: 12;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center; padding: 0 40px;
+  pointer-events: none;
+}
+.brand {
+  font-family: var(--fd);
+  font-size: clamp(72px, 10vw, 148px);
+  line-height: 1; letter-spacing: 0.05em;
+  color: var(--paper);
+  opacity: 0; transform: translateY(18px);
+  transition: opacity 1.2s ease 0.1s, transform 1.2s ease 0.1s;
+}
+.brand .ak { color: var(--amber); }
+.tagline {
+  font-family: var(--fb);
+  font-size: clamp(11px, 1.1vw, 14px);
+  letter-spacing: 0.3em; text-transform: uppercase;
+  color: var(--muted); margin-top: 16px;
+  opacity: 0; transform: translateY(10px);
+  transition: opacity 1s ease 0.4s, transform 1s ease 0.4s;
+}
+.h-rule {
+  width: 28px; height: 1px; background: var(--dim);
+  margin: 26px auto;
+  opacity: 0; transition: opacity 1s ease 0.6s;
+}
+.h-desc {
+  font-family: var(--fb);
+  font-size: clamp(13px, 1.3vw, 15px);
+  color: var(--muted); max-width: 340px; line-height: 2.1;
+  opacity: 0; transform: translateY(8px);
+  transition: opacity 1s ease 0.75s, transform 1s ease 0.75s;
+}
+.h-cta {
+  pointer-events: all; display: inline-block; margin-top: 36px;
+  font-family: var(--fb);
+  font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase;
+  color: var(--paper); text-decoration: none;
+  border-bottom: 1px solid oklch(76% 0.16 72 / 0.5);
+  padding-bottom: 3px;
+  opacity: 0; transform: translateY(8px);
+  transition: opacity 1s ease 1s, transform 1s ease 1s, color 0.3s, border-color 0.3s;
+}
+.h-cta:hover { color: var(--amber); border-color: var(--amber); }
+
+.hero-in .brand, .hero-in .tagline, .hero-in .h-rule,
+.hero-in .h-desc, .hero-in .h-cta {
+  opacity: 1; transform: translateY(0);
+}
+
+/* ── scroll hint ── */
+#shint {
+  position: absolute; bottom: 28px; left: 50%;
+  transform: translateX(-50%);
+  z-index: 13; display: flex; flex-direction: column;
+  align-items: center; gap: 9px; transition: opacity 0.5s;
+}
+#shint span {
+  font-size: 9px; letter-spacing: 0.36em;
+  text-transform: uppercase; color: var(--muted);
+}
+.sline {
+  width: 1px; height: 38px;
+  background: linear-gradient(180deg, var(--muted) 0%, transparent 100%);
+  animation: spulse 2.6s ease-in-out infinite;
+}
+@keyframes spulse { 0%,100%{opacity:.2} 50%{opacity:.75} }
+
+/* ── post-curtain content ── */
+#after {
+  position: absolute; inset: 0; z-index: 9;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center; padding: 60px 32px 80px;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.8s ease;
+}
+#after.show { opacity: 1; pointer-events: all; }
+
+.af-quote {
+  font-family: var(--fd);
+  font-size: clamp(28px, 4vw, 60px);
+  line-height: 1.25; color: var(--paper);
+  max-width: 680px; margin-bottom: 8px;
+}
+.af-quote em { font-style: normal; color: var(--amber); }
+.af-source {
+  font-size: 11px; letter-spacing: 0.25em;
+  text-transform: uppercase; color: var(--dim);
+  margin-bottom: 56px;
+}
+
+/* Article cards */
+.cards {
+  display: flex; gap: 24px;
+  justify-content: center; flex-wrap: wrap;
+  max-width: 860px; width: 100%;
+}
+.card {
+  flex: 1 1 220px; max-width: 260px;
+  border: 1px solid var(--dim);
+  padding: 24px 22px 20px;
+  text-align: left; text-decoration: none;
+  color: inherit;
+  transition: border-color 0.3s, background 0.3s;
+  background: oklch(11% 0.01 72 / 0);
+}
+.card:hover {
+  border-color: oklch(76% 0.16 72 / 0.5);
+  background: oklch(76% 0.16 72 / 0.04);
+}
+.card-meta {
+  font-size: 10px; letter-spacing: 0.28em;
+  text-transform: uppercase; color: var(--dim);
+  margin-bottom: 12px;
+}
+.card-title {
+  font-family: var(--fb);
+  font-size: clamp(13px, 1.2vw, 15px);
+  line-height: 1.65; color: var(--paper);
+  margin-bottom: 14px;
+}
+.card-arrow {
+  font-size: 12px; color: var(--amber);
+  letter-spacing: 0.1em;
+}
+
+.af-all {
+  display: inline-block; margin-top: 36px;
+  font-size: 11px; letter-spacing: 0.3em;
+  text-transform: uppercase; color: var(--muted);
+  text-decoration: none;
+  border-bottom: 1px solid var(--dim); padding-bottom: 2px;
+  transition: color 0.3s, border-color 0.3s;
+}
+.af-all:hover { color: var(--amber); border-color: var(--amber); }
+</style>
+</head>
+<body>
+<div id="stage">
+
+  <!-- Ink background -->
+  <div id="bg">
+    <svg id="ink-svg" viewBox="0 0 1000 600"
+         preserveAspectRatio="xMidYMid slice"
+         xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <!-- Turbulence displacement for organic ink edges -->
+        <filter id="ink-disp" x="-20%" y="-20%" width="140%" height="140%">
+          <feTurbulence type="turbulence" baseFrequency="0.012 0.008"
+                        numOctaves="5" seed="42" result="turb"/>
+          <feDisplacementMap in="SourceGraphic" in2="turb"
+                             scale="38" xChannelSelector="R" yChannelSelector="G"/>
+        </filter>
+        <filter id="blur-soft">
+          <feGaussianBlur stdDeviation="32"/>
+        </filter>
+        <filter id="blur-mid">
+          <feGaussianBlur stdDeviation="16"/>
+        </filter>
+        <filter id="blur-tight">
+          <feGaussianBlur stdDeviation="6"/>
+        </filter>
+
+        <!-- Radial ink bloom gradients -->
+        <radialGradient id="rg-center" cx="50%" cy="54%" r="42%">
+          <stop offset="0%"   stop-color="oklch(28% 0.04 72)" stop-opacity="1"/>
+          <stop offset="45%"  stop-color="oklch(18% 0.03 72)" stop-opacity="0.7"/>
+          <stop offset="100%" stop-color="transparent"/>
+        </radialGradient>
+        <radialGradient id="rg-lo-left" cx="18%" cy="78%" r="35%">
+          <stop offset="0%"   stop-color="oklch(20% 0.035 72)" stop-opacity="0.85"/>
+          <stop offset="100%" stop-color="transparent"/></radialGradient>
+        <radialGradient id="rg-lo-right" cx="82%" cy="72%" r="32%">
+          <stop offset="0%"   stop-color="oklch(20% 0.035 72)" stop-opacity="0.8"/>
+          <stop offset="100%" stop-color="transparent"/>
+        </radialGradient>
+        <radialGradient id="rg-top" cx="50%" cy="5%" r="48%">
+          <stop offset="0%"   stop-color="oklch(18% 0.025 72)" stop-opacity="0.55"/>
+          <stop offset="100%" stop-color="transparent"/>
+        </radialGradient>
+        <radialGradient id="rg-diffuse" cx="50%" cy="60%" r="70%">
+          <stop offset="0%"   stop-color="oklch(22% 0.03 72)" stop-opacity="0.5"/>
+          <stop offset="100%" stop-color="transparent"/></radialGradient>
+      </defs>
+
+      <!-- Wide diffuse bloom — like ink spreading in water -->
+      <rect width="1000" height="600" fill="url(#rg-diffuse)" filter="url(#blur-soft)"/>
+      <!-- Top seeping -->
+      <rect width="1000" height="600" fill="url(#rg-top)"     filter="url(#blur-soft)"/>
+      <!-- Corner pools -->
+      <rect width="1000" height="600" fill="url(#rg-lo-left)" filter="url(#blur-mid)"/>
+      <rect width="1000" height="600" fill="url(#rg-lo-right)"filter="url(#blur-mid)"/>
+      <!-- Central concentration with organic edge via displacement -->
+      <rect width="1000" height="600" fill="url(#rg-center)"filter="url(#ink-disp)" opacity="0.9"/>
+      <!-- Fine ink threads — horizontal smears -->
+      <g filter="url(#blur-tight)" opacity="0.07">
+        <ellipse cx="500" cy="570" rx="420" ry="22" fill="oklch(55% 0.04 72)"/>
+        <ellipse cx="160" cy="390" rx="130" ry="12" fill="oklch(50% 0.035 72)"/>
+        <ellipse cx="840" cy="360" rx="110" ry="10" fill="oklch(50% 0.035 72)"/>
+      </g>
+    </svg>
+    <div id="grain"></div>
+  </div>
+
+  <!-- Parallax mid -->
+  <div class="plx" id="pmid" style="z-index:3;"></div>
+  <!-- Parallax near -->
+  <div class="plx" id="pnear" style="z-index:4;"></div>
+
+  <!-- Amber seam -->
+  <div id="seam"></div>
+
+  <!-- Curtains -->
+  <div id="curtains">
+    <div class="curtain" id="curtain-l">
+      <div class="c-base"></div>
+      <div class="c-folds"></div>
+      <div class="c-noise"></div>
+      <div class="c-light"></div>
+      <div class="c-shadow"></div>
+    </div>
+    <div class="curtain" id="curtain-r">
+      <div class="c-base"></div>
+      <div class="c-folds"></div>
+      <div class="c-noise"></div>
+      <div class="c-light"></div>
+      <div class="c-shadow"></div>
+    </div>
+  </div>
+
+  <!-- Post-curtain content (behind curtains, z-index 9) -->
+  <div id="after">
+    <p class="af-quote">路漫漫其修远兮，<br/>吾将<em>上下</em>而求索</p>
+    <p class="af-source">— 屈原 · 离骚</p>
+    <div class="cards">
+      <a class="card" href="#">
+        <p class="card-meta">2025 · 工程</p>
+        <p class="card-title">从零理解 Linux 内存分配：mmap、brk 与 glibc 的边界</p>
+        <p class="card-arrow">→</p>
+      </a>
+      <a class="card" href="#">
+        <p class="card-meta">2025 · 思考</p>
+        <p class="card-title">写给自己的备忘录：为什么我停止追求"最佳实践"</p>
+        <p class="card-arrow">→</p>
+      </a>
+      <a class="card" href="#">
+        <p class="card-meta">2024 · 工具</p>
+        <p class="card-title">我如何用 Rust 重写了一个让我痛苦三年的 Python 脚本</p>
+        <p class="card-arrow">→</p>
+      </a>
+    </div>
+    <a class="af-all" href="#">查看所有文章 →</a>
+  </div>
+
+  <!-- Hero -->
+  <div id="hero">
+    <h1 class="brand">阿<span class="ak">白</span></h1>
+    <p class="tagline">技术博客记录</p>
+    <div class="h-rule"></div>
+    <p class="h-desc">不写教程，只留足迹。<br/>记录每一次真实的学习与思考。</p>
+    <a class="h-cta" href="#">进入博客</a>
+  </div>
+
+  <!-- Scroll hint -->
+  <div id="shint">
+    <div class="sline"></div>
+    <span>向下探索</span>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  var CL = document.getElementById('curtain-l');
+  var CR = document.getElementById('curtain-r');
+  var seam   = document.getElementById('seam');
+  var hero   = document.getElementById('hero');
+  var after  = document.getElementById('after');
+  var shint  = document.getElementById('shint');
+  var inkSvg = document.getElementById('ink-svg');
+  var pmid   = document.getElementById('pmid');
+  var pnear  = document.getElementById('pnear');
+
+  // ── Mouse parallax ──
+  var mx=0,my=0,smx=0,smy=0;
+  document.addEventListener('mousemove',function(e){
+    mx=(e.clientX/innerWidth -0.5)*2;
+    my=(e.clientY/innerHeight-0.5)*2;
+  });
+  function lp(a,b,t){return a+(b-a)*t;}
+  (function am(){
+    smx=lp(smx,mx,0.035); smy=lp(smy,my,0.035);pmid.style.transform ='translate('+(smx*-14)+'px,'+(smy*-9)+'px)';
+    pnear.style.transform='translate('+(smx*-26)+'px,'+(smy*-16)+'px)';
+    requestAnimationFrame(am);
+  })();
+
+  // ── Helpers ──
+  function cl(v,lo,hi){return Math.max(lo,Math.min(hi,v));}
+  function eo3(t){return 1-Math.pow(1-t,3);}
+  function eio(t){return t<0.5?2*t*t:-1+(4-2*t)*t;}
+  function prg(s,a,b){return cl((s-a)/(b-a),0,1);}
+
+  // ── Initial state ──
+  setTimeout(function(){ hero.classList.add('hero-in'); },150);
+  setTimeout(function(){ inkSvg.classList.add('show'); },400);
+
+  // Total scroll
+  var totalH = document.body.scrollHeight - innerHeight;
+
+  function tick(){
+    var sy = window.scrollY;
+    var p  = sy / totalH; // 0→1 over 520vh
+
+    // ── SLOW RITUAL: curtains open across 0 → 0.55 of scroll ──
+    var openP = eo3(prg(p, 0, 0.55));
+    CL.style.transform = 'translateX(-'+(openP*50.6)+'%)';
+    CR.style.transform = 'translateX('+(openP*50.6)+'%)';
+
+    // Seam: strong at start, fades as gap widens enough to see behind
+    var seamO = cl(1 - eo3(prg(p, 0.02, 0.18)), 0, 1);
+    seam.style.opacity = String(seamO);
+
+    // Scroll hint
+    shint.style.opacity = String(cl(1 - p * 14, 0, 1));
+
+    // Hero fades as curtains part enough
+    hero.style.opacity = String(cl(1 - eio(prg(p, 0.3, 0.5)), 0, 1));
+
+    // After content: fades in once curtains are ≥85% open
+    var afterO = eo3(prg(p, 0.52, 0.72));
+    after.style.opacity = String(afterO);
+    after.classList.toggle('show', afterO > 0.01);
+  }
+
+  window.addEventListener('scroll', tick, {passive:true});
+  tick();
+})();
+</script>
+</body>
+</html>

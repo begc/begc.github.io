@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="description" content="RuiJie Notes 关于页面，说明博客定位、技术内容和项目展示价值。"/>
+  <!-- PUBLIC SEO START -->
+  <meta name="robots" content="index,follow,max-image-preview:large"/>
+  <link rel="canonical" href="https://begc.github.io/about.html"/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:site_name" content="RuiJie Notes"/>
+  <meta property="og:title" content="关于 · RuiJie Notes"/>
+  <meta property="og:description" content="RuiJie Notes 关于页面，说明博客定位、技术内容和项目展示价值。"/>
+  <meta property="og:url" content="https://begc.github.io/about.html"/>
+  <meta name="twitter:card" content="summary"/>
+  <meta name="twitter:title" content="关于 · RuiJie Notes"/>
+  <meta name="twitter:description" content="RuiJie Notes 关于页面，说明博客定位、技术内容和项目展示价值。"/>
+  <!-- PUBLIC SEO END -->
+  <title>关于 · RuiJie Notes</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin/>
+  <link rel="stylesheet" href="assets/css/site.css?v=20260619-11"/>
+</head>
+<body data-page="about">
+  <a class="skip-link" href="#main">跳到正文</a>
+  <nav class="site-nav" aria-label="主导航">
+    <div class="nav-inner">
+      <a class="brand" href="index.html" aria-label="RuiJie Notes 首页">
+        <span class="brand-mark">bg</span>
+        <span class="brand-text">
+          <span class="brand-name">RuiJie Notes</span>
+          <span class="brand-sub">Big Data · Linux · Source</span>
+        </span>
+      </a>
+      <button class="icon-button nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-label="打开菜单"><i data-lucide="menu"></i></button>
+      <div class="nav-panel">
+        <div class="nav-links">
+          <a class="nav-link" data-page="home" href="index.html">首页</a>
+          <a class="nav-link" data-page="posts" href="posts.html">文章</a>
+          <a class="nav-link" data-page="tags" href="tags.html">专题</a>
+          <a class="nav-link" data-page="about" href="about.html">关于</a>
+        </div>
+        <div class="nav-actions">
+          <a class="icon-link" href="https://github.com/begc" target="_blank" rel="noopener" aria-label="GitHub"><i data-lucide="github"></i></a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="page-main" id="main">
+    <header class="container page-hero">
+      <span class="eyebrow">About</span>
+      <h1 class="page-title">关于这个博客</h1>
+      <p class="page-copy">这里主要放我学过和折腾过的东西：大数据环境搭建、Linux/CentOS 配置、问题排查、Go 源码阅读。内容不追求包装，能说明我做过什么、查过什么、怎么记录就够了。</p>
+    </header>
+
+    <section class="container section">
+      <div class="about-grid">
+        <article class="about-panel reveal">
+          <h2>内容方向</h2>
+          <p>目前内容集中在 Hadoop、Hive、Kafka、MapReduce、Linux/CentOS 配置、MySQL 安装、iptables、Nacos 访问策略和 Go 标准库源码阅读。</p>
+          <div class="signal-grid">
+            <div class="signal-item">
+              <span class="signal-value" id="aboutPostCount">14</span>
+              <span class="signal-label">文章</span>
+            </div>
+            <div class="signal-item">
+              <span class="signal-value" id="aboutTagCount">16</span>
+              <span class="signal-label">标签</span>
+            </div>
+            <div class="signal-item">
+              <span class="signal-value">4</span>
+              <span class="signal-label">专题</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="timeline reveal">
+          <h2>项目亮点</h2>
+          <div class="timeline-item">
+            <span class="timeline-date">01</span>
+            <div>
+              <p class="timeline-title">静态可部署</p>
+              <p>不依赖后端服务，适合部署到 GitHub Pages、Vercel、Netlify 或对象存储。</p>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <span class="timeline-date">02</span>
+            <div>
+              <p class="timeline-title">内容可持续扩展</p>
+              <p>旧文以 Markdown 保留，新增文章可以继续放入 `content/posts`，再补充索引数据。</p>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <span class="timeline-date">03</span>
+            <div>
+              <p class="timeline-title">阅读体验完整</p>
+              <p>支持移动端布局、目录、阅读进度、标签筛选、搜索、代码块、表格和图片展示。</p>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <span class="timeline-date">04</span>
+            <div>
+              <p class="timeline-title">适合面试讲述</p>
+              <p>可以从内容迁移、前端交互、响应式设计、静态资源发布和后续工程化改造几个角度展开。</p>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <span>© 2026 RuiJie Notes</span>
+      <div class="footer-links">
+        <a href="index.html">首页</a>
+        <a href="posts.html">文章</a>
+        <a href="https://github.com/begc" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>
+  </footer>
+  <div class="toast" id="toast" role="status"></div>
+  <script src="assets/js/posts-data.js?v=20260619-11"></script>
+  <script src="assets/js/site.js?v=20260619-11"></script>
+</body>
+</html>

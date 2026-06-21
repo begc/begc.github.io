@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="description" content="RuiJie Notes 是个人技术博客，记录大数据工程、Linux 运维、源码阅读和长期学习沉淀。"/>
+  <!-- PUBLIC SEO START -->
+  <meta name="robots" content="index,follow,max-image-preview:large"/>
+  <link rel="canonical" href="https://begc.github.io/"/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:site_name" content="RuiJie Notes"/>
+  <meta property="og:title" content="RuiJie Notes · 技术博客"/>
+  <meta property="og:description" content="RuiJie Notes 是个人技术博客，记录大数据工程、Linux 运维、源码阅读和长期学习沉淀。"/>
+  <meta property="og:url" content="https://begc.github.io/"/>
+  <meta name="twitter:card" content="summary"/>
+  <meta name="twitter:title" content="RuiJie Notes · 技术博客"/>
+  <meta name="twitter:description" content="RuiJie Notes 是个人技术博客，记录大数据工程、Linux 运维、源码阅读和长期学习沉淀。"/>
+  <!-- PUBLIC SEO END -->
+  <title>RuiJie Notes · 技术博客</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin/>
+  <link rel="stylesheet" href="assets/css/site.css?v=20260619-11"/>
+</head>
+<body data-page="home">
+  <a class="skip-link" href="#main">跳到正文</a>
+  <nav class="site-nav" aria-label="主导航">
+    <div class="nav-inner">
+      <a class="brand" href="index.html" aria-label="RuiJie Notes 首页">
+        <span class="brand-mark">bg</span>
+        <span class="brand-text">
+          <span class="brand-name">RuiJie Notes</span>
+          <span class="brand-sub">Personal Tech Blog</span>
+        </span>
+      </a>
+      <button class="icon-button nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-label="打开菜单"><i data-lucide="menu"></i></button>
+      <div class="nav-panel">
+        <div class="nav-links">
+          <a class="nav-link" data-page="home" href="index.html">首页</a>
+          <a class="nav-link" data-page="posts" href="posts.html">文章</a>
+          <a class="nav-link" data-page="tags" href="tags.html">专题</a>
+          <a class="nav-link" data-page="about" href="about.html">关于</a>
+        </div>
+        <div class="nav-actions">
+          <a class="icon-link" href="https://github.com/begc" target="_blank" rel="noopener" aria-label="GitHub"><i data-lucide="github"></i></a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="page-main" id="main">
+    <section class="immersive-hero" aria-labelledby="homeTitle">
+      <a class="hero-hit-area" href="posts.html" aria-label="进入博客文章列表">
+        <span class="hero-bg hero-bg-default" aria-hidden="true"></span>
+        <span class="hero-bg hero-bg-hover" aria-hidden="true"></span>
+        <span class="hero-gridlines" aria-hidden="true"></span>
+        <span class="hero-scanline" aria-hidden="true"></span>
+        <span class="hero-vignette" aria-hidden="true"></span>
+        <span class="hero-navline" aria-hidden="true">
+          <span>Journal</span>
+          <span>Notes</span>
+          <span class="star-mark">✦</span>
+          <span>Archive</span>
+          <span>About</span>
+        </span>
+        <span class="hero-center">
+          <span class="eyebrow hero-kicker">RuiJie Notes</span>
+          <h1 class="hero-title" id="homeTitle">
+            <span class="title-main">我的博客</span>
+            <span class="title-hover">向内记录，向外生长</span>
+          </h1>
+          <span class="hero-lede">
+            <span class="lede-main">这里收集我的学习、项目、思考和长期沉淀。</span>
+            <span class="lede-hover">从一篇文章开始，进入我的技术世界。</span>
+          </span>
+        </span>
+        <span class="hero-reels" aria-hidden="true">
+          <span class="reel-card reel-one">
+            <span class="reel-play"><i data-lucide="book-open"></i></span>
+            <span>Read Notes</span>
+          </span>
+          <span class="reel-card reel-two">
+            <strong id="heroPostCount">14</strong>
+            <span>Saved Posts</span>
+          </span>
+          <span class="reel-card reel-three">
+            <span class="reel-play"><i data-lucide="layers-3"></i></span>
+            <span>Explore Topics</span>
+          </span>
+        </span>
+        <span class="hero-descend">
+          <span>Enter</span>
+          <span class="descend-dot"></span>
+        </span>
+      </a>
+    </section>
+
+    <section class="container section">
+      <div class="signal-grid">
+        <div class="signal-item reveal">
+          <span class="signal-value" id="statPosts">14</span>
+          <span class="signal-label">篇旧文已迁移，正文和代码块继续保留</span>
+        </div>
+        <div class="signal-item reveal">
+          <span class="signal-value" id="statCategories">4</span>
+          <span class="signal-label">个内容方向，方便面试时按项目能力讲述</span>
+        </div>
+        <div class="signal-item reveal">
+          <span class="signal-value" id="statTags">16</span>
+          <span class="signal-label">个标签，可继续扩展为长期知识库</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="container section">
+      <div class="section-head">
+        <div>
+          <span class="section-kicker">Featured</span>
+          <h2 class="section-title">技术圈更容易扫到重点的文章入口</h2>
+          <p class="section-copy">把大数据环境搭建、运维排障、源码阅读这些内容放在首页靠前位置，方便面试官和技术同学快速判断你的实践方向。</p>
+        </div>
+        <a class="text-link" href="posts.html">全部文章</a>
+      </div>
+      <div class="post-grid" id="featuredPosts"></div>
+    </section>
+
+    <section class="topic-band section">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <span class="section-kicker">Topics</span>
+            <h2 class="section-title">按能力域组织，而不是只按时间堆文章</h2>
+          </div>
+          <a class="text-link" href="tags.html">专题地图</a>
+        </div>
+        <div class="topic-grid" id="topicGrid"></div>
+      </div>
+    </section>
+
+    <section class="container section">
+      <div class="section-head">
+        <div>
+          <span class="section-kicker">Recent</span>
+          <h2 class="section-title">最近更新</h2>
+        </div>
+      </div>
+      <div class="post-list" id="recentPosts"></div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <span>© 2026 RuiJie Notes</span>
+      <div class="footer-links">
+        <a href="posts.html">文章</a>
+        <a href="about.html">关于</a>
+        <a href="https://github.com/begc" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>
+  </footer>
+  <div class="toast" id="toast" role="status"></div>
+  <script src="assets/js/posts-data.js?v=20260619-11"></script>
+  <script src="assets/js/site.js?v=20260619-11"></script>
+</body>
+</html>

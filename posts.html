@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="description" content="RuiJie Notes 技术文章归档，支持搜索、专题和标签筛选。"/>
+  <!-- PUBLIC SEO START -->
+  <meta name="robots" content="index,follow,max-image-preview:large"/>
+  <link rel="canonical" href="https://begc.github.io/posts.html"/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:site_name" content="RuiJie Notes"/>
+  <meta property="og:title" content="文章 · RuiJie Notes"/>
+  <meta property="og:description" content="RuiJie Notes 技术文章归档，支持搜索、专题和标签筛选。"/>
+  <meta property="og:url" content="https://begc.github.io/posts.html"/>
+  <meta name="twitter:card" content="summary"/>
+  <meta name="twitter:title" content="文章 · RuiJie Notes"/>
+  <meta name="twitter:description" content="RuiJie Notes 技术文章归档，支持搜索、专题和标签筛选。"/>
+  <!-- PUBLIC SEO END -->
+  <title>文章 · RuiJie Notes</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin/>
+  <link rel="stylesheet" href="assets/css/site.css?v=20260619-11"/>
+</head>
+<body data-page="posts">
+  <a class="skip-link" href="#main">跳到正文</a>
+  <nav class="site-nav" aria-label="主导航">
+    <div class="nav-inner">
+      <a class="brand" href="index.html" aria-label="RuiJie Notes 首页">
+        <span class="brand-mark">bg</span>
+        <span class="brand-text">
+          <span class="brand-name">RuiJie Notes</span>
+          <span class="brand-sub">Big Data · Linux · Source</span>
+        </span>
+      </a>
+      <button class="icon-button nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-label="打开菜单"><i data-lucide="menu"></i></button>
+      <div class="nav-panel">
+        <div class="nav-links">
+          <a class="nav-link" data-page="home" href="index.html">首页</a>
+          <a class="nav-link" data-page="posts" href="posts.html">文章</a>
+          <a class="nav-link" data-page="tags" href="tags.html">专题</a>
+          <a class="nav-link" data-page="about" href="about.html">关于</a>
+        </div>
+        <div class="nav-actions">
+          <a class="icon-link" href="https://github.com/begc" target="_blank" rel="noopener" aria-label="GitHub"><i data-lucide="github"></i></a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="page-main" id="main">
+    <header class="container page-hero">
+      <span class="eyebrow">Archive</span>
+      <h1 class="page-title">文章归档</h1>
+      <p class="page-copy">这里放我以前整理过的技术笔记，主要是 Hadoop、Hive、Kafka、Linux 配置和一些排障记录。想找某一类内容，可以直接搜关键词或点标签。</p>
+    </header>
+
+    <div class="filter-bar">
+      <div class="container filter-inner">
+        <label class="search-box">
+          <i data-lucide="search"></i>
+          <input id="postSearch" type="search" placeholder="搜索 Hadoop / Hive / Linux / 源码..." autocomplete="off"/>
+        </label>
+        <div class="tag-filter" id="tagFilters" aria-label="文章筛选"></div>
+      </div>
+    </div>
+
+    <section class="container section">
+      <div class="post-grid" id="postsList"></div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <span>© 2026 RuiJie Notes</span>
+      <div class="footer-links">
+        <a href="index.html">首页</a>
+        <a href="tags.html">专题</a>
+        <a href="https://github.com/begc" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>
+  </footer>
+  <div class="toast" id="toast" role="status"></div>
+  <script src="assets/js/posts-data.js?v=20260619-11"></script>
+  <script src="assets/js/site.js?v=20260619-11"></script>
+</body>
+</html>

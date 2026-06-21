@@ -1,0 +1,1361 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="description" content=" 学习hive理论"/>
+  <meta name="author" content=" zhourj"/>
+  <meta name="robots" content="index,follow,max-image-preview:large"/>
+  <link rel="canonical" href="https://begc.github.io/posts/hivetheorystudy/"/>
+  <meta property="og:type" content="article"/>
+  <meta property="og:site_name" content="RuiJie Notes"/>
+  <meta property="og:title" content="Hive 理论研究学习"/>
+  <meta property="og:description" content=" 学习hive理论"/>
+  <meta property="og:url" content="https://begc.github.io/posts/hivetheorystudy/"/>
+  <meta property="og:image" content="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&amp;fit=crop&amp;w=1200&amp;q=80"/>
+  <meta property="article:published_time" content="2023-04-07"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="Hive 理论研究学习"/>
+  <meta name="twitter:description" content=" 学习hive理论"/>
+  <meta name="twitter:image" content="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&amp;fit=crop&amp;w=1200&amp;q=80"/>
+  <title>Hive 理论研究学习 · RuiJie Notes</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin/>
+  <link rel="stylesheet" href="../../assets/css/site.css?v=20260619-11"/>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"Hive 理论研究学习","description":" 学习hive理论","datePublished":"2023-04-07","dateModified":"2023-04-07","author":{"@type":"Person","name":" zhourj"},"publisher":{"@type":"Person","name":"begc"},"mainEntityOfPage":"https://begc.github.io/posts/hivetheorystudy/","image":"https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80"}</script>
+</head>
+<body data-page="post">
+  <a class="skip-link" href="#main">跳到正文</a>
+  <div class="read-progress" aria-hidden="true"></div>
+  <nav class="site-nav" aria-label="主导航">
+    <div class="nav-inner">
+      <a class="brand" href="../../index.html" aria-label="RuiJie Notes 首页">
+        <span class="brand-mark">bg</span>
+        <span class="brand-text">
+          <span class="brand-name">RuiJie Notes</span>
+          <span class="brand-sub">Big Data · Linux · Source</span>
+        </span>
+      </a>
+      <button class="icon-button nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-label="打开菜单"><i data-lucide="menu"></i></button>
+      <div class="nav-panel">
+        <div class="nav-links">
+          <a class="nav-link" data-page="home" href="../../index.html">首页</a>
+          <a class="nav-link" data-page="posts" href="../../posts.html">文章</a>
+          <a class="nav-link" data-page="tags" href="../../tags.html">专题</a>
+          <a class="nav-link" data-page="about" href="../../about.html">关于</a>
+        </div>
+        <div class="nav-actions">
+          <a class="icon-link" href="https://github.com/begc" target="_blank" rel="noopener" aria-label="GitHub"><i data-lucide="github"></i></a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="page-main" id="main">
+    <div class="detail-shell">
+      <aside class="toc-wrap">
+        <span class="toc-label">目录</span>
+        <nav class="toc" id="toc" aria-label="文章目录"><a class="depth-2" href="#1-hive-的基本介绍">1、HIVE 的基本介绍</a><a class="depth-3" href="#1-hive-产生的原因">1) HIVE 产生的原因？</a><a class="depth-3" href="#2-hive是什么">2) HIVE是什么？</a><a class="depth-3" href="#3-hive-架构">3）HIVE 架构？</a><a class="depth-4" href="#2-hive的服务-角色">2、Hive的服务（角色）</a><a class="depth-4" href="#antlr词法语法分析工具解析hql">ANTLR词法语法分析工具解析hql</a><a class="depth-2" href="#2-数据仓库的基本介绍">2、数据仓库的基本介绍</a><a class="depth-4" href="#1-数据仓库基本概念">1、数据仓库基本概念</a><a class="depth-4" href="#2-数据处理分类-olap与oltp">2、数据处理分类：OLAP与OLTP</a><a class="depth-4" href="#3-oltp">3、OLTP</a><a class="depth-4" href="#4-olap">4、OLAP</a><a class="depth-3" href="#4-数据库与数据仓库的区别">4、数据库与数据仓库的区别</a><a class="depth-2" href="#3-hive-sql">3、HIVE SQL</a><a class="depth-3" href="#hive-ddl-数据库定义语言">Hive DDL（数据库定义语言）</a><a class="depth-4" href="#1-数据库的基本操作">1、数据库的基本操作</a><a class="depth-4" href="#2-数据库表的基本操作">2、数据库表的基本操作</a><a class="depth-3" href="#hive-dml">Hive DML</a><a class="depth-4" href="#1-插入数据">1、插入数据</a><a class="depth-4" href="#2-数据更新和删除">2、数据更新和删除</a><a class="depth-2" href="#4-hive-serde">4、Hive Serde</a><a class="depth-2" href="#5-hiveserver2">5、 HiveServer2</a><a class="depth-3" href="#基本概念介绍">基本概念介绍</a><a class="depth-3" href="#hiveserver2的搭建使用">hiveserver2的搭建使用</a><a class="depth-3" href="#hiveserver2的访问方式">HiveServer2的访问方式</a><a class="depth-2" href="#6-hive函数">6、Hive函数</a><a class="depth-3" href="#1-内置运算符">1.内置运算符</a><a class="depth-3" href="#2-内置函数">2.内置函数</a><a class="depth-3" href="#3-内置的聚合函数-udaf">3.内置的聚合函数（UDAF）</a><a class="depth-3" href="#4-内置表生成函数-udtf">4.内置表生成函数（UDTF）</a><a class="depth-3" href="#5-自定义函数">5.自定义函数</a><a class="depth-2" href="#7-hive参数操作和运行方式">7、Hive参数操作和运行方式</a><a class="depth-3" href="#1-hive参数操作">1、Hive参数操作</a><a class="depth-3" href="#2-hive运行方式">2、hive运行方式</a><a class="depth-2" href="#8-hive动态分区和分桶">8、Hive动态分区和分桶</a><a class="depth-3" href="#1-hive动态分区">1、Hive动态分区</a><a class="depth-3" href="#2-hive分桶">2、Hive分桶</a><a class="depth-2" href="#9-hive的视图和索引">9、Hive的视图和索引</a><a class="depth-3" href="#1-hive-lateral-view">1、Hive Lateral View</a><a class="depth-3" href="#2-hive视图">2、Hive视图</a><a class="depth-3" href="#3-hive索引">3、Hive索引</a><a class="depth-2" href="#10-hive权限管理">10、Hive权限管理</a><a class="depth-2" href="#11-hive优化">11、 Hive优化</a><a class="depth-3" href="#1-查看hive执行计划-小白慎用">1、查看Hive执行计划（小白慎用）</a><a class="depth-3" href="#2-hive的抓取策略">2、Hive的抓取策略</a><a class="depth-3" href="#3-hive本地模式">3、Hive本地模式</a><a class="depth-3" href="#4-hive并行模式">4、Hive并行模式</a><a class="depth-3" href="#5-hive严格模式">5、Hive严格模式</a><a class="depth-3" href="#6-hive排序">6、Hive排序</a><a class="depth-3" href="#7-hive-join">7、Hive join</a><a class="depth-3" href="#8-map-side聚合">8、Map-Side聚合</a><a class="depth-3" href="#9-合并小文件">9、合并小文件</a><a class="depth-3" href="#10-合理设置map以及reduce的数量">10、合理设置Map以及Reduce的数量</a><a class="depth-3" href="#11-jvm重用">11、JVM重用</a><a class="depth-3" href="#12-去重统计">12、去重统计</a><a class="depth-2" href="#12-压缩和存储">12、 压缩和存储</a><a class="depth-3" href="#1-hadoop压缩配置">1、 Hadoop压缩配置</a><a class="depth-3" href="#2-文件存储格式">2、文件存储格式</a><a class="depth-3" href="#3-存储和压缩结合">3、存储和压缩结合</a><a class="depth-2" href="#13-hive-high-avaliable">13、 hive—high Avaliable</a></nav>
+      </aside>
+
+      <article class="article">
+        <header class="article-header reveal">
+          <span class="eyebrow">源码研究 · hive</span>
+          <h1 class="article-title">Hive 理论研究学习</h1>
+          <p class="article-description"> 学习hive理论</p>
+          <div class="post-meta-line">
+            <span> zhourj</span>
+            <span class="dot"></span>
+            <span>2023.04.07</span>
+            <span class="dot"></span>
+            <span>55 min read</span>
+            <span class="dot"></span>
+            <span>大数据工程</span>
+          </div>
+          <figure class="article-cover">
+            <img src="https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&amp;fit=crop&amp;w=1200&amp;q=80" alt="Hive 理论研究学习" loading="eager" decoding="async"/>
+          </figure>
+        </header>
+
+        <div class="markdown-body article-body reveal">
+<h2 id="1-hive-的基本介绍">1、HIVE 的基本介绍</h2>
+<h3 id="1-hive-产生的原因">1) HIVE 产生的原因？</h3>
+<p>a) 方便对文件及数据的元数据进行管理，提供统一的元数据管理方式。</p>
+<p>b) 提供更加简单的方式来访问大规模的数据集，使用SQL语言进行数据分析。</p>
+<p>c) 非java编程者对hdfs的数据做mapreduce操作。</p>
+<h3 id="2-hive是什么">2) HIVE是什么？</h3>
+<p>Hive经常被大数据企业用作企业级数据仓库。</p>
+<p>​ Hive在使用过程中是使用SQL语句来进行数据分析，由SQL语句到具体的任务执行还需要经   过解释器，编译器，优化器，执行器四部分才能完成。</p>
+<p>​ （1）解释器：调用语法解释器和语义分析器将SQL语句转换成对应的可执行的java代码或者业务代码。</p>
+<p>​ （2）编译器：将对应的java代码转换成字节码文件或者jar包。</p>
+<p>​ （3）优化器：从SQL语句到java代码的解析转化过程中需要调用优化器，进行相关策略的优化，实现最优的 查询性能。</p>
+<p>​ （4）执行器：当业务代码转换完成之后，需要上传到MapReduce的集群中执行。</p>
+<h3 id="3-hive-架构">3）HIVE 架构？</h3>
+<p><img src="../../assets/img/article-image-unavailable.svg" alt="" loading="lazy" decoding="async"/></p>
+<p>（1）用户接口主要有三个：CLI，Client 和 WUI。其中最常用的是CLI，Cli 启动的时候，会同时启动一个Hive副本。Client是Hive的客户端，用户连接至 Hive Server。在启动 Client模式的时候，需要指出Hive Server所在节点，并 且在该节点启动Hive Server。 WUI是通过浏览器访问Hive。</p>
+<p>（2）Hive将元数据存储在数据库中，如mysql、derby。Hive中的元数据包 括表的名字，表的列和分区及其属性，表的属性（是否为外部表等），表的数 据所在目录等。</p>
+<p>（3）解释器、编译器、优化器完成HQL查询语句从词法分析、语法分析、编 译、优化以及查询计划的生成。生成的查询计划存储在HDFS中，并在随后有 MapReduce调用执行。</p>
+<p>（4）Hive的数据存储在HDFS中，大部分的查询、计算由MapReduce完成 （包含<em>的查询，比如select </em> from tbl不会生成MapRedcue任务）。</p>
+<h4 id="2-hive的服务-角色">2、Hive的服务（角色）</h4>
+<h5 id="1-用户访问接口">1、用户访问接口</h5>
+<p>​ CLI（Command Line Interface）：用户可以使用Hive自带的命令行接口执行Hive QL、设置参数等功能</p>
+<p>​ JDBC/ODBC：用户可以使用JDBC或者ODBC的方式在代码中操作Hive</p>
+<p>​ Web GUI：浏览器接口，用户可以在浏览器中对Hive进行操作（2.2之后淘汰）</p>
+<h5 id="2-thrift-server">2、Thrift Server:</h5>
+<p>​ Thrift服务运行客户端使用Java、C++、Ruby等多种语言，通过编程的方式远程访问Hive</p>
+<h5 id="3-driver">3、Driver</h5>
+<p>​ Hive Driver是Hive的核心，其中包含解释器、编译器、优化器等各个组件，完成从SQL语句到MapReduce任务的解析优化执行过程</p>
+<h5 id="4-metastore">4、metastore</h5>
+<p>​ Hive的元数据存储服务，一般将数据存储在关系型数据库中，为了实现Hive元数据的持久化操作，Hive的安装包中自带了Derby内存数据库，但是在实际的生产环境中一般使用mysql来存储元数据</p>
+<p><img src="../../assets/img/article-image-unavailable.svg" alt="" loading="lazy" decoding="async"/></p>
+<ul><li>Hive的架构</li></ul>
+<ul><li>编译器将一个Hive SQL转换操作符</li></ul>
+<ul><li>操作符是Hive的最小的处理单元</li></ul>
+<ul><li>每个操作符代表HDFS的一个操作或者一道MapReduce作业</li></ul>
+<ul><li>Operator</li></ul>
+<ul><li>Operator都是hive定义的一个处理过程</li></ul>
+<ul><li>Operator都定义有:</li></ul>
+<ul><li>protected List &lt;Operator&lt;? extends Serializable &gt;&gt; childOperators;</li></ul>
+<ul><li>protected List &lt;Operator&lt;? extends Serializable &gt;&gt; parentOperators;</li></ul>
+<ul><li>protected boolean done; // 初始化值为false</li></ul>
+<h4 id="antlr词法语法分析工具解析hql">ANTLR词法语法分析工具解析hql</h4>
+<p><img src="../../assets/img/article-image-unavailable.svg" alt="" loading="lazy" decoding="async"/></p>
+<h2 id="2-数据仓库的基本介绍">2、数据仓库的基本介绍</h2>
+<h4 id="1-数据仓库基本概念">1、数据仓库基本概念</h4>
+<p>​        数据仓库，英文名称为Data Warehouse，可简写为DW或DWH。数据仓库，是为企业所有级别的决策制定过程，提供所有类型数据支持的战略集合。它是单个数据存储，出于分析性报告和决策支持目的而创建。 为需要业务智能的企业，提供指导业务流程改进、监视时间、成本、质量以及控制。</p>
+<h4 id="2-数据处理分类-olap与oltp">2、数据处理分类：OLAP与OLTP</h4>
+<p>​        数据处理大致可以分成两大类：联机事务处理OLTP（on-line transaction processing）、联机分析处理OLAP（On-Line Analytical Processing）。OLTP是传统的关系型数据库的主要应用，主要是基本的、日常的事务处理，例如银行交易。OLAP是数据仓库系统的主要应用，支持复杂的分析操作，侧重决策支持，并且提供直观易懂的查询结果。</p>
+<h4 id="3-oltp">3、OLTP</h4>
+<p>​        OLTP，也叫联机事务处理（Online Transaction Processing），表示事务性非常高的系统，一般都是高可用的在线系统，以小的事务以及小的查询为主，评估其系统的时候，一般看其每秒执行的Transaction以及Execute SQL的数量。在这样的系统中，单个数据库每秒处理的Transaction往往超过几百个，或者是几千个，Select 语句的执行量每秒几千甚至几万个。典型的OLTP系统有电子商务系统、银行、证券等，如美国eBay的业务数据库，就是很典型的OLTP数据库。</p>
+<h4 id="4-olap">4、OLAP</h4>
+<p>​        OLAP（On-Line Analysis Processing）在线分析处理是一种共享多维信息的快速分析技术；OLAP利用多维数据库技术使用户从不同角度观察数据；OLAP用于支持复杂的分析操作，侧重于对管理人员的决策支持，可以满足分析人员快速、灵活地进行大数据复量的复杂查询的要求，并且以一种直观、易懂的形式呈现查询结果，辅助决策。</p>
+<h5 id="基本概念">基本概念：</h5>
+<p>​            度量：数据度量的指标，数据的实际含义 ​            维度：描述与业务主题相关的一组属性 ​            事实：不同维度在某一取值下的度量</p>
+<h5 id="特点">特点：</h5>
+<p>​            (1)快速性：用户对OLAP的快速反应能力有很高的要求。系统应能在5秒内对用户的大部分分析要求做出反应。 ​            (2)可分析性：OLAP系统应能处理与应用有关的任何逻辑分析和统计分析。</p>
+<p>​            (3)多维性：多维性是OLAP的关键属性。系统必须提供对数据的多维视图和分析,包括对层次维和多重层次维的完全支持。 ​            (4)信息性：不论数据量有多大，也不管数据存储在何处，OLAP系统应能及时获得信息，并且管理大容量信息。</p>
+<h5 id="分类">分类：</h5>
+<p>​            按照存储方式分类：</p>
+<p>​                    ROLAP：关系型在线分析处理</p>
+<p>​                    MOLAP：多维在线分析处理</p>
+<p>​                    HOLAP：混合型在线分析处理</p>
+<p>​            按照处理方式分类：</p>
+<p>​                    Server OLAP和Client OLAP</p>
+<h5 id="操作">操作：</h5>
+<p><img src="../../assets/img/article-image-unavailable.svg" alt="" loading="lazy" decoding="async"/></p>
+<p>​            钻取：在维的不同层次间的变化，从上层降到下一层，或者说将汇总数据拆分到更细节的数据，比如通过对2019年第二季度的总销售数据进行钻取来查看2019年4,5,6,每个月的消费数据，再例如可以钻取浙江省来查看杭州市、温州市、宁波市......这些城市的销售数据 ​            上卷：钻取的逆操作，即从细粒度数据向更高汇总层的聚合，如将江苏省、上海市、浙江省的销售数据进行汇总来查看江浙沪地区的销售数据 ​            切片：选择维中特定的值进行分析，比如只选择电子产品的销售数据或者2019年第二季度的数据 ​            切块：选择维中特定区间的数据或者某批特定值进行分析，比如选择2019年第一季度到第二季度的销售数据或者是电子产品和日用品的销售数据 ​            旋转：维的位置互换，就像是二维表的行列转换，比如通过旋转来实现产品维和地域维的互换</p>
+<h3 id="4-数据库与数据仓库的区别">4、数据库与数据仓库的区别</h3>
+<p>​        <strong>注意：前三条重点掌握理解，后面的了解即可</strong></p>
+<p>​        1、数据库是对业务系统的支撑，性能要求高，相应的时间短，而数据仓库则对响应时间没有太多的要求，当然也是越快越好</p>
+<p>​        2、数据库存储的是某一个产品线或者某个业务线的数据，数据仓库可以将多个数据源的数据经过统一的规则清洗之后进行集中统一管理</p>
+<p>​        3、数据库中存储的数据可以修改，无法保存各个历史时刻的数据，数据仓库可以保存各个时间点的数据，形成时间拉链表，可以对各个历史时刻的数据做分析</p>
+<p>​        4、数据库一次操作的数据量小，数据仓库操作的数据量大</p>
+<p>​        5、数据库使用的是实体-关系（E-R）模型，数据仓库使用的是星型模型或者雪花模型</p>
+<p>​        6、数据库是面向事务级别的操作，数据仓库是面向分析的操作</p>
+<h2 id="3-hive-sql">3、HIVE SQL</h2>
+<h3 id="hive-ddl-数据库定义语言">Hive DDL（数据库定义语言）</h3>
+<h4 id="1-数据库的基本操作">1、数据库的基本操作</h4>
+<pre data-lang="sql"><code>--展示所有数据库
+    show databases;
+--切换数据库
+    use database_name;
+/*创建数据库        
+    CREATE (DATABASE|SCHEMA) [IF NOT EXISTS] database_name
+      [COMMENT database_comment]
+      [LOCATION hdfs_path]
+      [WITH DBPROPERTIES (property_name=property_value, ...)];
+*/
+    create database test;
+/*
+    删除数据库    
+    DROP (DATABASE|SCHEMA) [IF EXISTS] database_name [RESTRICT|CASCADE];    
+*/
+    drop database database_name;</code></pre>
+<p><strong>注意：当进入hive的命令行开始编写SQL语句的时候，如果没有任何相关的数据库操作，那么默认情况下，所有的表存在于default数据库，在hdfs上的展示形式是将此数据库的表保存在hive的默认路径下，如果创建了数据库，那么会在hive的默认路径下生成一个database_name.db的文件夹，此数据库的所有表会保存在database_name.db的目录下。</strong></p>
+<h4 id="2-数据库表的基本操作">2、数据库表的基本操作</h4>
+<pre data-lang="sql"><code>/*
+    创建表的操作
+        基本语法：
+        CREATE [TEMPORARY] [EXTERNAL] TABLE [IF NOT EXISTS] [db_name.]table_name    --             (Note: TEMPORARY available in Hive 0.14.0 and later)
+          [(col_name data_type [COMMENT col_comment], ... [constraint_specification])]
+          [COMMENT table_comment]
+          [PARTITIONED BY (col_name data_type [COMMENT col_comment], ...)]
+          [CLUSTERED BY (col_name, col_name, ...) [SORTED BY (col_name [ASC|DESC], ...)]                 INTO num_buckets BUCKETS]
+          [SKEWED BY (col_name, col_name, ...)                  -- (Note: Available in Hive             0.10.0 and later)]
+         ON ((col_value, col_value, ...), (col_value, col_value, ...), ...)
+         [STORED AS DIRECTORIES]
+          [
+               [ROW FORMAT row_format] 
+               [STORED AS file_format]
+             | STORED BY &#039;storage.handler.class.name&#039; [WITH SERDEPROPERTIES (...)]  --                 (Note: Available in Hive 0.6.0 and later)
+          ]
+          [LOCATION hdfs_path]
+          [TBLPROPERTIES (property_name=property_value, ...)]   -- (Note: Available in Hive             0.6.0 and later)
+          [AS select_statement];   -- (Note: Available in Hive 0.5.0 and later; not                     supported for external tables)
+
+        CREATE [TEMPORARY] [EXTERNAL] TABLE [IF NOT EXISTS] [db_name.]table_name
+              LIKE existing_table_or_view_name
+          [LOCATION hdfs_path];
+         复杂数据类型
+        data_type
+           : primitive_type
+           | array_type
+           | map_type
+           | struct_type
+           | union_type  -- (Note: Available in Hive 0.7.0 and later)
+         基本数据类型
+        primitive_type
+          : TINYINT
+          | SMALLINT
+          | INT
+          | BIGINT
+          | BOOLEAN
+          | FLOAT
+          | DOUBLE
+           | DOUBLE PRECISION -- (Note: Available in Hive 2.2.0 and later)
+          | STRING
+          | BINARY      -- (Note: Available in Hive 0.8.0 and later)
+          | TIMESTAMP   -- (Note: Available in Hive 0.8.0 and later)
+          | DECIMAL     -- (Note: Available in Hive 0.11.0 and later)
+          | DECIMAL(precision, scale)  -- (Note: Available in Hive 0.13.0 and later)
+          | DATE        -- (Note: Available in Hive 0.12.0 and later)
+          | VARCHAR     -- (Note: Available in Hive 0.12.0 and later)
+          | CHAR        -- (Note: Available in Hive 0.13.0 and later)
+
+        array_type
+          : ARRAY &lt; data_type &gt;
+
+        map_type
+          : MAP &lt; primitive_type, data_type &gt;
+
+        struct_type
+          : STRUCT &lt; col_name : data_type [COMMENT col_comment], ...&gt;
+
+        union_type
+           : UNIONTYPE &lt; data_type, data_type, ... &gt;  -- (Note: Available in Hive 0.7.0 and             later)
+         行格式规范
+        row_format
+          : DELIMITED [FIELDS TERMINATED BY char [ESCAPED BY char]] [COLLECTION ITEMS                 TERMINATED BY char]
+            [MAP KEYS TERMINATED BY char] [LINES TERMINATED BY char]
+           [NULL DEFINED AS char]   -- (Note: Available in Hive 0.13 and later)
+              | SERDE serde_name [WITH SERDEPROPERTIES (property_name=property_value,                 property_name=property_value, ...)]
+         文件基本类型
+        file_format:
+          : SEQUENCEFILE
+          | TEXTFILE    -- (Default, depending on hive.default.fileformat configuration)
+          | RCFILE      -- (Note: Available in Hive 0.6.0 and later)
+          | ORC         -- (Note: Available in Hive 0.11.0 and later)
+          | PARQUET     -- (Note: Available in Hive 0.13.0 and later)
+          | AVRO        -- (Note: Available in Hive 0.14.0 and later)
+          | JSONFILE    -- (Note: Available in Hive 4.0.0 and later)
+          | INPUTFORMAT input_format_classname OUTPUTFORMAT output_format_classname
+         表约束
+        constraint_specification:
+          : [, PRIMARY KEY (col_name, ...) DISABLE NOVALIDATE ]
+            [, CONSTRAINT constraint_name FOREIGN KEY (col_name, ...) REFERENCES                     table_name(col_name, ...) DISABLE NOVALIDATE 
+*/
+
+--创建普通hive表（不包含行定义格式）
+    create table psn
+    (
+    id int,
+    name string,
+    likes array&lt;string&gt;,
+    address map&lt;string,string&gt;
+    )
+--创建自定义行格式的hive表
+    create table psn2
+    (
+    id int,
+    name string,
+    likes array&lt;string&gt;,
+    address map&lt;string,string&gt;
+    )
+    row format delimited
+    fields terminated by &#039;,&#039;
+    collection items terminated by &#039;-&#039;
+    map keys terminated by &#039;:&#039;;
+--创建默认分隔符的hive表（^A、^B、^C）
+    create table psn3
+    (
+    id int,
+    name string,
+    likes array&lt;string&gt;,
+    address map&lt;string,string&gt;
+    )
+    row format delimited
+    fields terminated by &#039;\001&#039;
+    collection items terminated by &#039;\002&#039;
+    map keys terminated by &#039;\003&#039;;
+    --或者
+    create table psn3
+    (
+    id int,
+    name string,
+    likes array&lt;string&gt;,
+    address map&lt;string,string&gt;
+    )
+--创建hive的外部表(需要添加external和location的关键字)
+    create external table psn4
+    (
+    id int,
+    name string,
+    likes array&lt;string&gt;,
+    address map&lt;string,string&gt;
+    )
+    row format delimited
+    fields terminated by &#039;,&#039;
+    collection items terminated by &#039;-&#039;
+    map keys terminated by &#039;:&#039;
+    location &#039;/data&#039;;
+/*
+    在之前创建的表都属于hive的内部表（psn,psn2,psn3）,而psn4属于hive的外部表，
+    内部表跟外部表的区别：
+        1、hive内部表创建的时候数据存储在hive的默认存储目录中，外部表在创建的时候需要制定额外的目录
+        2、hive内部表删除的时候，会将元数据和数据都删除，而外部表只会删除元数据，不会删除数据
+    应用场景:
+        内部表:需要先创建表，然后向表中添加数据，适合做中间表的存储
+        外部表：可以先创建表，再添加数据，也可以先有数据，再创建表，本质上是将hdfs的某一个目录的数据跟                hive的表关联映射起来，因此适合原始数据的存储，不会因为误操作将数据给删除掉
+*/    
+/*
+    hive的分区表:
+        hive默认将表的数据保存在某一个hdfs的存储目录下，当需要检索符合条件的某一部分数据的时候，需要全量        遍历数据，io量比较大，效率比较低，因此可以采用分而治之的思想，将符合某些条件的数据放置在某一个目录         ，此时检索的时候只需要搜索指定目录即可，不需要全量遍历数据。
+*/
+--创建单分区表
+    create table psn5
+    (
+    id int,
+    name string,
+    likes array&lt;string&gt;,
+    address map&lt;string,string&gt;
+    )
+    partitioned by(gender string)
+    row format delimited
+    fields terminated by &#039;,&#039;
+    collection items terminated by &#039;-&#039;
+    map keys terminated by &#039;:&#039;;
+--创建多分区表
+    create table psn6
+    (
+    id int,
+    name string,
+    likes array&lt;string&gt;,
+    address map&lt;string,string&gt;
+    )
+    partitioned by(gender string,age int)
+    row format delimited
+    fields terminated by &#039;,&#039;
+    collection items terminated by &#039;-&#039;
+    map keys terminated by &#039;:&#039;;    
+/*
+    注意：
+        1、当创建完分区表之后，在保存数据的时候，会在hdfs目录中看到分区列会成为一个目录，以多级目录的形式              存在
+        2、当创建多分区表之后，插入数据的时候不可以只添加一个分区列，需要将所有的分区列都添加值
+        3、多分区表在添加分区列的值得时候，与顺序无关，与分区表的分区列的名称相关，按照名称就行匹配
+*/    
+--给分区表添加分区列的值
+    alter table table_name add partition(col_name=col_value)
+--删除分区列的值
+    alter table table_name drop partition(col_name=col_value)
+/*
+    注意:
+        1、添加分区列的值的时候，如果定义的是多分区表，那么必须给所有的分区列都赋值
+        2、删除分区列的值的时候，无论是单分区表还是多分区表，都可以将指定的分区进行删除
+*/
+/*
+    修复分区:
+        在使用hive外部表的时候，可以先将数据上传到hdfs的某一个目录中，然后再创建外部表建立映射关系，如果在上传数据的时候，参考分区表的形式也创建了多级目录，那么此时创建完表之后，是查询不到数据的，原因是分区的元数据没有保存在mysql中，因此需要修复分区，将元数据同步更新到mysql中，此时才可以查询到元数据。具体操作如下：
+*/    
+--在hdfs创建目录并上传文件
+    hdfs dfs -mkdir /msb
+    hdfs dfs -mkdir /msb/age=10
+    hdfs dfs -mkdir /msb/age=20
+    hdfs dfs -put /root/data/data /msb/age=10
+    hdfs dfs -put /root/data/data /msb/age=20
+--创建外部表
+    create external table psn7
+    (
+    id int,
+    name string,
+    likes array&lt;string&gt;,
+    address map&lt;string,string&gt;
+    )
+    partitioned by(age int)
+    row format delimited
+    fields terminated by &#039;,&#039;
+    collection items terminated by &#039;-&#039;
+    map keys terminated by &#039;:&#039;
+    location &#039;/msb&#039;;
+--查询结果（没有数据）
+    select * from psn7;
+--修复分区
+    msck repair table psn7;
+--查询结果（有数据）
+    select * from psn7;
+/*
+    问题：
+        以上面的方式创建hive的分区表会存在问题，每次插入的数据都是人为指定分区列的值，我们更加希望能够根据记录中的某一个字段来判断将数据插入到哪一个分区目录下，此时利用我们上面的分区方式是无法完成操作的，需要使用动态分区来完成相关操作，现在学的知识点无法满足，后续讲解。
+*/
+
+Hive查询执行分区语法
+
+ SELECT day_table.* FROM day_table WHERE day_table.dt&gt;= &#039;2008-0808&#039;;
+
+ 分区表的意义在于优化查询。查询时尽量利用分区字段。如果不使用分区字段， 就会全部扫描。
+
+▪ Hive查询表的分区信息语法： – SHOW PARTITIONS day_hour_table;
+
+▪ 预先导入分区数据，但是无法识别怎么办
+
+Msck repair table tablename
+
+ 直接添加分区
+
+
+-- hive查看表描述
+DESCRIBE [EXTENDED|FORMATTED] table_name</code></pre>
+<h3 id="hive-dml">Hive DML</h3>
+<h4 id="1-插入数据">1、插入数据</h4>
+<h5 id="1-loading-files-into-tables">1、Loading files into tables</h5>
+<pre data-lang="sql"><code>/*
+    记载数据文件到某一张表中
+    语法：
+        LOAD DATA [LOCAL] INPATH &#039;filepath&#039; [OVERWRITE] INTO TABLE tablename [PARTITION         (partcol1=val1, partcol2=val2 ...)]
+
+        LOAD DATA [LOCAL] INPATH &#039;filepath&#039; [OVERWRITE] INTO TABLE tablename [PARTITION         (partcol1=val1, partcol2=val2 ...)] [INPUTFORMAT &#039;inputformat&#039; SERDE &#039;serde&#039;]             (3.0 or later)
+*/
+--加载本地数据到hive表
+    load data local inpath &#039;/root/data/data&#039; into table psn;--(/root/data/data指的是本地linux目录)
+--加载hdfs数据文件到hive表
+    load data inpath &#039;/data/data&#039; into table psn;--(/data/data指的是hdfs的目录)
+/*
+    注意：
+        1、load操作不会对数据做任何的转换修改操作
+        2、从本地linux load数据文件是复制文件的过程
+        3、从hdfs load数据文件是移动文件的过程
+        4、load操作也支持向分区表中load数据，只不过需要添加分区列的值
+*/</code></pre>
+<h5 id="2-inserting-data-into-hive-tables-from-queries">2、Inserting data into Hive Tables from queries</h5>
+<pre data-lang="sql"><code>/*
+    从查询语句中获取数据插入某张表
+    语法：
+        Standard syntax:
+        INSERT OVERWRITE TABLE tablename1 [PARTITION (partcol1=val1, partcol2=val2 ...)             [IF NOT EXISTS]] select_statement1 FROM from_statement;
+        INSERT INTO TABLE tablename1 [PARTITION (partcol1=val1, partcol2=val2 ...)]                 select_statement1 FROM from_statement;
+
+        Hive extension (multiple inserts):
+        FROM from_statement
+        INSERT OVERWRITE TABLE tablename1 [PARTITION (partcol1=val1, partcol2=val2 ...)             [IF NOT EXISTS]] select_statement1
+        [INSERT OVERWRITE TABLE tablename2 [PARTITION ... [IF NOT EXISTS]]                             select_statement2]
+        [INSERT INTO TABLE tablename2 [PARTITION ...] select_statement2] ...;
+            FROM from_statement
+        INSERT INTO TABLE tablename1 [PARTITION (partcol1=val1, partcol2=val2 ...)]                 select_statement1
+        [INSERT INTO TABLE tablename2 [PARTITION ...] select_statement2]
+        [INSERT OVERWRITE TABLE tablename2 [PARTITION ... [IF NOT EXISTS]]                             select_statement2] ...;
+
+        Hive extension (dynamic partition inserts):
+            INSERT OVERWRITE TABLE tablename PARTITION (partcol1[=val1], partcol2[=val2]                 ...) select_statement FROM from_statement;
+            INSERT INTO TABLE tablename PARTITION (partcol1[=val1], partcol2[=val2] ...)                 select_statement FROM from_statement;
+*/
+--注意：这种方式插入数据的时候需要预先创建好结果表
+--从表中查询数据插入结果表
+    INSERT OVERWRITE TABLE psn9 SELECT id,name FROM psn
+--从表中获取部分列插入到新表中
+    from psn
+    insert overwrite table psn9
+    select id,name 
+    insert into table psn10
+    select id</code></pre>
+<h5 id="3-writing-data-into-the-filesystem-from-queries">3、Writing data into the filesystem from queries</h5>
+<pre data-lang="sql"><code>/*
+    将查询到的结果插入到文件系统中
+    语法：    
+    Standard syntax:
+        INSERT OVERWRITE [LOCAL] DIRECTORY directory1
+          [ROW FORMAT row_format] [STORED AS file_format] (Note: Only available starting             with Hive 0.11.0)
+          SELECT ... FROM ...
+
+    Hive extension (multiple inserts):
+        FROM from_statement
+        INSERT OVERWRITE [LOCAL] DIRECTORY directory1 select_statement1
+        [INSERT OVERWRITE [LOCAL] DIRECTORY directory2 select_statement2] ... 
+        row_format
+          : DELIMITED [FIELDS TERMINATED BY char [ESCAPED BY char]] [COLLECTION ITEMS             TERMINATED BY char]
+        [MAP KEYS TERMINATED BY char] [LINES TERMINATED BY char]
+        [NULL DEFINED AS char] (Note: Only available starting with Hive 0.13)
+*/
+--注意：路径千万不要填写根目录，会把所有的数据文件都覆盖
+--将查询到的结果导入到hdfs文件系统中
+    insert overwrite directory &#039;/result&#039; select * from psn;
+--将查询的结果导入到本地文件系统中
+    insert overwrite local directory &#039;/result&#039; select * from psn;</code></pre>
+<h5 id="4-inserting-values-into-tables-from-sql">4、Inserting values into tables from SQL</h5>
+<pre data-lang="sql"><code>/*
+    使用传统关系型数据库的方式插入数据，效率较低
+    语法：
+    Standard Syntax:
+        INSERT INTO TABLE tablename [PARTITION (partcol1[=val1], partcol2[=val2] ...)]             VALUES values_row [, values_row ...]
+
+    Where values_row is:
+        ( value [, value ...] )
+        where a value is either null or any valid SQL literal
+*/
+--插入数据
+    insert into psn values(1,&#039;zhangsan&#039;)</code></pre>
+<h4 id="2-数据更新和删除">2、数据更新和删除</h4>
+<p><img src="../../assets/img/article-image-unavailable.svg" alt="" loading="lazy" decoding="async"/></p>
+<p><img src="../../assets/img/article-image-unavailable.svg" alt="" loading="lazy" decoding="async"/></p>
+<p>​        在官网中我们明确看到hive中是支持Update和Delete操作的，但是实际上，是需要事务的支持的，Hive对于事务的支持有很多的限制，如下图所示：</p>
+<p><img src="../../assets/img/article-image-unavailable.svg" alt="" loading="lazy" decoding="async"/></p>
+<p>因此，在使用hive的过程中，我们一般不会产生删除和更新的操作，如果你需要测试的话，参考下面如下配置：</p>
+<pre data-lang="java"><code>//在hive的hive-site.xml中添加如下配置：
+    &lt;property&gt;
+        &lt;name&gt;hive.support.concurrency&lt;/name&gt;
+        &lt;value&gt;true&lt;/value&gt;
+    &lt;/property&gt;
+    &lt;property&gt;
+        &lt;name&gt;hive.enforce.bucketing&lt;/name&gt;
+        &lt;value&gt;true&lt;/value&gt;
+    &lt;/property&gt;
+    &lt;property&gt;
+        &lt;name&gt;hive.exec.dynamic.partition.mode&lt;/name&gt;
+        &lt;value&gt;nonstrict&lt;/value&gt;
+    &lt;/property&gt;
+    &lt;property&gt;
+        &lt;name&gt;hive.txn.manager&lt;/name&gt;
+        &lt;value&gt;org.apache.hadoop.hive.ql.lockmgr.DbTxnManager&lt;/value&gt;
+    &lt;/property&gt;
+    &lt;property&gt;
+        &lt;name&gt;hive.compactor.initiator.on&lt;/name&gt;
+        &lt;value&gt;true&lt;/value&gt;
+    &lt;/property&gt;
+    &lt;property&gt;
+        &lt;name&gt;hive.compactor.worker.threads&lt;/name&gt;
+        &lt;value&gt;1&lt;/value&gt;
+    &lt;/property&gt;
+//操作语句
+    create table test_trancaction (user_id Int,name String) clustered by (user_id) into 3             buckets stored as orc TBLPROPERTIES (&#039;transactional&#039;=&#039;true&#039;);
+    create table test_insert_test(id int,name string) row format delimited fields                   TERMINATED BY &#039;,&#039;;
+    insert into test_trancaction select * from test_insert_test;
+    update test_trancaction set name=&#039;jerrick_up&#039; where id=1;
+//数据文件
+    1,jerrick
+    2,tom
+    3,jerry
+    4,lily
+    5,hanmei
+    6,limlei
+    7,lucky</code></pre>
+<h2 id="4-hive-serde">4、Hive Serde</h2>
+<p>目的：</p>
+<p>​        Hive Serde用来做序列化和反序列化，构建在数据存储和执行引擎之间，对两者实现解耦。</p>
+<p>应用场景：</p>
+<p>​        1、hive主要用来存储结构化数据，如果结构化数据存储的格式嵌套比较复杂的时候，可以使用serde的方式，利用正则表达式匹配的方法来读取数据，例如，表字段如下：id,name,map&lt;string,array&lt;map&lt;string,string&gt;&gt;&gt;</p>
+<p>​        2、当读取数据的时候，数据的某些特殊格式不希望显示在数据中，如：</p>
+<p>192.168.57.4 - - [29/Feb/2019:18:14:35 +0800] &quot;GET /bg-upper.png HTTP/1.1&quot; 304 -</p>
+<p>不希望数据显示的时候包含[]或者&quot;&quot;,此时可以考虑使用serde的方式</p>
+<p>语法规则：</p>
+<pre data-lang="code"><code>        row_format
+        : DELIMITED 
+          [FIELDS TERMINATED BY char [ESCAPED BY char]] 
+          [COLLECTION ITEMS TERMINATED BY char] 
+          [MAP KEYS TERMINATED BY char] 
+          [LINES TERMINATED BY char] 
+        : SERDE serde_name [WITH SERDEPROPERTIES (property_name=property_value,                                                     property_name=property_value, ...)]</code></pre>
+<p>应用案例：</p>
+<p>​    1、数据文件</p>
+<pre data-lang="code"><code>192.168.57.4 - - [29/Feb/2019:18:14:35 +0800] &quot;GET /bg-upper.png HTTP/1.1&quot; 304 -
+192.168.57.4 - - [29/Feb/2019:18:14:35 +0800] &quot;GET /bg-nav.png HTTP/1.1&quot; 304 -
+192.168.57.4 - - [29/Feb/2019:18:14:35 +0800] &quot;GET /asf-logo.png HTTP/1.1&quot; 304 -
+192.168.57.4 - - [29/Feb/2019:18:14:35 +0800] &quot;GET /bg-button.png HTTP/1.1&quot; 304 -
+192.168.57.4 - - [29/Feb/2019:18:14:35 +0800] &quot;GET /bg-middle.png HTTP/1.1&quot; 304 -
+192.168.57.4 - - [29/Feb/2019:18:14:36 +0800] &quot;GET / HTTP/1.1&quot; 200 11217
+192.168.57.4 - - [29/Feb/2019:18:14:36 +0800] &quot;GET / HTTP/1.1&quot; 200 11217
+192.168.57.4 - - [29/Feb/2019:18:14:36 +0800] &quot;GET /tomcat.css HTTP/1.1&quot; 304 -
+192.168.57.4 - - [29/Feb/2019:18:14:36 +0800] &quot;GET /tomcat.png HTTP/1.1&quot; 304 -
+192.168.57.4 - - [29/Feb/2019:18:14:36 +0800] &quot;GET /asf-logo.png HTTP/1.1&quot; 304 -
+192.168.57.4 - - [29/Feb/2019:18:14:36 +0800] &quot;GET /bg-middle.png HTTP/1.1&quot; 304 -
+192.168.57.4 - - [29/Feb/2019:18:14:36 +0800] &quot;GET /bg-button.png HTTP/1.1&quot; 304 -
+192.168.57.4 - - [29/Feb/2019:18:14:36 +0800] &quot;GET /bg-nav.png HTTP/1.1&quot; 304 -
+192.168.57.4 - - [29/Feb/2019:18:14:36 +0800] &quot;GET /bg-upper.png HTTP/1.1&quot; 304 -
+192.168.57.4 - - [29/Feb/2019:18:14:36 +0800] &quot;GET / HTTP/1.1&quot; 200 11217
+192.168.57.4 - - [29/Feb/2019:18:14:36 +0800] &quot;GET /tomcat.css HTTP/1.1&quot; 304 -
+192.168.57.4 - - [29/Feb/2019:18:14:36 +0800] &quot;GET /tomcat.png HTTP/1.1&quot; 304 -
+192.168.57.4 - - [29/Feb/2019:18:14:36 +0800] &quot;GET / HTTP/1.1&quot; 200 11217
+192.168.57.4 - - [29/Feb/2019:18:14:36 +0800] &quot;GET /tomcat.css HTTP/1.1&quot; 304 -
+192.168.57.4 - - [29/Feb/2019:18:14:36 +0800] &quot;GET /tomcat.png HTTP/1.1&quot; 304 -
+192.168.57.4 - - [29/Feb/2019:18:14:36 +0800] &quot;GET /bg-button.png HTTP/1.1&quot; 304 -
+192.168.57.4 - - [29/Feb/2019:18:14:36 +0800] &quot;GET /bg-upper.png HTTP/1.1&quot; 304 -</code></pre>
+<p>​    2、基本操作：</p>
+<pre data-lang="sql"><code>--创建表
+    CREATE TABLE logtbl (
+        host STRING,
+        identity STRING,
+        t_user STRING,
+        time STRING,
+        request STRING,
+        referer STRING,
+        agent STRING)
+      ROW FORMAT SERDE &#039;org.apache.hadoop.hive.serde2.RegexSerDe&#039;
+      WITH SERDEPROPERTIES (
+        &quot;input.regex&quot; = &quot;([^ ]*) ([^ ]*) ([^ ]*) \\[(.*)\\] \&quot;(.*)\&quot; (-|[0-9]*) (-|[0-        9]*)&quot;
+      )
+  STORED AS TEXTFILE;
+--加载数据
+    load data local inpath &#039;/root/data/log&#039; into table logtbl;
+--查询操作
+    select * from logtbl;
+--数据显示如下（不包含[]和&quot;）
+192.168.57.4    -    -    29/Feb/2019:18:14:35 +0800    GET /bg-upper.png HTTP/1.1    304    -
+192.168.57.4    -    -    29/Feb/2019:18:14:35 +0800    GET /bg-nav.png HTTP/1.1    304    -
+192.168.57.4    -    -    29/Feb/2019:18:14:35 +0800    GET /asf-logo.png HTTP/1.1    304    -
+192.168.57.4    -    -    29/Feb/2019:18:14:35 +0800    GET /bg-button.png HTTP/1.1    304    -
+192.168.57.4    -    -    29/Feb/2019:18:14:35 +0800    GET /bg-middle.png HTTP/1.1    304    -</code></pre>
+<h2 id="5-hiveserver2">5、 HiveServer2</h2>
+<h3 id="基本概念介绍">基本概念介绍</h3>
+<p>1、HiveServer2基本介绍</p>
+<pre data-lang="sql"><code>HiveServer2 (HS2) is a server interface that enables remote clients to execute queries against Hive and retrieve the results (a more detailed intro here). The current implementation, based on Thrift RPC, is an improved version of HiveServer and supports multi-client concurrency and authentication. It is designed to provide better support for open API clients like JDBC and ODBC.</code></pre>
+<p>​         HiveServer2是一个服务接口，能够允许远程的客户端去执行SQL请求且得到检索结果。HiveServer2的实现，依托于Thrift RPC，是HiveServer的提高版本，它被设计用来提供更好的支持对于open API例如JDBC和ODBC。</p>
+<pre data-lang="code"><code>HiveServer is an optional service that allows a remote client to submit requests to Hive, using a variety of programming languages, and retrieve results. HiveServer is built on Apache ThriftTM (http://thrift.apache.org/), therefore it is sometimes called the Thrift server although this can lead to confusion because a newer service named HiveServer2 is also built on Thrift. Since the introduction of HiveServer2, HiveServer has also been called HiveServer1.</code></pre>
+<p>​        HiveServer是一个可选的服务，只允许一个远程的客户端去提交请求到hive中。（目前已被淘汰）</p>
+<p>2、Beeline</p>
+<p>​        HiveServer2 supports a command shell Beeline that works with HiveServer2. It&#039;s a JDBC client that is based on the SQLLine CLI 。</p>
+<p>​        HiveServer2提供了一种新的命令行接口，可以提交执行SQL语句。</p>
+<h3 id="hiveserver2的搭建使用">hiveserver2的搭建使用</h3>
+<p>​    在搭建hiveserver2服务的时候需要修改hdfs的超级用户的管理权限，修改配置如下：</p>
+<pre data-lang="sql"><code>--在hdfs集群的core-site.xml文件中添加如下配置文件
+    &lt;property&gt;
+        &lt;name&gt;hadoop.proxyuser.root.groups&lt;/name&gt;    
+        &lt;value&gt;*&lt;/value&gt;
+    &lt;/property&gt;
+    &lt;property&gt;
+        &lt;name&gt;hadoop.proxyuser.root.hosts&lt;/name&gt;    
+        &lt;value&gt;*&lt;/value&gt;
+    &lt;/property&gt;
+--配置完成之后重新启动集群，或者在namenode的节点上执行如下命令
+    hdfs dfsadmin -fs hdfs://node01:8020 -refreshSuperUserGroupsConfiguration
+    hdfs dfsadmin -fs hdfs://node02:8020 -refreshSuperUserGroupsConfiguration</code></pre>
+<p>1、独立hiveserver2模式</p>
+<p>​    1、将现有的所有hive的服务停止，不需要修改任何服务，在node03机器上执行hiveserver2或者hive --service hiveserver2的命令，开始启动hiveserver2的服务，hiveserver2的服务也是一个阻塞式窗口，当开启服务后，会开启一个10000的端口，对外提供服务。</p>
+<p>​    2、在node04上使用beeline的方式进行登录</p>
+<p>2、共享metastore server的hiveserver2模式搭建</p>
+<p>​    1、在node03上执行hive --service metastore启动元数据服务</p>
+<p>​    2、在node04上执行hiveserver2或者hive --service hiveserver2两个命令其中一个都可以</p>
+<p>​    3、在任意一台包含beeline脚本的虚拟机中执行beeline的命令进行连接</p>
+<h3 id="hiveserver2的访问方式">HiveServer2的访问方式</h3>
+<h5 id="1-beeline的访问方式">1、beeline的访问方式</h5>
+<p>​    （1）beeline -u jdbc:hive2://&lt;host&gt;:&lt;port&gt;/&lt;db&gt; -n name</p>
+<p>​    （2）beeline进入到beeline的命令行 ​                beeline&gt; !connect jdbc:hive2://&lt;host&gt;:&lt;port&gt;/&lt;db&gt; root 123</p>
+<p>​        注意：</p>
+<p>​            1、使用beeline方式登录的时候，默认的用户名和密码是不验证的，也就是说随便写用户名和密码即可</p>
+<p>​            2、使用第一种beeline的方式访问的时候，用户名和密码可以不输入</p>
+<p>​            3、使用第二种beeline方式访问的时候，必须输入用户名和密码，用户名和密码是什么无所谓</p>
+<h5 id="2-jdbc的访问方式">2、jdbc的访问方式</h5>
+<p>​    1、创建普通的java项目，将hive的jar包添加到classpath中，最精简的jar包如下：</p>
+<pre data-lang="code"><code>commons-lang-2.6.jar
+commons-logging-1.2.jar
+curator-client-2.7.1.jar
+curator-framework-2.7.1.jar
+guava-14.0.1.jar
+hive-exec-2.3.4.jar
+hive-jdbc-2.3.4.jar
+hive-jdbc-handler-2.3.4.jar
+hive-metastore-2.3.4.jar
+hive-service-2.3.4.jar
+hive-service-rpc-2.3.4.jar
+httpclient-4.4.jar
+httpcore-4.4.jar
+libfb303-0.9.3.jar
+libthrift-0.9.3.jar
+log4j-1.2-api-2.6.2.jar
+log4j-api-2.6.2.jar
+log4j-core-2.6.2.jar
+log4j-jul-2.5.jar
+log4j-slf4j-impl-2.6.2.jar
+log4j-web-2.6.2.jar
+zookeeper-3.4.6.jar</code></pre>
+<p>​</p>
+<p>​    2、编辑如下代码：</p>
+<pre data-lang="java"><code>package com.mashibing;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+public class HiveJdbcClient {
+
+    private static String driverName = &quot;org.apache.hive.jdbc.HiveDriver&quot;;
+
+    public static void main(String[] args) throws SQLException {
+        try {
+            Class.forName(driverName);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        Connection conn = DriverManager.getConnection(&quot;jdbc:hive2://node04:10000/default&quot;, &quot;root&quot;, &quot;&quot;);
+        Statement stmt = conn.createStatement();
+        String sql = &quot;select * from psn limit 5&quot;;
+        ResultSet res = stmt.executeQuery(sql);
+        while (res.next()) {
+            System.out.println(res.getString(1) + &quot;-&quot; + res.getString(&quot;name&quot;));
+        }
+    }
+}</code></pre>
+<p>运行之后，即可得到最终结果。</p>
+<h2 id="6-hive函数">6、Hive函数</h2>
+<p>​    Hive中提供了非常丰富的运算符和内置函数支撑，具体操作如下：</p>
+<h3 id="1-内置运算符">1.内置运算符</h3>
+<h5 id="1-1关系运算符">1.1关系运算符</h5>
+<div class="table-scroll"><table><thead><tr><th>运算符</th><th>类型</th><th>说明</th></tr></thead><tbody><tr><td>A = B</td><td>所有原始类型</td><td>如果A与B相等,返回TRUE,否则返回FALSE</td></tr><tr><td>A == B</td><td>无</td><td>失败，因为无效的语法。 SQL使用”=”，不使用”==”。</td></tr><tr><td>A &lt;&gt; B</td><td>所有原始类型</td><td>如果A不等于B返回TRUE,否则返回FALSE。如果A或B值为”NULL”，结果返回”NULL”。</td></tr><tr><td>A &lt; B</td><td>所有原始类型</td><td>如果A小于B返回TRUE,否则返回FALSE。如果A或B值为”NULL”，结果返回”NULL”。</td></tr><tr><td>A &lt;= B</td><td>所有原始类型</td><td>如果A小于等于B返回TRUE,否则返回FALSE。如果A或B值为”NULL”，结果返回”NULL”。</td></tr><tr><td>A &gt; B</td><td>所有原始类型</td><td>如果A大于B返回TRUE,否则返回FALSE。如果A或B值为”NULL”，结果返回”NULL”。</td></tr><tr><td>A &gt;= B</td><td>所有原始类型</td><td>如果A大于等于B返回TRUE,否则返回FALSE。如果A或B值为”NULL”，结果返回”NULL”。</td></tr><tr><td>A IS NULL</td><td>所有类型</td><td>如果A值为”NULL”，返回TRUE,否则返回FALSE</td></tr><tr><td>A IS NOT NULL</td><td>所有类型</td><td>如果A值不为”NULL”，返回TRUE,否则返回FALSE</td></tr><tr><td>A LIKE B</td><td>字符串</td><td>如 果A或B值为”NULL”，结果返回”NULL”。字符串A与B通过sql进行匹配，如果相符返回TRUE，不符返回FALSE。B字符串中 的”_”代表任一字符，”%”则代表多个任意字符。例如： (‘foobar’ like ‘foo’)返回FALSE，（ ‘foobar’ like ‘foo_ _ _’或者 ‘foobar’ like ‘foo%’)则返回TURE</td></tr><tr><td>A RLIKE B</td><td>字符串</td><td>如 果A或B值为”NULL”，结果返回”NULL”。字符串A与B通过java进行匹配，如果相符返回TRUE，不符返回FALSE。例如：（ ‘foobar’ rlike ‘foo’）返回FALSE，（’foobar’ rlike ‘^f.*r$’ ）返回TRUE。</td></tr><tr><td>A REGEXP B</td><td>字符串</td><td>与RLIKE相同。</td></tr></tbody></table></div>
+<h5 id="1-2算术运算符">1.2算术运算符</h5>
+<div class="table-scroll"><table><thead><tr><th>运算符</th><th>类型</th><th>说明</th></tr></thead><tbody><tr><td>A + B</td><td>所有数字类型</td><td>A和B相加。结果的与操作数值有共同类型。例如每一个整数是一个浮点数，浮点数包含整数。所以，一个浮点数和一个整数相加结果也是一个浮点数。</td></tr><tr><td>A – B</td><td>所有数字类型</td><td>A和B相减。结果的与操作数值有共同类型。</td></tr><tr><td>A * B</td><td>所有数字类型</td><td>A和B相乘，结果的与操作数值有共同类型。需要说明的是，如果乘法造成溢出，将选择更高的类型。</td></tr><tr><td>A / B</td><td>所有数字类型</td><td>A和B相除，结果是一个double（双精度）类型的结果。</td></tr><tr><td>A % B</td><td>所有数字类型</td><td>A除以B余数与操作数值有共同类型。</td></tr><tr><td>A &amp; B</td><td>所有数字类型</td><td>运算符查看两个参数的二进制表示法的值，并执行按位”与”操作。两个表达式的一位均为1时，则结果的该位为 1。否则，结果的该位为 0。</td></tr><tr><td>A\</td><td>B</td><td>所有数字类型</td><td>运算符查看两个参数的二进制表示法的值，并执行按位”或”操作。只要任一表达式的一位为 1，则结果的该位为 1。否则，结果的该位为 0。</td></tr><tr><td>A ^ B</td><td>所有数字类型</td><td>运算符查看两个参数的二进制表示法的值，并执行按位”异或”操作。当且仅当只有一个表达式的某位上为 1 时，结果的该位才为 1。否则结果的该位为 0。</td></tr><tr><td>~A</td><td>所有数字类型</td><td>对一个表达式执行按位”非”（取反）。</td></tr></tbody></table></div>
+<h5 id="1-3逻辑运算符">1.3逻辑运算符</h5>
+<div class="table-scroll"><table><thead><tr><th>运算符</th><th>类型</th><th>说明</th></tr></thead><tbody><tr><td>A AND B</td><td>布尔值</td><td>A和B同时正确时,返回TRUE,否则FALSE。如果A或B值为NULL，返回NULL。</td></tr><tr><td>A &amp;&amp; B</td><td>布尔值</td><td>与”A AND B”相同</td></tr><tr><td>A OR B</td><td>布尔值</td><td>A或B正确,或两者同时正确返返回TRUE,否则FALSE。如果A和B值同时为NULL，返回NULL。</td></tr><tr><td>A \</td><td>B</td><td>布尔值</td><td>与”A OR B”相同</td></tr><tr><td>NOT A</td><td>布尔值</td><td>如果A为NULL或错误的时候返回TURE，否则返回FALSE。</td></tr><tr><td>! A</td><td>布尔值</td><td>与”NOT A”相同</td></tr></tbody></table></div>
+<h5 id="1-4复杂类型函数">1.4复杂类型函数</h5>
+<div class="table-scroll"><table><thead><tr><th>函数</th><th>类型</th><th>说明</th></tr></thead><tbody><tr><td>map</td><td>(key1, value1, key2, value2, …)</td><td>通过指定的键/值对，创建一个map。</td></tr><tr><td>struct</td><td>(val1, val2, val3, …)</td><td>通过指定的字段值，创建一个结构。结构字段名称将COL1，COL2，…</td></tr><tr><td>array</td><td>(val1, val2, …)</td><td>通过指定的元素，创建一个数组。</td></tr></tbody></table></div>
+<p>1.5对复杂类型函数操作</p>
+<div class="table-scroll"><table><thead><tr><th>函数</th><th>类型</th><th>说明</th></tr></thead><tbody><tr><td>A[n]</td><td>A是一个数组，n为int型</td><td>返回数组A的第n个元素，第一个元素的索引为0。如果A数组为[&#039;foo&#039;,&#039;bar&#039;]，则A[0]返回’foo’和A[1]返回”bar”。</td></tr><tr><td>M[key]</td><td>M是Map&lt;K, V&gt;，关键K型</td><td>返回关键值对应的值，例如mapM为 \{‘f’ -&gt; ‘foo’, ‘b’ -&gt; ‘bar’, ‘all’ -&gt; ‘foobar’\}，则M[&#039;all&#039;] 返回’foobar’。</td></tr><tr><td>S.x</td><td>S为struct</td><td>返回结构x字符串在结构S中的存储位置。如 foobar \{int foo, int bar\} foobar.foo的领域中存储的整数。</td></tr></tbody></table></div>
+<h3 id="2-内置函数">2.内置函数</h3>
+<h5 id="2-1数学函数">2.1数学函数</h5>
+<div class="table-scroll"><table><thead><tr><th>返回类型</th><th>函数</th><th>说明</th></tr></thead><tbody><tr><td>BIGINT</td><td>round(double a)</td><td>四舍五入</td></tr><tr><td>DOUBLE</td><td>round(double a, int d)</td><td>小数部分d位之后数字四舍五入，例如round(21.263,2),返回21.26</td></tr><tr><td>BIGINT</td><td>floor(double a)</td><td>对给定数据进行向下舍入最接近的整数。例如floor(21.2),返回21。</td></tr><tr><td>BIGINT</td><td>ceil(double a), ceiling(double a)</td><td>将参数向上舍入为最接近的整数。例如ceil(21.2),返回23.</td></tr><tr><td>double</td><td>rand(), rand(int seed)</td><td>返回大于或等于0且小于1的平均分布随机数（依重新计算而变）</td></tr><tr><td>double</td><td>exp(double a)</td><td>返回e的n次方</td></tr><tr><td>double</td><td>ln(double a)</td><td>返回给定数值的自然对数</td></tr><tr><td>double</td><td>log10(double a)</td><td>返回给定数值的以10为底自然对数</td></tr><tr><td>double</td><td>log2(double a)</td><td>返回给定数值的以2为底自然对数</td></tr><tr><td>double</td><td>log(double base, double a)</td><td>返回给定底数及指数返回自然对数</td></tr><tr><td>double</td><td>pow(double a, double p) power(double a, double p)</td><td>返回某数的乘幂</td></tr><tr><td>double</td><td>sqrt(double a)</td><td>返回数值的平方根</td></tr><tr><td>string</td><td>bin(BIGINT a)</td><td>返回二进制格式</td></tr><tr><td>string</td><td>hex(BIGINT a) hex(string a)</td><td>将整数或字符转换为十六进制格式</td></tr><tr><td>string</td><td>unhex(string a)</td><td>十六进制字符转换由数字表示的字符。</td></tr><tr><td>string</td><td>conv(BIGINT num, int from_base, int to_base)</td><td>将 指定数值，由原来的度量体系转换为指定的试题体系。例如CONV(‘a’,16,2),返回。参考：’1010′ http://dev.mysql.com/doc/refman/5.0/en/mathematical-functions.html#function_conv</td></tr><tr><td>double</td><td>abs(double a)</td><td>取绝对值</td></tr><tr><td>int double</td><td>pmod(int a, int b) pmod(double a, double b)</td><td>返回a除b的余数的绝对值</td></tr><tr><td>double</td><td>sin(double a)</td><td>返回给定角度的正弦值</td></tr><tr><td>double</td><td>asin(double a)</td><td>返回x的反正弦，即是X。如果X是在-1到1的正弦值，返回NULL。</td></tr><tr><td>double</td><td>cos(double a)</td><td>返回余弦</td></tr><tr><td>double</td><td>acos(double a)</td><td>返回X的反余弦，即余弦是X，，如果-1&lt;= A &lt;= 1，否则返回null.</td></tr><tr><td>int double</td><td>positive(int a) positive(double a)</td><td>返回A的值，例如positive(2)，返回2。</td></tr><tr><td>int double</td><td>negative(int a) negative(double a)</td><td>返回A的相反数，例如negative(2),返回-2。</td></tr></tbody></table></div>
+<h5 id="2-2收集函数">2.2收集函数</h5>
+<div class="table-scroll"><table><thead><tr><th>返回类型</th><th>函数</th><th>说明</th></tr></thead><tbody><tr><td>int</td><td>size(Map&lt;K.V&gt;)</td><td>返回的map类型的元素的数量</td></tr><tr><td>int</td><td>size(Array&lt;T&gt;)</td><td>返回数组类型的元素数量</td></tr></tbody></table></div>
+<h5 id="2-3类型转换函数">2.3类型转换函数</h5>
+<div class="table-scroll"><table><thead><tr><th>返回类型</th><th>函数</th><th>说明</th></tr></thead><tbody><tr><td>指定 “type”</td><td>cast(expr as &lt;type&gt;)</td><td>类型转换。例如将字符”1″转换为整数:cast(’1′ as bigint)，如果转换失败返回NULL。</td></tr></tbody></table></div>
+<h5 id="2-4日期函数">2.4日期函数</h5>
+<div class="table-scroll"><table><thead><tr><th>返回类型</th><th>函数</th><th>说明</th></tr></thead><tbody><tr><td>string</td><td>from_unixtime(bigint unixtime[, string format])</td><td>UNIX_TIMESTAMP参数表示返回一个值’YYYY- MM – DD HH：MM：SS’或YYYYMMDDHHMMSS.uuuuuu格式，这取决于是否是在一个字符串或数字语境中使用的功能。该值表示在当前的时区。</td></tr><tr><td>bigint</td><td>unix_timestamp()</td><td>如果不带参数的调用，返回一个Unix时间戳（从’1970- 01 – 0100:00:00′到现在的UTC秒数）为无符号整数。</td></tr><tr><td>bigint</td><td>unix_timestamp(string date)</td><td>指定日期参数调用UNIX_TIMESTAMP（），它返回参数值’1970- 01 – 0100:00:00′到指定日期的秒数。</td></tr><tr><td>bigint</td><td>unix_timestamp(string date, string pattern)</td><td>指定时间输入格式，返回到1970年秒数：unix_timestamp(’2009-03-20′, ‘yyyy-MM-dd’) = 1237532400</td></tr><tr><td>string</td><td>to_date(string timestamp)</td><td>返回时间中的年月日： to_date(“1970-01-01 00:00:00″) = “1970-01-01″</td></tr><tr><td>string</td><td>to_dates(string date)</td><td>给定一个日期date，返回一个天数（0年以来的天数）</td></tr><tr><td>int</td><td>year(string date)</td><td>返回指定时间的年份，范围在1000到9999，或为”零”日期的0。</td></tr><tr><td>int</td><td>month(string date)</td><td>返回指定时间的月份，范围为1至12月，或0一个月的一部分，如’0000-00-00′或’2008-00-00′的日期。</td></tr><tr><td>int</td><td>day(string date) dayofmonth(date)</td><td>返回指定时间的日期</td></tr><tr><td>int</td><td>hour(string date)</td><td>返回指定时间的小时，范围为0到23。</td></tr><tr><td>int</td><td>minute(string date)</td><td>返回指定时间的分钟，范围为0到59。</td></tr><tr><td>int</td><td>second(string date)</td><td>返回指定时间的秒，范围为0到59。</td></tr><tr><td>int</td><td>weekofyear(string date)</td><td>返回指定日期所在一年中的星期号，范围为0到53。</td></tr><tr><td>int</td><td>datediff(string enddate, string startdate)</td><td>两个时间参数的日期之差。</td></tr><tr><td>int</td><td>date_add(string startdate, int days)</td><td>给定时间，在此基础上加上指定的时间段。</td></tr><tr><td>int</td><td>date_sub(string startdate, int days)</td><td>给定时间，在此基础上减去指定的时间段。</td></tr></tbody></table></div>
+<h5 id="2-5条件函数">2.5条件函数</h5>
+<div class="table-scroll"><table><thead><tr><th>返回类型</th><th>函数</th><th>说明</th></tr></thead><tbody><tr><td>T</td><td>if(boolean testCondition, T valueTrue, T valueFalseOrNull)</td><td>判断是否满足条件，如果满足返回一个值，如果不满足则返回另一个值。</td></tr><tr><td>T</td><td>COALESCE(T v1, T v2, …)</td><td>返回一组数据中，第一个不为NULL的值，如果均为NULL,返回NULL。</td></tr><tr><td>T</td><td>CASE a WHEN b THEN c [WHEN d THEN e]* [ELSE f] END</td><td>当a=b时,返回c；当a=d时，返回e，否则返回f。</td></tr><tr><td>T</td><td>CASE WHEN a THEN b [WHEN c THEN d]* [ELSE e] END</td><td>当值为a时返回b,当值为c时返回d。否则返回e。</td></tr></tbody></table></div>
+<h5 id="2-6字符函数">2.6字符函数</h5>
+<div class="table-scroll"><table><thead><tr><th>返回类型</th><th>函数</th><th>说明</th></tr></thead><tbody><tr><td>int</td><td>length(string A)</td><td>返回字符串的长度</td></tr><tr><td>string</td><td>reverse(string A)</td><td>返回倒序字符串</td></tr><tr><td>string</td><td>concat(string A, string B…)</td><td>连接多个字符串，合并为一个字符串，可以接受任意数量的输入字符串</td></tr><tr><td>string</td><td>concat_ws(string SEP, string A, string B…)</td><td>链接多个字符串，字符串之间以指定的分隔符分开。</td></tr><tr><td>string</td><td>substr(string A, int start) substring(string A, int start)</td><td>从文本字符串中指定的起始位置后的字符。</td></tr><tr><td>string</td><td>substr(string A, int start, int len) substring(string A, int start, int len)</td><td>从文本字符串中指定的位置指定长度的字符。</td></tr><tr><td>string</td><td>upper(string A) ucase(string A)</td><td>将文本字符串转换成字母全部大写形式</td></tr><tr><td>string</td><td>lower(string A) lcase(string A)</td><td>将文本字符串转换成字母全部小写形式</td></tr><tr><td>string</td><td>trim(string A)</td><td>删除字符串两端的空格，字符之间的空格保留</td></tr><tr><td>string</td><td>ltrim(string A)</td><td>删除字符串左边的空格，其他的空格保留</td></tr><tr><td>string</td><td>rtrim(string A)</td><td>删除字符串右边的空格，其他的空格保留</td></tr><tr><td>string</td><td>regexp_replace(string A, string B, string C)</td><td>字符串A中的B字符被C字符替代</td></tr><tr><td>string</td><td>regexp_extract(string subject, string pattern, int index)</td><td>通过下标返回正则表达式指定的部分。regexp_extract(‘foothebar’, ‘foo(.*?)(bar)’, 2) returns ‘bar.’</td></tr><tr><td>string</td><td>parse_url(string urlString, string partToExtract [, string keyToExtract])</td><td>返回URL指定的部分。parse_url(‘http://facebook.com/path1/p.php?k1=v1&amp;k2=v2#Ref1′, ‘HOST’) 返回：’facebook.com’</td></tr><tr><td>string</td><td>get_json_object(string json_string, string path)</td><td>select a.timestamp, get_json_object(a.appevents, ‘$.eventid’), get_json_object(a.appenvets, ‘$.eventname’) from log a;</td></tr><tr><td>string</td><td>space(int n)</td><td>返回指定数量的空格</td></tr><tr><td>string</td><td>repeat(string str, int n)</td><td>重复N次字符串</td></tr><tr><td>int</td><td>ascii(string str)</td><td>返回字符串中首字符的数字值</td></tr><tr><td>string</td><td>lpad(string str, int len, string pad)</td><td>返回指定长度的字符串，给定字符串长度小于指定长度时，由指定字符从左侧填补。</td></tr><tr><td>string</td><td>rpad(string str, int len, string pad)</td><td>返回指定长度的字符串，给定字符串长度小于指定长度时，由指定字符从右侧填补。</td></tr><tr><td>array</td><td>split(string str, string pat)</td><td>将字符串转换为数组。</td></tr><tr><td>int</td><td>find_in_set(string str, string strList)</td><td>返回字符串str第一次在strlist出现的位置。如果任一参数为NULL,返回NULL；如果第一个参数包含逗号，返回0。</td></tr><tr><td>array&lt;array&lt;string&gt;&gt;</td><td>sentences(string str, string lang, string locale)</td><td>将字符串中内容按语句分组，每个单词间以逗号分隔，最后返回数组。 例如sentences(‘Hello there! How are you?’) 返回：( (“Hello”, “there”), (“How”, “are”, “you”) )</td></tr><tr><td>array&lt;struct&lt;string,double&gt;&gt;</td><td>ngrams(array&lt;array&lt;string&gt;&gt;, int N, int K, int pf)</td><td>SELECT ngrams(sentences(lower(tweet)), 2, 100 [, 1000]) FROM twitter;</td></tr><tr><td>array&lt;struct&lt;string,double&gt;&gt;</td><td>context_ngrams(array&lt;array&lt;string&gt;&gt;, array&lt;string&gt;, int K, int pf)</td><td>SELECT context_ngrams(sentences(lower(tweet)), array(null,null), 100, [, 1000]) FROM twitter;</td></tr></tbody></table></div>
+<h3 id="3-内置的聚合函数-udaf">3.内置的聚合函数（UDAF）</h3>
+<div class="table-scroll"><table><thead><tr><th>返回类型</th><th>函数</th><th>说明</th></tr></thead><tbody><tr><td>bigint</td><td>count(*) , count(expr), count(DISTINCT expr[, expr_., expr_.])</td><td>返回记录条数。</td></tr><tr><td>double</td><td>sum(col), sum(DISTINCT col)</td><td>求和</td></tr><tr><td>double</td><td>avg(col), avg(DISTINCT col)</td><td>求平均值</td></tr><tr><td>double</td><td>min(col)</td><td>返回指定列中最小值</td></tr><tr><td>double</td><td>max(col)</td><td>返回指定列中最大值</td></tr><tr><td>double</td><td>var_pop(col)</td><td>返回指定列的方差</td></tr><tr><td>double</td><td>var_samp(col)</td><td>返回指定列的样本方差</td></tr><tr><td>double</td><td>stddev_pop(col)</td><td>返回指定列的偏差</td></tr><tr><td>double</td><td>stddev_samp(col)</td><td>返回指定列的样本偏差</td></tr><tr><td>double</td><td>covar_pop(col1, col2)</td><td>两列数值协方差</td></tr><tr><td>double</td><td>covar_samp(col1, col2)</td><td>两列数值样本协方差</td></tr><tr><td>double</td><td>corr(col1, col2)</td><td>返回两列数值的相关系数</td></tr><tr><td>double</td><td>percentile(col, p)</td><td>返回数值区域的百分比数值点。0&lt;=P&lt;=1,否则返回NULL,不支持浮点型数值。</td></tr><tr><td>array&lt;double&gt;</td><td>percentile(col, array(p~1,,\ [, p,,2,,]…))</td><td>返回数值区域的一组百分比值分别对应的数值点。0&lt;=P&lt;=1,否则返回NULL,不支持浮点型数值。</td></tr><tr><td>double</td><td>percentile_approx(col, p[, B])</td><td>Returns an approximate p^th^ percentile of a numeric column (including floating point types) in the group. The B parameter controls approximation accuracy at the cost of memory. Higher values yield better approximations, and the default is 10,000. When the number of distinct values in col is smaller than B, this gives an exact percentile value.</td></tr><tr><td>array&lt;double&gt;</td><td>percentile_approx(col, array(p~1,, [, p,,2_]…) [, B])</td><td>Same as above, but accepts and returns an array of percentile values instead of a single one.</td></tr><tr><td>array&lt;struct\{‘x’,&#039;y’\}&gt;</td><td>histogram_numeric(col, b)</td><td>Computes a histogram of a numeric column in the group using b non-uniformly spaced bins. The output is an array of size b of double-valued (x,y) coordinates that represent the bin centers and heights</td></tr><tr><td>array</td><td>collect_set(col)</td><td>返回无重复记录</td></tr></tbody></table></div>
+<h3 id="4-内置表生成函数-udtf">4.内置表生成函数（UDTF）</h3>
+<div class="table-scroll"><table><thead><tr><th>返回类型</th><th>函数</th><th>说明</th></tr></thead><tbody><tr><td>数组</td><td>explode(array&lt;TYPE&gt; a)</td><td>数组一条记录中有多个参数，将参数拆分，每个参数生成一列。</td></tr><tr><td></td><td>json_tuple</td><td>get_json_object 语句：select a.timestamp, get_json_object(a.appevents, ‘$.eventid’), get_json_object(a.appenvets, ‘$.eventname’) from log a; json_tuple语句: select a.timestamp, b.* from log a lateral view json_tuple(a.appevent, ‘eventid’, ‘eventname’) b as f1, f2</td></tr></tbody></table></div>
+<h3 id="5-自定义函数">5.自定义函数</h3>
+<p>自定义函数包括三种UDF、UDAF、UDTF</p>
+<p>​        UDF(User-Defined-Function) ：一进一出</p>
+<p>​        UDAF(User- Defined Aggregation Funcation) ：聚集函数，多进一出。Count/max/min</p>
+<p>​        UDTF(User-Defined Table-Generating Functions) :一进多出，如explore()</p>
+<h5 id="5-1-udf-开发"><strong>5.1</strong> UDF 开发</h5>
+<p>1、UDF函数可以直接应用于select语句，对查询结构做格式化处理后，再输出内容。</p>
+<p>2、编写UDF函数的时候需要注意一下几点：</p>
+<p>a）自定义UDF需要继承org.apache.hadoop.hive.ql.UDF。</p>
+<p>b）需要实现evaluate函数，evaluate函数支持重载。</p>
+<pre data-lang="java"><code>package com.hrj.hive.udf;
+
+ import org.apache.hadoop.hive.ql.exec.UDF;
+
+ public class helloUDF extends UDF {
+
+ public String evaluate(String str) {
+     try {
+         return &quot;HelloWorld &quot; + str;
+     } catch (Exception e) {
+         return null;
+         }
+     }
+ }</code></pre>
+<p>3、步骤</p>
+<p>(1)将jar包上传到虚拟机中：</p>
+<p>​    a）把程序打包放到目标机器上去；</p>
+<p>​    b）进入hive客户端，添加jar包：hive&gt;add jar /run/jar/udf_test.jar;</p>
+<p>​    c）创建临时函数：hive&gt;CREATE TEMPORARY FUNCTION add_example AS &#039;hive.udf.Add&#039;;</p>
+<p>​    d）查询HQL语句：</p>
+<p>​        SELECT add_example(8, 9) FROM scores;</p>
+<p>​        SELECT add_example(scores.math, scores.art) FROM scores;</p>
+<p>​        SELECT add_example(6, 7, 8, 6.8) FROM scores;</p>
+<p>​    e）销毁临时函数：hive&gt; DROP TEMPORARY FUNCTION add_example;</p>
+<p>​    注意：此种方式创建的函数属于临时函数，当关闭了当前会话之后，函数会无法使用，因为jar的引用没有了，无法找到对应的java文件进行处理，因此不推荐使用。</p>
+<p>(2)将jar包上传到hdfs集群中：</p>
+<p>​     a）把程序打包上传到hdfs的某个目录下</p>
+<p>​    b）创建函数：hive&gt;CREATE FUNCTION add_example AS &#039;hive.udf.Add&#039; using jar &quot;hdfs://mycluster/jar/udf_test.jar&quot;;</p>
+<p>​    d）查询HQL语句：</p>
+<p>​        SELECT add_example(8, 9) FROM scores;</p>
+<p>​        SELECT add_example(scores.math, scores.art) FROM scores;</p>
+<p>​        SELECT add_example(6, 7, 8, 6.8) FROM scores;</p>
+<p>​    e）销毁临时函数：hive&gt; DROP  FUNCTION add_example;</p>
+<h5 id="5-2-编写-wordcount"><strong>5.2</strong> 编写 WORDCOUNT</h5>
+<pre data-lang="sql"><code>from (select explode(split(line,&#039; &#039;))word from wc) t insert into wc_result select word,count(word) group by t.word</code></pre>
+<h2 id="7-hive参数操作和运行方式">7、Hive参数操作和运行方式</h2>
+<h3 id="1-hive参数操作">1、Hive参数操作</h3>
+<h5 id="1-hive参数介绍">1、hive参数介绍</h5>
+<p>​        hive当中的参数、变量都是以命名空间开头的，详情如下表所示：</p>
+<div class="table-scroll"><table><thead><tr><th><strong>命名空间</strong></th><th><strong>读写权限</strong></th><th><strong>含义</strong></th></tr></thead><tbody><tr><td>hiveconf</td><td>可读写</td><td>hive-site.xml当中的各配置变量例：hive --hiveconf hive.cli.print.header=true</td></tr><tr><td>system</td><td>可读写</td><td>系统变量，包含JVM运行参数等例：system:user.name=root</td></tr><tr><td>env</td><td>只读</td><td>环境变量例：env：JAVA_HOME</td></tr><tr><td>hivevar</td><td>可读写</td><td>例：hive -d val=key</td></tr></tbody></table></div>
+<p>​        hive的变量可以通过${}方式进行引用，其中system、env下的变量必须以前缀开头</p>
+<h5 id="2-hive参数的设置方式">2、hive参数的设置方式</h5>
+<p>​        1、在${HIVE_HOME}/conf/hive-site.xml文件中添加参数设置</p>
+<p>​            <strong>注意：永久生效，所有的hive会话都会加载对应的配置</strong></p>
+<p>​        2、在启动hive cli时，通过--hiveconf key=value的方式进行设置</p>
+<p>​            例如：hive --hiveconf hive.cli.print.header=true</p>
+<p>​            <strong>注意：只在当前会话有效，退出会话之后参数失效</strong></p>
+<p>​        3、在进入到cli之后，通过set命令设置</p>
+<p>​            例如：set hive.cli.print.header=true;</p>
+<pre data-lang="sql"><code>--在hive cli控制台可以通过set对hive中的参数进行查询设置
+--set设置
+    set hive.cli.print.header=true;
+--set查看
+    set hive.cli.print.header
+--set查看全部属性
+    set</code></pre>
+<p>​        4、hive参数初始化设置</p>
+<p>​            在当前用户的家目录下创建<strong>.hiverc</strong>文件，在当前文件中设置hive参数的命令，每次进入hive cli的时候，都会加载.hiverc的文件，执行文件中的命令。</p>
+<p>​            <strong>注意：在当前用户的家目录下还会存在.hivehistory文件，此文件中保存了hive cli中执行的所有命令</strong></p>
+<h3 id="2-hive运行方式">2、hive运行方式</h3>
+<h5 id="1-hive运行方式分类">1、hive运行方式分类</h5>
+<p>​        （1）命令行方式或者控制台模式</p>
+<p>​        （2）脚本运行方式（实际生产环境中用最多）</p>
+<p>​        （3）JDBC方式：hiveserver2</p>
+<p>​        （ 4）web GUI接口（hwi、hue等）</p>
+<h5 id="2-hive命令行模式详解">2、hive命令行模式详解</h5>
+<p>​        （1）在命令行中可以直接输入SQL语句，例如：select * from table_name</p>
+<p>​        （2）在命令行中可以与HDFS交互，例如：dfs ls /</p>
+<p>​        （3）在命令行中可以与linux交互，例如：! pwd或者! ls /</p>
+<p>​                    <strong>注意：与linux交互的时候必须要加!</strong></p>
+<h5 id="3-hive脚本运行方式">3、hive脚本运行方式</h5>
+<pre data-lang="sql"><code>--hive直接执行sql命令，可以写一个sql语句，也可以使用;分割写多个sql语句
+    hive -e &quot;&quot;
+--hive执行sql命令，将sql语句执行的结果重定向到某一个文件中
+    hive -e &quot;&quot;&gt;aaa
+--hive静默输出模式，输出的结果中不包含ok，time token等关键字
+    hive -S -e &quot;&quot;&gt;aaa
+--hive可以直接读取文件中的sql命令，进行执行
+    hive -f file
+--hive可以从文件中读取命令，并且执行初始化操作
+    hive -i /home/my/hive-init.sql
+--在hive的命令行中也可以执行外部文件中的命令
+    hive&gt; source file (在hive cli中运行)</code></pre>
+<p>​    4、hive JDBC访问方式，之前讲过，不再赘述</p>
+<p>​    5、Hive GUI方式</p>
+<p>​   <img src="../../assets/img/article-image-unavailable.svg" alt="" loading="lazy" decoding="async"/></p>
+<h2 id="8-hive动态分区和分桶">8、Hive动态分区和分桶</h2>
+<h3 id="1-hive动态分区">1、Hive动态分区</h3>
+<h5 id="1-hive的动态分区介绍">1、hive的动态分区介绍</h5>
+<p>​        hive的静态分区需要用户在插入数据的时候必须手动指定hive的分区字段值，但是这样的话会导致用户的操作复杂度提高，而且在使用的时候会导致数据只能插入到某一个指定分区，无法让数据散列分布，因此更好的方式是当数据在进行插入的时候，根据数据的某一个字段或某几个字段值动态的将数据插入到不同的目录中，此时，引入动态分区。</p>
+<h5 id="2-hive的动态分区配置">2、hive的动态分区配置</h5>
+<pre data-lang="sql"><code>--hive设置hive动态分区开启
+    set hive.exec.dynamic.partition=true;
+    默认：true
+--hive的动态分区模式
+    set hive.exec.dynamic.partition.mode=nostrict;
+    默认：strict（至少有一个分区列是静态分区）
+--每一个执行mr节点上，允许创建的动态分区的最大数量(100)
+    set hive.exec.max.dynamic.partitions.pernode;
+--所有执行mr节点上，允许创建的所有动态分区的最大数量(1000)    
+    set hive.exec.max.dynamic.partitions;
+--所有的mr job允许创建的文件的最大数量(100000)    
+    set hive.exec.max.created.files;</code></pre>
+<h5 id="3-hive动态分区语法">3、hive动态分区语法</h5>
+<pre data-lang="sql"><code>--Hive extension (dynamic partition inserts):
+    INSERT OVERWRITE TABLE tablename PARTITION (partcol1[=val1], partcol2[=val2] ...)         select_statement FROM from_statement;
+    INSERT INTO TABLE tablename PARTITION (partcol1[=val1], partcol2[=val2] ...)             select_statement FROM from_statement;
+-- 加载数据
+from psn21 
+insert overwrite table psn22 partition(age, sex) 
+select id, name, age, sex, likes, address distribute by age, sex;</code></pre>
+<h3 id="2-hive分桶">2、Hive分桶</h3>
+<h5 id="1-hive分桶的介绍">1、Hive分桶的介绍</h5>
+<pre data-lang="sql"><code>    Bucketed tables are fantastic in that they allow much more efficient sampling than do non-bucketed tables, and they may later allow for time saving operations such as mapside joins. However, the bucketing specified at table creation is not enforced when the table is written to, and so it is possible for the table&#039;s metadata to advertise properties which are not upheld by the table&#039;s actual layout. This should obviously be avoided. Here&#039;s how to do it right.</code></pre>
+<p>​        注意：</p>
+<p>​            1、Hive分桶表是对列值取hash值得方式，将不同数据放到不同文件中存储</p>
+<p>​            2、对于hive中每一个表、分区都可以进一步进行分桶</p>
+<p>​            3、由列的hash值除以桶的个数来决定每条数据划分在哪个桶中</p>
+<h5 id="2-hive分桶的配置">2、Hive分桶的配置</h5>
+<pre data-lang="sql"><code>--设置hive支持分桶
+    set hive.enforce.bucketing=true;
+▪ 默认：false；设置为true之后，mr运行时会根据bucket的个数自动分配reduce task个数。（用户也可以通过mapred.reduce.tasks自己设置reduce任务个数，但分桶时不推荐使用） 
+▪ 注意：一次作业产生的桶（文件数量）和reduce task个数一致。
+-- 往分桶表中加载数据
+insert into table bucket_table select columns from tbl;
+insert overwrite table bucket_table select columns from tbl;</code></pre>
+<h5 id="3-hive分桶的抽样查询">3、Hive分桶的抽样查询</h5>
+<pre data-lang="sql"><code>--案例
+    select * from bucket_table tablesample(bucket 1 out of 4 on columns)
+--TABLESAMPLE语法：
+    TABLESAMPLE(BUCKET x OUT OF y)
+        x：表示从哪个bucket开始抽取数据
+        y：必须为该表总bucket数的倍数或因子
+例：
+
+▪ 当表总bucket数为32时 ▪ TABLESAMPLE(BUCKET 3 OUT OF 16)，抽取哪些数据？
+
+– 共抽取2（32/16）个bucket的数据，抽取第3、第19（16+3）个 bucket的数据
+         桶数/y
+
+– 创建分桶表 CREATE TABLE psnbucket( id INT, name STRING, age INT) CLUSTERED BY (age) INTO 4 BUCKETS ROW FORMAT DELIMITED FIELDS TERMINATED BY &#039;,&#039;;
+
+– 加载数据： insert into table psnbucket select id, name, age from psn31;
+
+– 抽样 select id, name, age from psnbucket tablesample(bucket 2 out of 4 on age);</code></pre>
+<h2 id="9-hive的视图和索引">9、Hive的视图和索引</h2>
+<h3 id="1-hive-lateral-view">1、Hive Lateral View</h3>
+<h5 id="1-基本介绍">1、基本介绍</h5>
+<p>​        Lateral View用于和UDTF函数（explode、split）结合来使用。 ​        首先通过UDTF函数拆分成多行，再将多行结果组合成一个支持别名的虚拟表。主要解决在select使用UDTF做查询过程中，查询只能包含单个UDTF，不能包含其他字段、以及多个UDTF的问题。 ​        语法： ​            LATERAL VIEW udtf(expression) tableAlias AS columnAlias (&#039;,&#039; columnAlias)</p>
+<h5 id="2-案例">2、案例</h5>
+<pre data-lang="sql"><code>select count(distinct(myCol1)), count(distinct(myCol2)) from psn2 
+LATERAL VIEW explode(likes) myTable1 AS myCol1 
+LATERAL VIEW explode(address) myTable2 AS myCol2, myCol3;</code></pre>
+<h3 id="2-hive视图">2、Hive视图</h3>
+<h5 id="1-hive视图基本介绍">1、Hive视图基本介绍</h5>
+<p>​        Hive 中的视图和RDBMS中视图的概念一致，都是一组数据的逻辑表示，本质上就是一条SELECT语句的结果集。视图是纯粹的逻辑对象，没有关联的存储(Hive 3.0.0引入的物化视图除外)，当查询引用视图时，Hive可以将视图的定义与查询结合起来，例如将查询中的过滤器推送到视图中。</p>
+<h5 id="2-hive视图特点">2、Hive视图特点</h5>
+<p>​        1、不支持物化视图 ​        2、只能查询，不能做加载数据操作 ​        3、视图的创建，只是保存一份元数据，查询视图时才执行对应的子查询 ​        4、view定义中若包含了ORDER BY/LIMIT语句，当查询视图时也进行ORDER BY/LIMIT语句操作，view当中              定义的优先级更高 ​        5、view支持迭代视图</p>
+<h5 id="3-hive视图语法">3、Hive视图语法</h5>
+<pre data-lang="sql"><code>--创建视图：
+    CREATE VIEW [IF NOT EXISTS] [db_name.]view_name 
+      [(column_name [COMMENT column_comment], ...) ]
+      [COMMENT view_comment]
+      [TBLPROPERTIES (property_name = property_value, ...)]
+      AS SELECT ... ;
+--查询视图：
+    select colums from view;
+--删除视图：
+    DROP VIEW [IF EXISTS] [db_name.]view_name;</code></pre>
+<h3 id="3-hive索引">3、Hive索引</h3>
+<h5 id="1-hive索引">1、hive索引</h5>
+<p>​        为了提高数据的检索效率，可以使用hive的索引</p>
+<h5 id="2-hive基本操作">2、hive基本操作</h5>
+<pre data-lang="sql"><code>--创建索引：
+    create index t1_index on table psn2(name) 
+    as &#039;org.apache.hadoop.hive.ql.index.compact.CompactIndexHandler&#039; with deferred             rebuild in table t1_index_table;
+--as：指定索引器；
+--in table：指定索引表，若不指定默认生成在default__psn2_t1_index__表中
+    create index t1_index on table psn2(name) 
+    as &#039;org.apache.hadoop.hive.ql.index.compact.CompactIndexHandler&#039; with deferred             rebuild;
+--查询索引
+    show index on psn2;
+--重建索引（建立索引之后必须重建索引才能生效）
+    ALTER INDEX t1_index ON psn2 REBUILD;
+--删除索引
+    DROP INDEX IF EXISTS t1_index ON psn2;</code></pre>
+<h2 id="10-hive权限管理">10、Hive权限管理</h2>
+<h5 id="1-hive授权模型介绍">1、hive授权模型介绍</h5>
+<p><img src="../../assets/img/article-image-unavailable.svg" alt="" loading="lazy" decoding="async"/></p>
+<p>（1）Storage Based Authorization in the Metastore Server 基于存储的授权 - 可以对Metastore中的元数据进行保护，但是没有提供更加细粒度的访问控制（例如：列级别、行级别）。 （2）SQL Standards Based Authorization in HiveServer2 基于SQL标准的Hive授权 - 完全兼容SQL的授权模型，推荐使用该模式。 （3）Default Hive Authorization (Legacy Mode) hive默认授权 - 设计目的仅仅只是为了防止用户产生误操作，而不是防止恶意用户访问未经授权的数据。</p>
+<h5 id="2-基于sql标准的hiveserver2授权模式">2、基于SQL标准的hiveserver2授权模式</h5>
+<p>​    （1）完全兼容SQL的授权模型 ​    （2）除支持对于用户的授权认证，还支持角色role的授权认证 ​            1、role可理解为是一组权限的集合，通过role为用户授权 ​            2、一个用户可以具有一个或多个角色，默认包含另种角色：public、admin</p>
+<h5 id="3-基于sql标准的hiveserver2授权模式的限制">3、基于SQL标准的hiveserver2授权模式的限制</h5>
+<p>​        1、启用当前认证方式之后，dfs, add, delete, compile, and reset等命令被禁用。 ​        2、通过set命令设置hive configuration的方式被限制某些用户使用。 ​            （可通过修改配置文件hive-site.xml中hive.security.authorization.sqlstd.confwhitelist进行配置） ​        3、添加、删除函数以及宏的操作，仅为具有admin的用户开放。 ​        4、用户自定义函数（开放支持永久的自定义函数），可通过具有admin角色的用户创建，其他用户都可以使用。 ​        5、Transform功能被禁用。</p>
+<h5 id="4-详细配置">4、详细配置</h5>
+<pre data-lang="code"><code>&lt;property&gt;
+  &lt;name&gt;hive.security.authorization.enabled&lt;/name&gt;
+  &lt;value&gt;true&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+  &lt;name&gt;hive.server2.enable.doAs&lt;/name&gt;
+  &lt;value&gt;false&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+  &lt;name&gt;hive.users.in.admin.role&lt;/name&gt;
+  &lt;value&gt;root&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+  &lt;name&gt;hive.security.authorization.manager&lt;/name&gt;  &lt;value&gt;org.apache.hadoop.hive.ql.security.authorization.plugin.sqlstd.SQLStdHiveAuthorizerFactory&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+  &lt;name&gt;hive.security.authenticator.manager&lt;/name&gt;
+  &lt;value&gt;org.apache.hadoop.hive.ql.security.SessionStateUserAuthenticator&lt;/value&gt;
+&lt;/property&gt;</code></pre>
+<h5 id="5-hive权限管理命令">5、Hive权限管理命令</h5>
+<pre data-lang="sql"><code>--角色的添加、删除、查看、设置：
+-- 创建角色
+CREATE ROLE role_name;  
+-- 删除角色
+DROP ROLE role_name; 
+-- 设置角色
+SET ROLE (role_name|ALL|NONE); 
+-- 查看当前具有的角色
+SHOW CURRENT ROLES;  
+-- 查看所有存在的角色
+SHOW ROLES;  </code></pre>
+<h5 id="6-hive权限分配图">6、Hive权限分配图</h5>
+<div class="table-scroll"><table><thead><tr><th>Action</th><th>Select</th><th>Insert</th><th>Update</th><th>Delete</th><th>Owership</th><th>Admin</th><th>URL Privilege(RWX Permission + Ownership)</th></tr></thead><tbody><tr><td>ALTER DATABASE</td><td></td><td></td><td></td><td></td><td></td><td>Y</td><td></td></tr><tr><td>ALTER INDEX PROPERTIES</td><td></td><td></td><td></td><td></td><td>Y</td><td></td><td></td></tr><tr><td>ALTER INDEX REBUILD</td><td></td><td></td><td></td><td></td><td>Y</td><td></td><td></td></tr><tr><td>ALTER PARTITION LOCATION</td><td></td><td></td><td></td><td></td><td>Y</td><td></td><td>Y (for new partition location)</td></tr><tr><td>ALTER TABLE (all of them except the ones above)</td><td></td><td></td><td></td><td></td><td>Y</td><td></td><td></td></tr><tr><td>ALTER TABLE ADD PARTITION</td><td></td><td>Y</td><td></td><td></td><td></td><td></td><td>Y (for partition location)</td></tr><tr><td>ALTER TABLE DROP PARTITION</td><td></td><td></td><td></td><td>Y</td><td></td><td></td><td></td></tr><tr><td>ALTER TABLE LOCATION</td><td></td><td></td><td></td><td></td><td>Y</td><td></td><td>Y (for new location)</td></tr><tr><td>ALTER VIEW PROPERTIES</td><td></td><td></td><td></td><td></td><td>Y</td><td></td><td></td></tr><tr><td>ALTER VIEW RENAME</td><td></td><td></td><td></td><td></td><td>Y</td><td></td><td></td></tr><tr><td>ANALYZE TABLE</td><td>Y</td><td>Y</td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>CREATE DATABASE</td><td></td><td></td><td></td><td></td><td></td><td></td><td>Y (if custom location specified)</td></tr><tr><td>CREATE FUNCTION</td><td></td><td></td><td></td><td></td><td></td><td>Y</td><td></td></tr><tr><td>CREATE INDEX</td><td></td><td></td><td></td><td></td><td>Y (of table)</td><td></td><td></td></tr><tr><td>CREATE MACRO</td><td></td><td></td><td></td><td></td><td></td><td>Y</td><td></td></tr><tr><td>CREATE TABLE</td><td></td><td></td><td></td><td></td><td>Y (of database)</td><td></td><td>Y  (for create external table – the location)</td></tr><tr><td>CREATE TABLE AS SELECT</td><td>Y (of input)</td><td></td><td></td><td></td><td>Y (of database)</td><td></td><td></td></tr><tr><td>CREATE VIEW</td><td>Y + G</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>DELETE</td><td></td><td></td><td></td><td>Y</td><td></td><td></td><td></td></tr><tr><td>DESCRIBE TABLE</td><td>Y</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>DROP DATABASE</td><td></td><td></td><td></td><td></td><td>Y</td><td></td><td></td></tr><tr><td>DROP FUNCTION</td><td></td><td></td><td></td><td></td><td></td><td>Y</td><td></td></tr><tr><td>DROP INDEX</td><td></td><td></td><td></td><td></td><td>Y</td><td></td><td></td></tr><tr><td>DROP MACRO</td><td></td><td></td><td></td><td></td><td></td><td>Y</td><td></td></tr><tr><td>DROP TABLE</td><td></td><td></td><td></td><td></td><td>Y</td><td></td><td></td></tr><tr><td>DROP VIEW</td><td></td><td></td><td></td><td></td><td>Y</td><td></td><td></td></tr><tr><td>DROP VIEW PROPERTIES</td><td></td><td></td><td></td><td></td><td>Y</td><td></td><td></td></tr><tr><td>EXPLAIN</td><td>Y</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>INSERT</td><td></td><td>Y</td><td></td><td>Y (for OVERWRITE)</td><td></td><td></td><td></td></tr><tr><td>LOAD</td><td></td><td>Y (output)</td><td></td><td>Y (output)</td><td></td><td></td><td>Y (input location)</td></tr><tr><td>MSCK (metastore check)</td><td></td><td></td><td></td><td></td><td></td><td>Y</td><td></td></tr><tr><td>SELECT</td><td>Y</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>SHOW COLUMNS</td><td>Y</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>SHOW CREATE TABLE</td><td>Y+G</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>SHOW PARTITIONS</td><td>Y</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>SHOW TABLE PROPERTIES</td><td>Y</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>SHOW TABLE STATUS</td><td>Y</td><td></td><td></td><td></td><td></td><td></td><td></td></tr><tr><td>TRUNCATE TABLE</td><td></td><td></td><td></td><td></td><td>Y</td><td></td><td></td></tr><tr><td>UPDATE</td><td></td><td></td><td>Y</td><td></td><td></td><td></td><td></td></tr></tbody></table></div>
+<h5 id="7-hive-权限管理">7、Hive 权限管理</h5>
+<p>权限：</p>
+<pre data-lang="sql"><code>SELECT privilege – gives read access to an object.
+
+INSERT privilege – gives ability to add data to an object (table).
+
+UPDATE privilege – gives ability to run update queries on an object (table).
+
+DELETE privilege – gives ability to delete data in an object (table).
+
+ALL PRIVILEGES – gives all privileges (gets translated into all the above privileges).</code></pre>
+<h2 id="11-hive优化">11、 Hive优化</h2>
+<p>​        Hive的存储层依托于HDFS，Hive的计算层依托于MapReduce，一般Hive的执行效率主要取决于SQL语句的执行效率，因此，Hive的优化的核心思想是MapReduce的优化。</p>
+<h3 id="1-查看hive执行计划-小白慎用">1、查看Hive执行计划（小白慎用）</h3>
+<p>​        Hive的SQL语句在执行之前需要将SQL语句转换成MapReduce任务，因此需要了解具体的转换过程，可以在SQL语句中输入如下命令查看具体的执行计划。</p>
+<pre data-lang="sql"><code>--查看执行计划，添加extended关键字可以查看更加详细的执行计划
+explain [extended] query</code></pre>
+<h3 id="2-hive的抓取策略">2、Hive的抓取策略</h3>
+<p>​        Hive的某些SQL语句需要转换成MapReduce的操作，某些SQL语句就不需要转换成MapReduce操作，但是同学们需要注意，理论上来说，所有的SQL语句都需要转换成MapReduce操作，只不过Hive在转换SQL语句的过程中会做部分优化，使某些简单的操作不再需要转换成MapReduce，例如：</p>
+<p>​        （1）select 仅支持本表字段</p>
+<p>​        （2）where仅对本表字段做条件过滤</p>
+<pre data-lang="sql"><code>--查看Hive的数据抓取策略
+Set hive.fetch.task.conversion=none/more;</code></pre>
+<h3 id="3-hive本地模式">3、Hive本地模式</h3>
+<p>​        类似于MapReduce的操作，Hive的运行也分为本地模式和集群模式，在开发阶段可以选择使用本地执行，提高SQL语句的执行效率，验证SQL语句是否正确。</p>
+<pre data-lang="sql"><code>--设置本地模式
+set hive.exec.mode.local.auto=true;</code></pre>
+<p>​        注意：要想使用Hive的本地模式，加载数据文件大小不能超过128M,如果超过128M,就算设置了本地模式，也会按照集群模式运行。</p>
+<pre data-lang="sql"><code>--设置读取数据量的大小限制
+set hive.exec.mode.local.auto.inputbytes.max=128M</code></pre>
+<h3 id="4-hive并行模式">4、Hive并行模式</h3>
+<p>​        在SQL语句足够复杂的情况下，可能在一个SQL语句中包含多个子查询语句，且多个子查询语句之间没有任何依赖关系，此时，可以Hive运行的并行度</p>
+<pre data-lang="sql"><code>--设置Hive SQL的并行度
+set hive.exec.parallel=true;</code></pre>
+<p>​        注意：Hive的并行度并不是无限增加的，在一次SQL计算中，可以通过以下参数来设置并行的job的个数</p>
+<pre data-lang="sql"><code>--设置一次SQL计算允许并行执行的job个数的最大值
+set hive.exec.parallel.thread.number</code></pre>
+<h3 id="5-hive严格模式">5、Hive严格模式</h3>
+<p>​        Hive中为了提高SQL语句的执行效率，可以设置严格模式，充分利用Hive的某些特点。</p>
+<pre data-lang="sql"><code>-- 设置Hive的严格模式
+set hive.mapred.mode=strict;</code></pre>
+<p>​        注意：当设置严格模式之后，会有如下限制：</p>
+<p>​                （1）对于分区表，必须添加where对于分区字段的条件过滤</p>
+<p>​                （2）order by语句必须包含limit输出限制</p>
+<p>​                （3）限制执行笛卡尔积的查询</p>
+<h3 id="6-hive排序">6、Hive排序</h3>
+<p>​        在编写SQL语句的过程中，很多情况下需要对数据进行排序操作，Hive中支持多种排序操作适合不同的应用场景。</p>
+<p>​        1、Order By - 对于查询结果做全排序，只允许有一个reduce处理 ​            （当数据量较大时，应慎用。严格模式下，必须结合limit来使用） ​        2、Sort By - 对于单个reduce的数据进行排序 ​        3、Distribute By - 分区排序，经常和Sort By结合使用 ​        4、Cluster By - 相当于 Sort By + Distribute By ​            （Cluster By不能通过asc、desc的方式指定排序规则； ​                可通过 distribute by column sort by column asc|desc 的方式）</p>
+<h3 id="7-hive-join">7、Hive join</h3>
+<p>​        1、Hive 在多个表的join操作时尽可能多的使用相同的连接键，这样在转换MR任务时会转换成少的MR的任务。</p>
+<p>​        2、手动Map join:在map端完成join操作</p>
+<pre data-lang="sql"><code>--SQL方式，在SQL语句中添加MapJoin标记（mapjoin hint）
+SELECT  /*+ MAPJOIN(smallTable) */  smallTable.key,  bigTable.value 
+FROM  smallTable  JOIN  bigTable  ON  smallTable.key  =  bigTable.key;</code></pre>
+<p>​        3、开启自动的Map Join</p>
+<pre data-lang="sql"><code>--通过修改以下配置启用自动的mapjoin：
+set hive.auto.convert.join = true;
+--（该参数为true时，Hive自动对左边的表统计量，如果是小表就加入内存，即对小表使用Map join）
+--相关配置参数：
+hive.mapjoin.smalltable.filesize;  
+--（大表小表判断的阈值，如果表的大小小于该值则会被加载到内存中运行）
+hive.ignore.mapjoin.hint；
+--（默认值：true；是否忽略mapjoin hint 即mapjoin标记）</code></pre>
+<p>​        4、大表join大表</p>
+<p>​        （1）空key过滤：有时join超时是因为某些key对应的数据太多，而相同key对应的数据都会发送到相同的reducer上，从而导致内存不够。此时我们应该仔细分析这些异常的key，很多情况下，这些key对应的数据是异常数据，我们需要在SQL语句中进行过滤。 ​        （2）空key转换：有时虽然某个key为空对应的数据很多，但是相应的数据不是异常数据，必须要包含在join的结果中，此时我们可以表a中key为空的字段赋一个随机的值，使得数据随机均匀地分不到不同的reducer上</p>
+<h3 id="8-map-side聚合">8、Map-Side聚合</h3>
+<p>​        Hive的某些SQL操作可以实现map端的聚合，类似于MR的combine操作</p>
+<pre data-lang="sql"><code>--通过设置以下参数开启在Map端的聚合：
+set hive.map.aggr=true;
+--相关配置参数：
+--map端group by执行聚合时处理的多少行数据（默认：100000）
+hive.groupby.mapaggr.checkinterval： 
+--进行聚合的最小比例（预先对100000条数据做聚合，若聚合之后的数据量/100000的值大于该配置0.5，则不会聚合）
+hive.map.aggr.hash.min.reduction： 
+--map端聚合使用的内存的最大值
+hive.map.aggr.hash.percentmemory： 
+--是否对GroupBy产生的数据倾斜做优化，默认为false
+hive.groupby.skewindata</code></pre>
+<h3 id="9-合并小文件">9、合并小文件</h3>
+<p>​        Hive在操作的时候，如果文件数目小，容易在文件存储端造成压力，给hdfs造成压力，影响效率</p>
+<pre data-lang="sql"><code>--设置合并属性
+--是否合并map输出文件：
+set hive.merge.mapfiles=true
+--是否合并reduce输出文件：
+set hive.merge.mapredfiles=true;
+--合并文件的大小：
+set hive.merge.size.per.task=256*1000*1000</code></pre>
+<h3 id="10-合理设置map以及reduce的数量">10、合理设置Map以及Reduce的数量</h3>
+<pre data-lang="sql"><code>--Map数量相关的参数
+--一个split的最大值，即每个map处理文件的最大值
+set mapred.max.split.size
+--一个节点上split的最小值
+set mapred.min.split.size.per.node
+--一个机架上split的最小值
+set mapred.min.split.size.per.rack
+--Reduce数量相关的参数
+--强制指定reduce任务的数量
+set mapred.reduce.tasks
+--每个reduce任务处理的数据量
+set hive.exec.reducers.bytes.per.reducer
+--每个任务最大的reduce数
+set hive.exec.reducers.max</code></pre>
+<h3 id="11-jvm重用">11、JVM重用</h3>
+<pre data-lang="sql"><code>/*
+适用场景：
+    1、小文件个数过多
+    2、task个数过多
+缺点：
+    设置开启之后，task插槽会一直占用资源，不论是否有task运行，直到所有的task即整个job全部执行完成时，才会释放所有的task插槽资源！
+*/
+set mapred.job.reuse.jvm.num.tasks=n;--（n为task插槽个数）</code></pre>
+<h3 id="12-去重统计">12、去重统计</h3>
+<p>数据量小的时候无所谓，数据量大的情况下，由于COUNT DISTINCT操作需要用一个Reduce Task来完成， 这一个Reduce需要处理的数据量太大，就会导致整个Job很难完成，一般COUNT DISTINCT使用先GROUP BY再COUNT的方式替换</p>
+<h2 id="12-压缩和存储">12、 压缩和存储</h2>
+<h3 id="1-hadoop压缩配置">1、 Hadoop压缩配置</h3>
+<h5 id="1-mr支持的压缩编码"><strong>1)</strong> MR支持的压缩编码</h5>
+<div class="table-scroll"><table><thead><tr><th>压缩格式</th><th>工具</th><th>算法</th><th>文件扩展名</th><th>是否可切分</th></tr></thead><tbody><tr><td>DEFAULT</td><td>无</td><td>DEFAULT</td><td>.deflate</td><td>否</td></tr><tr><td>Gzip</td><td>gzip</td><td>DEFAULT</td><td>.gz</td><td>否</td></tr><tr><td>bzip2</td><td>bzip2</td><td>bzip2</td><td>.bz2</td><td>是</td></tr><tr><td>LZO</td><td>lzop</td><td>LZO</td><td>.lzo</td><td>否</td></tr><tr><td>LZ4</td><td>无</td><td>LZ4</td><td>.lz4</td><td>否</td></tr><tr><td>Snappy</td><td>无</td><td>Snappy</td><td>.snappy</td><td>否</td></tr></tbody></table></div>
+<p>为了支持多种压缩/解压缩算法，Hadoop引入了编码/解码器，如下表所示</p>
+<div class="table-scroll"><table><thead><tr><th>压缩格式</th><th>对应的编码/解码器</th></tr></thead><tbody><tr><td>DEFLATE</td><td>org.apache.hadoop.io.compress.DefaultCodec</td></tr><tr><td>gzip</td><td>org.apache.hadoop.io.compress.GzipCodec</td></tr><tr><td>bzip2</td><td>org.apache.hadoop.io.compress.BZip2Codec</td></tr><tr><td>LZO</td><td>com.hadoop.compression.lzo.LzopCodec</td></tr><tr><td>LZ4</td><td>org.apache.hadoop.io.compress.Lz4Codec</td></tr><tr><td>Snappy</td><td>org.apache.hadoop.io.compress.SnappyCodec</td></tr></tbody></table></div>
+<h5 id="2-压缩配置参数"><strong>2)</strong> 压缩配置参数</h5>
+<p>要在Hadoop中启用压缩，可以配置如下参数（mapred-site.xml文件中）：</p>
+<div class="table-scroll"><table><thead><tr><th>参数</th><th>默认值</th><th>阶段</th><th>建议</th></tr></thead><tbody><tr><td>io.compression.codecs   （在core-site.xml中配置）</td><td>org.apache.hadoop.io.compress.DefaultCodec, org.apache.hadoop.io.compress.GzipCodec, org.apache.hadoop.io.compress.BZip2Codec,org.apache.hadoop.io.compress.Lz4Codec</td><td>输入压缩</td><td>Hadoop使用文件扩展名判断是否支持某种编解码器</td></tr><tr><td>mapreduce.map.output.compress</td><td>false</td><td>mapper输出</td><td>这个参数设为true启用压缩</td></tr><tr><td>mapreduce.map.output.compress.codec</td><td>org.apache.hadoop.io.compress.DefaultCodec</td><td>mapper输出</td><td>使用LZO、LZ4或snappy编解码器在此阶段压缩数据</td></tr><tr><td>mapreduce.output.fileoutputformat.compress</td><td>false</td><td>reducer输出</td><td>这个参数设为true启用压缩</td></tr><tr><td>mapreduce.output.fileoutputformat.compress.codec</td><td>org.apache.hadoop.io.compress. DefaultCodec</td><td>reducer输出</td><td>使用标准工具或者编解码器，如gzip和bzip2</td></tr><tr><td>mapreduce.output.fileoutputformat.compress.type</td><td>RECORD</td><td>reducer输出</td><td>SequenceFile输出使用的压缩类型：NONE和BLOCK</td></tr></tbody></table></div>
+<h5 id="3-开启map输出阶段压缩"><strong>3)</strong> 开启Map输出阶段压缩</h5>
+<p>​        开启map输出阶段压缩可以减少job中map和Reduce task间数据传输量。具体配置如下：</p>
+<p>​        案例实操：</p>
+<pre data-lang="sql"><code>--1）开启hive中间传输数据压缩功能
+    hive (default)&gt;set hive.exec.compress.intermediate=true;
+--2）开启mapreduce中map输出压缩功能
+    hive (default)&gt;set mapreduce.map.output.compress=true;
+--3）设置mapreduce中map输出数据的压缩方式
+    hive (default)&gt;set mapreduce.map.output.compress.codec= org.apache.hadoop.io.compress.SnappyCodec;
+
+--4）执行查询语句
+hive (default)&gt; select count(*) from aaaa;</code></pre>
+<h5 id="4-开启reduce输出阶段压缩"><strong>4)</strong> 开启Reduce输出阶段压缩</h5>
+<p>​        当Hive将输出写入到表中时，输出内容同样可以进行压缩。属性hive.exec.compress.output控制着这个功能。用户可能需要保持默认设置文件中的默认值false，这样默认的输出就是非压缩的纯文本文件了。用户可以通过在查询语句或执行脚本中设置这个值为true，来开启输出结果压缩功能。</p>
+<p>案例实操：</p>
+<pre data-lang="sql"><code>--1）开启hive最终输出数据压缩功能
+    hive (default)&gt;set hive.exec.compress.output=true;
+--2）开启mapreduce最终输出数据压缩
+    hive (default)&gt;set mapreduce.output.fileoutputformat.compress=true;
+--3）设置mapreduce最终数据输出压缩方式
+    hive (default)&gt; set mapreduce.output.fileoutputformat.compress.codec = org.apache.hadoop.io.compress.SnappyCodec;
+--4）设置mapreduce最终数据输出压缩为块压缩
+    hive (default)&gt; set mapreduce.output.fileoutputformat.compress.type=BLOCK;
+--5）测试一下输出结果是否是压缩文件
+    hive (default)&gt; insert overwrite local directory &#039;/root/data&#039; select * from aaaa;</code></pre>
+<h3 id="2-文件存储格式">2、文件存储格式</h3>
+<p>​        Hive支持的存储数的格式主要有：TEXTFILE 、SEQUENCEFILE、ORC、PARQUET。</p>
+<h5 id="1-列式存储和行式存储">1) 列式存储和行式存储</h5>
+<p><img src="../../assets/img/article-image-unavailable.svg" alt="" loading="lazy" decoding="async"/></p>
+<p>上图左边为逻辑表，右边第一个为行式存储，第二个为列式存储。</p>
+<p><strong>行存储的特点：</strong> 查询满足条件的一整行数据的时候，列存储则需要去每个聚集的字段找到对应的每个列的值，行存储只需要找到其中一个值，其余的值都在相邻地方，所以此时行存储查询的速度更快。</p>
+<p><strong>列存储的特点：</strong> 因为每个字段的数据聚集存储，在查询只需要少数几个字段的时候，能大大减少读取的数据量；每个字段的数据类型一定是相同的，列式存储可以针对性的设计更好的设计压缩算法。</p>
+<p>TEXTFILE和SEQUENCEFILE的存储格式都是基于行存储的；</p>
+<p>ORC和PARQUET是基于列式存储的。</p>
+<h5 id="2-textfile格式"><strong>2)</strong> <strong>TEXTFILE格式</strong></h5>
+<p>默认格式，数据不做压缩，磁盘开销大，数据解析开销大。可结合Gzip、Bzip2使用(系统自动检查，执行查询时自动解压)，但使用这种方式，hive不会对数据进行切分，从而无法对数据进行并行操作。</p>
+<h5 id="3-orc格式"><strong>3)</strong> ORC格式</h5>
+<p>​        Orc (Optimized Row Columnar)是hive 0.11版里引入的新的存储格式。</p>
+<p>​        可以看到每个Orc文件由1个或多个stripe组成，每个stripe250MB大小，这个Stripe实际相当于RowGroup概念，不过大小由4MB-&gt;250MB，这样应该能提升顺序读的吞吐率。每个Stripe里有三部分组成，分别是Index Data,Row Data,Stripe Footer：</p>
+<p><img src="../../assets/img/article-image-unavailable.svg" alt="" loading="lazy" decoding="async"/></p>
+<p>1）Index Data：一个轻量级的index，默认是每隔1W行做一个索引。这里做的索引应该只是记录某行的各字段在Row Data中的offset。</p>
+<p>2）Row Data：存的是具体的数据，先取部分行，然后对这些行按列进行存储。对每个列进行了编码，分成多个Stream来存储。</p>
+<p>​           3）Stripe Footer：存的是各个Stream的类型，长度等信息。</p>
+<p>​        每个文件有一个File Footer，这里面存的是每个Stripe的行数，每个Column的数据类型信息等；每个文件的尾部是一个PostScript，这里面记录了整个文件的压缩类型以及FileFooter的长度信息等。在读取文件时，会seek到文件尾部读PostScript，从里面解析到File Footer长度，再读FileFooter，从里面解析到各个Stripe信息，再读各个Stripe，即从后往前读。</p>
+<h5 id="4-parquet格式"><strong>4)</strong> PARQUET格式</h5>
+<p>​        Parquet是面向分析型业务的列式存储格式，由Twitter和Cloudera合作开发，2015年5月从Apache的孵化器里毕业成为Apache顶级项目。</p>
+<p>​        Parquet文件是以二进制方式存储的，所以是不可以直接读取的，文件中包括该文件的数据和元数据，因此Parquet格式文件是自解析的。</p>
+<p>​        通常情况下，在存储Parquet数据的时候会按照Block大小设置行组的大小，由于一般情况下每一个Mapper任务处理数据的最小单位是一个Block，这样可以把每一个行组由一个Mapper任务处理，增大任务执行并行度。Parquet文件的格式如下图所示。</p>
+<p><img src="../../assets/img/article-image-unavailable.svg" alt="" loading="lazy" decoding="async"/></p>
+<p>​        上图展示了一个Parquet文件的内容，一个文件中可以存储多个行组，文件的首位都是该文件的Magic Code，用于校验它是否是一个Parquet文件，Footer length记录了文件元数据的大小，通过该值和文件长度可以计算出元数据的偏移量，文件的元数据中包括每一个行组的元数据信息和该文件存储数据的Schema信息。除了文件中每一个行组的元数据，每一页的开始都会存储该页的元数据，在Parquet中，有三种类型的页：数据页、字典页和索引页。数据页用于存储当前行组中该列的值，字典页存储该列值的编码字典，每一个列块中最多包含一个字典页，索引页用来存储当前行组下该列的索引，目前Parquet中还不支持索引页。</p>
+<h5 id="5-主流文件存储格式对比实验"><strong>5)</strong> 主流文件存储格式对比实验</h5>
+<p>​        从存储文件的压缩比和查询速度两个角度对比。</p>
+<p>​        存储文件的压缩比测试：</p>
+<pre data-lang="sql"><code>--1）TextFile
+--（1）创建表，存储数据格式为TEXTFILE
+    create table log_text (track_time string,url string,session_id string,referer string,ip string,end_user_id string,city_id string)row format delimited fields terminated by &#039;\t&#039;stored as textfile ;
+--（2）向表中加载数据
+    hive (default)&gt; load data local inpath &#039;/root/log&#039; into table log_text ;
+--（3）查看表中数据大小
+    dfs -du -h /user/hive/warehouse/log_text;
+    18.1 M  /user/hive/warehouse/log_text/log.data
+--2）ORC
+--（1）创建表，存储数据格式为ORC
+    create table log_orc(track_time string,url string,session_id string,referer string,ip string,end_user_id string,city_id string)row format delimited fields terminated by &#039;\t&#039;stored as orc ;
+--（2）向表中加载数据
+    insert into table log_orc select * from log_text ;
+--（3）查看表中数据大小
+    dfs -du -h /user/hive/warehouse/log_orc/ ;
+    2.8 M  /user/hive/warehouse/log_orc/000000_0
+--3）Parquet
+--（1）创建表，存储数据格式为parquet
+    create table log_parquet(track_time string,url string,session_id string,referer string,ip string,end_user_id string,city_id string)row format delimited fields terminated by &#039;\t&#039;stored as parquet ;    
+--（2）向表中加载数据
+    insert into table log_parquet select * from log_text ;
+--（3）查看表中数据大小
+    dfs -du -h /user/hive/warehouse/log_parquet/ ;
+    13.1 M  /user/hive/warehouse/log_parquet/000000_0
+--存储文件的压缩比总结：
+    ORC &gt;  Parquet &gt;  textFile</code></pre>
+<h3 id="3-存储和压缩结合">3、存储和压缩结合</h3>
+<p>​        官网：https://cwiki.apache.org/confluence/display/Hive/LanguageManual+ORC</p>
+<p>​        ORC存储方式的压缩：</p>
+<div class="table-scroll"><table><thead><tr><th>Key</th><th>Default</th><th>Notes</th></tr></thead><tbody><tr><td>orc.compress</td><td>ZLIB</td><td>high level compression (one of NONE, ZLIB, SNAPPY)</td></tr><tr><td>orc.compress.size</td><td>262,144</td><td>number of bytes in each compression chunk</td></tr><tr><td>orc.stripe.size</td><td>67,108,864</td><td>number of bytes in each stripe</td></tr><tr><td>orc.row.index.stride</td><td>10,000</td><td>number of rows between index entries (must be &gt;= 1000)</td></tr><tr><td>orc.create.index</td><td>true</td><td>whether to create row indexes</td></tr><tr><td>orc.bloom.filter.columns</td><td>&quot;&quot;</td><td>comma separated list of column names for which bloom filter should be created</td></tr><tr><td>orc.bloom.filter.fpp</td><td>0.05</td><td>false positive probability for bloom filter (must &gt;0.0 and &lt;1.0)</td></tr></tbody></table></div>
+<pre data-lang="sql"><code>--1）创建一个非压缩的的ORC存储方式
+--（1）建表语句
+    create table log_orc_none(track_time string,url string,session_id string,referer string,ip string,end_user_id string,city_id string)row format delimited fields terminated by &#039;\t&#039;stored as orc tblproperties (&quot;orc.compress&quot;=&quot;NONE&quot;);
+--（2）插入数据
+    insert into table log_orc_none select * from log_text ;
+--（3）查看插入后数据
+    dfs -du -h /user/hive/warehouse/log_orc_none/ ;
+    7.7 M  /user/hive/warehouse/log_orc_none/000000_0
+--2）创建一个SNAPPY压缩的ORC存储方式
+--（1）建表语句
+    create table log_orc_snappy(track_time string,url string,session_id string,referer string,ip string,end_user_id string,city_id string)row format delimited fields terminated by &#039;\t&#039;stored as orc tblproperties (&quot;orc.compress&quot;=&quot;SNAPPY&quot;);
+--（2）插入数据
+    insert into table log_orc_snappy select * from log_text ;
+--（3）查看插入后数据
+    dfs -du -h /user/hive/warehouse/log_orc_snappy/ ;
+    3.8 M  /user/hive/warehouse/log_orc_snappy/000000_0
+--3）上一节中默认创建的ORC存储方式，导入数据后的大小为
+    2.8 M  /user/hive/warehouse/log_orc/000000_0
+--总结
+    比Snappy压缩的还小。原因是orc存储文件默认采用ZLIB压缩。比snappy压缩的小。</code></pre>
+<h2 id="13-hive-high-avaliable">13、 hive—high Avaliable</h2>
+<p>​        hive的搭建方式有三种，分别是</p>
+<p>​            1、Local/Embedded Metastore Database (Derby)</p>
+<p>​            2、Remote Metastore Database</p>
+<p>​            3、Remote Metastore Server</p>
+<p>​        一般情况下，我们在学习的时候直接使用hive –service metastore的方式启动服务端，使用hive的方式直接访问登录客户端，除了这种方式之外，hive提供了hiveserver2的服务端启动方式，提供了beeline和jdbc的支持，并且官网也提出，一般在生产环境中，使用hiveserver2的方式比较多，如图：</p>
+<p><img src="../../assets/img/article-image-unavailable.svg" alt="" loading="lazy" decoding="async"/></p>
+<p>使用hiveserver2的优点如下：</p>
+<p>​    1、在应用端不需要部署hadoop和hive的客户端</p>
+<p>​    2、hiveserver2不用直接将hdfs和metastore暴露给用户</p>
+<p>​    3、有HA机制，解决应用端的并发和负载问题</p>
+<p>​    4、jdbc的连接方式，可以使用任何语言，方便与应用进行数据交互</p>
+<p>本文档主要介绍如何进行hive的HA的搭建：</p>
+<p>如何进行搭建，参照之前hadoop的HA，使用zookeeper完成HA</p>
+<p><img src="../../assets/img/article-image-unavailable.svg" alt="" loading="lazy" decoding="async"/></p>
+<p><strong>1、环境如下:</strong></p>
+<div class="table-scroll"><table><thead><tr><th></th><th>Node01</th><th>Node02</th><th>Node03</th><th>Node04</th></tr></thead><tbody><tr><td>Namenode</td><td>1</td><td>1</td><td></td><td></td></tr><tr><td>Journalnode</td><td>1</td><td>1</td><td>1</td><td></td></tr><tr><td>Datanode</td><td></td><td>1</td><td>1</td><td>1</td></tr><tr><td>Zkfc</td><td>1</td><td>1</td><td></td><td></td></tr><tr><td>zookeeper</td><td>1</td><td>1</td><td>1</td><td></td></tr><tr><td>resourcemanager</td><td></td><td>1</td><td>1</td><td>1</td></tr><tr><td>nodemanager</td><td></td><td>1</td><td>1</td><td>1</td></tr><tr><td>Hiveserver2</td><td></td><td></td><td>1</td><td></td></tr><tr><td>beeline</td><td></td><td></td><td></td><td>1</td></tr></tbody></table></div>
+<p><strong>2、node02—hive-site.xml</strong></p>
+<pre data-lang="xml"><code>&lt;property&gt;  
+  &lt;name&gt;hive.metastore.warehouse.dir&lt;/name&gt;  
+  &lt;value&gt;/user/hive/warehouse&lt;/value&gt;  
+&lt;/property&gt;  
+&lt;property&gt;  
+  &lt;name&gt;javax.jdo.option.ConnectionURL&lt;/name&gt;  
+  &lt;value&gt;jdbc:mysql://node01:3306/hive?createDatabaseIfNotExist=true&lt;/value&gt;  
+&lt;/property&gt;  
+&lt;property&gt;  
+  &lt;name&gt;javax.jdo.option.ConnectionDriverName&lt;/name&gt;  
+  &lt;value&gt;com.mysql.jdbc.Driver&lt;/value&gt;  
+&lt;/property&gt;     
+&lt;property&gt;  
+  &lt;name&gt;javax.jdo.option.ConnectionUserName&lt;/name&gt;  
+  &lt;value&gt;root&lt;/value&gt;  
+&lt;/property&gt;  
+&lt;property&gt;  
+  &lt;name&gt;javax.jdo.option.ConnectionPassword&lt;/name&gt;  
+  &lt;value&gt;123&lt;/value&gt;  
+&lt;/property&gt;
+&lt;property&gt;
+  &lt;name&gt;hive.server2.support.dynamic.service.discovery&lt;/name&gt;
+  &lt;value&gt;true&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+  &lt;name&gt;hive.server2.zookeeper.namespace&lt;/name&gt;
+  &lt;value&gt;hiveserver2_zk&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+  &lt;name&gt;hive.zookeeper.quorum&lt;/name&gt;
+  &lt;value&gt;node01:2181,node02:2181,node03:2181&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+  &lt;name&gt;hive.zookeeper.client.port&lt;/name&gt;
+  &lt;value&gt;2181&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+  &lt;name&gt;hive.server2.thrift.bind.host&lt;/name&gt;
+  &lt;value&gt;node02&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+  &lt;name&gt;hive.server2.thrift.port&lt;/name&gt;
+  &lt;value&gt;10001&lt;/value&gt; 
+&lt;/property&gt;</code></pre>
+<p><strong>3、node4—hive-site.xml</strong></p>
+<pre data-lang="xml"><code>&lt;property&gt;  
+  &lt;name&gt;hive.metastore.warehouse.dir&lt;/name&gt;  
+  &lt;value&gt;/user/hive/warehouse&lt;/value&gt;  
+&lt;/property&gt;  
+&lt;property&gt;  
+  &lt;name&gt;javax.jdo.option.ConnectionURL&lt;/name&gt;  
+  &lt;value&gt;jdbc:mysql://node01:3306/hive?createDatabaseIfNotExist=true&lt;/value&gt;  
+&lt;/property&gt;  
+&lt;property&gt;  
+  &lt;name&gt;javax.jdo.option.ConnectionDriverName&lt;/name&gt;  
+  &lt;value&gt;com.mysql.jdbc.Driver&lt;/value&gt;  
+&lt;/property&gt;     
+&lt;property&gt;  
+  &lt;name&gt;javax.jdo.option.ConnectionUserName&lt;/name&gt;  
+  &lt;value&gt;root&lt;/value&gt;  
+&lt;/property&gt;  
+&lt;property&gt;  
+  &lt;name&gt;javax.jdo.option.ConnectionPassword&lt;/name&gt;  
+  &lt;value&gt;123&lt;/value&gt;  
+&lt;/property&gt;
+&lt;property&gt;
+  &lt;name&gt;hive.server2.support.dynamic.service.discovery&lt;/name&gt;
+  &lt;value&gt;true&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+  &lt;name&gt;hive.server2.zookeeper.namespace&lt;/name&gt;
+  &lt;value&gt;hiveserver2_zk&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+  &lt;name&gt;hive.zookeeper.quorum&lt;/name&gt;
+  &lt;value&gt;node01:2181,node02:2181,node03:2181&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+  &lt;name&gt;hive.zookeeper.client.port&lt;/name&gt;
+  &lt;value&gt;2181&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+  &lt;name&gt;hive.server2.thrift.bind.host&lt;/name&gt;
+  &lt;value&gt;node04&lt;/value&gt;
+&lt;/property&gt;
+&lt;property&gt;
+  &lt;name&gt;hive.server2.thrift.port&lt;/name&gt;
+  &lt;value&gt;10001&lt;/value&gt; 
+&lt;/property&gt;</code></pre>
+<p><strong>4、使用jdbc或者beeline两种方式进行访问</strong></p>
+<p>1） beeline</p>
+<p>!connect jdbc:hive2://node01,node02,node03/;serviceDiscoveryMode=zooKeeper;zooKeeperNamespace=hiveserver2_zk root 123</p>
+<p>2）jdbc</p>
+<pre data-lang="java"><code>public class HiveJdbcClient2 {
+
+    private static String driverName = &quot;org.apache.hive.jdbc.HiveDriver&quot;;
+
+    public static void main(String[] args) throws SQLException {
+        try {
+            Class.forName(driverName);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        Connection conn = DriverManager.getConnection(&quot;jdbc:hive2://node01,node02,node03/default;serviceDiscoveryMode=zooKeeper;zooKeeperNamespace=hiveserver2_zk&quot;, &quot;root&quot;, &quot;&quot;);
+        Statement stmt = conn.createStatement();
+        String sql = &quot;select * from tbl&quot;;
+        ResultSet res = stmt.executeQuery(sql);
+        while (res.next()) {
+            System.out.println(res.getString(1));
+        }
+    }
+}</code></pre>
+<p>​</p>
+        </div>
+      </article>
+
+      <aside class="article-side">
+        <div class="side-panel reveal">
+          <p class="side-panel-title">标签</p>
+          <div class="tag-list"><a class="tag-pill" href="../../posts.html?tag=%E6%BA%90%E7%A0%81%E7%A0%94%E7%A9%B6">源码研究</a><a class="tag-pill" href="../../posts.html?tag=hive">hive</a><a class="tag-pill" href="../../posts.html?tag=%E7%90%86%E8%AE%BA%E5%AD%A6%E4%B9%A0">理论学习</a></div>
+        </div>
+      </aside>
+
+      <footer class="article-footer reveal">
+        <a class="button" href="../../posts.html">返回文章列表</a>
+        <button class="button" type="button" data-share="https://begc.github.io/posts/hivetheorystudy/">复制链接</button>
+      </footer>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <span>© 2026 RuiJie Notes</span>
+      <div class="footer-links">
+        <a href="../../index.html">首页</a>
+        <a href="../../posts.html">文章</a>
+        <a href="../../tags.html">专题</a>
+      </div>
+    </div>
+  </footer>
+  <div class="toast" id="toast" role="status"></div>
+  <script src="../../assets/js/site.js?v=20260619-11"></script>
+</body>
+</html>

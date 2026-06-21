@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="description" content="体验 CentOs9以及进行基础配置"/>
+  <meta name="author" content="zhourj"/>
+  <meta name="robots" content="index,follow,max-image-preview:large"/>
+  <link rel="canonical" href="https://begc.github.io/posts/centos-init-config/"/>
+  <meta property="og:type" content="article"/>
+  <meta property="og:site_name" content="RuiJie Notes"/>
+  <meta property="og:title" content="Centos9 Stream 开局配置"/>
+  <meta property="og:description" content="体验 CentOs9以及进行基础配置"/>
+  <meta property="og:url" content="https://begc.github.io/posts/centos-init-config/"/>
+  <meta property="og:image" content="https://images.unsplash.com/photo-1510915361894-db8b60106cb1?auto=format&amp;fit=crop&amp;w=1200&amp;q=80"/>
+  <meta property="article:published_time" content="2023-03-06"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="Centos9 Stream 开局配置"/>
+  <meta name="twitter:description" content="体验 CentOs9以及进行基础配置"/>
+  <meta name="twitter:image" content="https://images.unsplash.com/photo-1510915361894-db8b60106cb1?auto=format&amp;fit=crop&amp;w=1200&amp;q=80"/>
+  <title>Centos9 Stream 开局配置 · RuiJie Notes</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin/>
+  <link rel="stylesheet" href="../../assets/css/site.css?v=20260619-11"/>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"Centos9 Stream 开局配置","description":"体验 CentOs9以及进行基础配置","datePublished":"2023-03-06","dateModified":"2023-03-06","author":{"@type":"Person","name":"zhourj"},"publisher":{"@type":"Person","name":"begc"},"mainEntityOfPage":"https://begc.github.io/posts/centos-init-config/","image":"https://images.unsplash.com/photo-1510915361894-db8b60106cb1?auto=format&fit=crop&w=1200&q=80"}</script>
+</head>
+<body data-page="post">
+  <a class="skip-link" href="#main">跳到正文</a>
+  <div class="read-progress" aria-hidden="true"></div>
+  <nav class="site-nav" aria-label="主导航">
+    <div class="nav-inner">
+      <a class="brand" href="../../index.html" aria-label="RuiJie Notes 首页">
+        <span class="brand-mark">bg</span>
+        <span class="brand-text">
+          <span class="brand-name">RuiJie Notes</span>
+          <span class="brand-sub">Big Data · Linux · Source</span>
+        </span>
+      </a>
+      <button class="icon-button nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-label="打开菜单"><i data-lucide="menu"></i></button>
+      <div class="nav-panel">
+        <div class="nav-links">
+          <a class="nav-link" data-page="home" href="../../index.html">首页</a>
+          <a class="nav-link" data-page="posts" href="../../posts.html">文章</a>
+          <a class="nav-link" data-page="tags" href="../../tags.html">专题</a>
+          <a class="nav-link" data-page="about" href="../../about.html">关于</a>
+        </div>
+        <div class="nav-actions">
+          <a class="icon-link" href="https://github.com/begc" target="_blank" rel="noopener" aria-label="GitHub"><i data-lucide="github"></i></a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="page-main" id="main">
+    <div class="detail-shell">
+      <aside class="toc-wrap">
+        <span class="toc-label">目录</span>
+        <nav class="toc" id="toc" aria-label="文章目录"><a class="depth-2" href="#1-使用国内镜像源">1、 使用国内镜像源</a><a class="depth-3" href="#使用的设备为-parallels-desktop-centos-stream9">使用的设备为 parallels desktop, centos stream9,</a><a class="depth-3" href="#mac-笔记本arm架构可用">mac 笔记本arm架构可用</a><a class="depth-2" href="#2-更新源信息">2、更新源信息</a><a class="depth-2" href="#3-配置网卡">3、配置网卡</a><a class="depth-2" href="#4-测试网络">4、测试网络</a><a class="depth-2" href="#5-设置主机名和映射关系">5、设置主机名和映射关系</a><a class="depth-2" href="#6-关闭防火墙">6、关闭防火墙</a><a class="depth-2" href="#7-关闭selinux">7、关闭seLINUX</a><a class="depth-2" href="#8-时间同步">8、时间同步</a><a class="depth-2" href="#9-安装-jdk">9、安装 JDK</a><a class="depth-2" href="#10-配置-ssh-免密-还需查询">10、配置 ssh 免密（还需查询）</a></nav>
+      </aside>
+
+      <article class="article">
+        <header class="article-header reveal">
+          <span class="eyebrow">Centos · linux</span>
+          <h1 class="article-title">Centos9 Stream 开局配置</h1>
+          <p class="article-description">体验 CentOs9以及进行基础配置</p>
+          <div class="post-meta-line">
+            <span>zhourj</span>
+            <span class="dot"></span>
+            <span>2023.03.06</span>
+            <span class="dot"></span>
+            <span>1 min read</span>
+            <span class="dot"></span>
+            <span>Linux 运维</span>
+          </div>
+          <figure class="article-cover">
+            <img src="https://images.unsplash.com/photo-1510915361894-db8b60106cb1?auto=format&amp;fit=crop&amp;w=1200&amp;q=80" alt="Centos9 Stream 开局配置" loading="eager" decoding="async"/>
+          </figure>
+        </header>
+
+        <div class="markdown-body article-body reveal">
+<h2 id="1-使用国内镜像源">1、 使用国内镜像源</h2>
+<h3 id="使用的设备为-parallels-desktop-centos-stream9">使用的设备为 parallels desktop, centos stream9,</h3>
+<h3 id="mac-笔记本arm架构可用">mac 笔记本arm架构可用</h3>
+<p>进入  /etc/yum.repos.d/centos.repo</p>
+<p>备份源配置 mv /etc/yum.repos.d/centos.repo /etc/yum.repos.d/centos.repo.backup</p>
+<p>阿里源配置</p>
+<pre data-lang="xml"><code># CentOS-Base.repo
+#
+# The mirror system uses the connecting IP address of the client and the
+# update status of each mirror to pick mirrors that are updated to and
+# geographically close to the client.  You should use this for CentOS updates
+# unless you are manually picking other mirrors.
+#
+# If the mirrorlist= does not work for you, as a fall back you can try the 
+# remarked out baseurl= line instead.
+#
+#
+
+[base]
+name=CentOS-$releasever - Base - mirrors.aliyun.com
+#failovermethod=priority
+baseurl=https://mirrors.aliyun.com/centos-stream/$stream/BaseOS/$basearch/os/
+        http://mirrors.aliyuncs.com/centos-stream/$stream/BaseOS/$basearch/os/
+        http://mirrors.cloud.aliyuncs.com/centos-stream/$stream/BaseOS/$basearch/os/
+gpgcheck=1
+gpgkey=https://mirrors.aliyun.com/centos-stream/RPM-GPG-KEY-CentOS-Official
+
+#additional packages that may be useful
+#[extras]
+#name=CentOS-$releasever - Extras - mirrors.aliyun.com
+#failovermethod=priority
+#baseurl=https://mirrors.aliyun.com/centos-stream/$stream/extras/$basearch/os/
+#        http://mirrors.aliyuncs.com/centos-stream/$stream/extras/$basearch/os/
+#        http://mirrors.cloud.aliyuncs.com/centos-stream/$stream/extras/$basearch/os/
+#gpgcheck=1
+#gpgkey=https://mirrors.aliyun.com/centos-stream/RPM-GPG-KEY-CentOS-Official
+
+#additional packages that extend functionality of existing packages
+[centosplus]
+name=CentOS-$releasever - Plus - mirrors.aliyun.com
+#failovermethod=priority
+baseurl=https://mirrors.aliyun.com/centos-stream/$stream/centosplus/$basearch/os/
+        http://mirrors.aliyuncs.com/centos-stream/$stream/centosplus/$basearch/os/
+        http://mirrors.cloud.aliyuncs.com/centos-stream/$stream/centosplus/$basearch/os/
+gpgcheck=1
+enabled=0
+gpgkey=https://mirrors.aliyun.com/centos-stream/RPM-GPG-KEY-CentOS-Official
+
+[PowerTools]
+name=CentOS-$releasever - PowerTools - mirrors.aliyun.com
+#failovermethod=priority
+baseurl=https://mirrors.aliyun.com/centos-stream/$stream/PowerTools/$basearch/os/
+        http://mirrors.aliyuncs.com/centos-stream/$stream/PowerTools/$basearch/os/
+        http://mirrors.cloud.aliyuncs.com/centos-stream/$stream/PowerTools/$basearch/os/
+gpgcheck=1
+enabled=0
+gpgkey=https://mirrors.aliyun.com/centos-stream/RPM-GPG-KEY-CentOS-Official
+
+
+[AppStream]
+name=CentOS-$releasever - AppStream - mirrors.aliyun.com
+#failovermethod=priority
+baseurl=https://mirrors.aliyun.com/centos-stream/$stream/AppStream/$basearch/os/
+        http://mirrors.aliyuncs.com/centos-stream/$stream/AppStream/$basearch/os/
+        http://mirrors.cloud.aliyuncs.com/centos-stream/$stream/AppStream/$basearch/os/
+gpgcheck=1
+gpgkey=https://mirrors.aliyun.com/centos-stream/RPM-GPG-KEY-CentOS-Official
+
+
+
+rpm -e --nodeps `rpm -qa|grep centos`
+rpm -ivh --nodeps --force https://mirrors.aliyun.com/centos-stream/9-stream/BaseOS/x86_64/os/Packages/centos-stream-release-9.0-12.el9.noarch.rpm
+rpm -ivh --nodeps --force https://mirrors.aliyun.com/centos-stream/9-stream/BaseOS/x86_64/os/Packages/centos-gpg-keys-9.0-12.el9.noarch.rpm
+rpm -ivh --nodeps --force https://mirrors.aliyun.com/centos-stream/9-stream/BaseOS/x86_64/os/Packages/centos-stream-repos-9.0-12.el9.noarch.rpm
+dnf clean all</code></pre>
+<h2 id="2-更新源信息">2、更新源信息</h2>
+<pre data-lang="xml"><code>yum makecache &amp;&amp; yum update</code></pre>
+<h2 id="3-配置网卡">3、配置网卡</h2>
+<pre data-lang="txt"><code># 查看网卡配置
+cat /etc/NetworkManager/system-connections/ens160.nmconnection
+[[connection]
+id=enp0s5
+uuid=4bef2a4e-a532-330a-8b3c-61e2ebce0883
+type=ethernet
+autoconnect-priority=-999
+interface-name=enp0s5
+timestamp=1672036689
+onboot=yes
+[ethernet]
+
+[ipv4]
+address1=10.211.55.101/24,10.211.55.1
+dns=8.8.8.8
+method=manual
+[ipv6]
+addr-gen-mode=eui64
+method=auto
+
+[proxy]
+
+nmcli c reload                         # 重新加载配置文件
+nmcli c up ens160                      # 重启ens160网卡</code></pre>
+<h2 id="4-测试网络">4、测试网络</h2>
+<pre data-lang="xml"><code># 测试网络
+[root@chenby ~]# ping www.oiox.cn -4
+PING  (117.161.38.205) 56(84) bytes of data.
+64 bytes from 117.161.38.205 (117.161.38.205): icmp_seq=1 ttl=55 time=6.84 ms
+64 bytes from 117.161.38.205 (117.161.38.205): icmp_seq=2 ttl=55 time=6.44 ms
+64 bytes from 117.161.38.205 (117.161.38.205): icmp_seq=3 ttl=55 time=7.12 ms
+
+---  ping statistics ---
+3 packets transmitted, 3 received, 0% packet loss, time 2003ms
+rtt min/avg/max/mdev = 6.441/6.800/7.117/0.277 ms
+[root@bogon ~]# ping www.oiox.cn -6
+PING www.oiox.cn(js-ipv6 (2409:8c10:c00:1404:3b::)) 56 data bytes
+64 bytes from js-ipv6 (2409:8c10:c00:1404:3b::): icmp_seq=1 ttl=56 time=5.94 ms
+64 bytes from js-ipv6 (2409:8c10:c00:1404:3b::): icmp_seq=2 ttl=56 time=6.11 ms
+64 bytes from js-ipv6 (2409:8c10:c00:1404:3b::): icmp_seq=3 ttl=56 time=6.01 ms
+
+--- www.oiox.cn ping statistics ---
+3 packets transmitted, 3 received, 0% packet loss, time 2002ms
+rtt min/avg/max/mdev = 5.941/6.020/6.107/0.067 ms</code></pre>
+<h2 id="5-设置主机名和映射关系">5、设置主机名和映射关系</h2>
+<pre data-lang="xml"><code>查看当前主机名 hostnamectl
+
+sudo nmcli g hostname
+sudo nmcli g hostname host.myfreax.com
+sudo systemctl restart systemd-hostnamed
+或者
+vim /etc/hostname
+node01
+vi /etc/hosts
+192.168.0.120 node01
+如果是多服务器搭建集群，也需更改对应ip地址与hostname
+rebbot</code></pre>
+<h2 id="6-关闭防火墙">6、关闭防火墙</h2>
+<pre data-lang="xml"><code>查看防火墙状态
+systemctl status firewalld
+firewall-cmd --state
+
+开启防火墙
+systemctl start firewalld
+关闭防火墙
+systemctl stop firewalld
+重启防火墙
+systemctl restart firewalld
+永久关闭防火墙
+systemctl disable firewalld</code></pre>
+<h2 id="7-关闭selinux">7、关闭seLINUX</h2>
+<pre data-lang="xml"><code>vim /etc/selinux/config 
+selinux  disabled
+or
+确认grubby软件包是否已经安装
+
+# rpm -q grubby
+
+要永久禁用 SELinux：
+
+配置您的引导加载程序以添加selinux=0到内核​​命令行：
+
+# grubby --update-kernel ALL --args selinux=0
+
+重新启动系统：
+
+# reboot
+
+确认
+
+重启后，getenforce命令确认返回结果为Disabled</code></pre>
+<h2 id="8-时间同步">8、时间同步</h2>
+<pre data-lang="xml"><code> 首先进到/etc/chrony.conf里面，添加如下两行，如图二所示
+
+server 210.72.145.44 iburst
+server ntp.aliyun.com iburst
+
+重新加载文件，同步时间，就能看到时间是正常的了
+
+systemctl restart chronyd.service	
+chronyc sources -y</code></pre>
+<h2 id="9-安装-jdk">9、安装 JDK</h2>
+<pre data-lang="xml"><code>事先查看是否自带jdk
+通过命令查看系统已安装的jdk
+rpm -qa | grep java  或 rpm -qa | grep jdk 命令来查询出系统自带的jdk（蓝框的四个就是系统自带的）注：其余的不要删
+rpm -e --nodeps   后面跟系统自带的jdk名    这个命令来删除系统自带的jdk，
+安装jdk
+rpm -i   jdk-8u181-linux-x64.rpm    
+        *有一些软件只认：/usr/java/default
+    vi /etc/profile     
+        export  JAVA_HOME=/usr/java/default
+        export PATH=$PATH:$JAVA_HOME/bin
+    source /etc/profile   |  .    /etc/profile</code></pre>
+<h2 id="10-配置-ssh-免密-还需查询">10、配置 ssh 免密（还需查询）</h2>
+<pre data-lang="xml"><code>1、确认本机sshd的配置文件（需要root权限）
+    vi /etc/ssh/sshd_config
+2、AuthorizedKeysFile .ssh/authorized_keys  去掉#键
+3、systemctl restart sshd（如果修改了的话，需要重新启动）
+4、成公钥和私钥 （这里不需要root权限，使用的账户执行）
+    ssh-keygen -t rsa （我直接Enter，简单粗暴）
+5、默认在 ~/.ssh目录生成两个文件：
+    id_rsa ：私钥
+    id_rsa.pub ：公钥
+6、导入本机
+    cat ~/.ssh/id_rsa.pub &gt;&gt; ~/.ssh/authorized_keys
+7、导入要免密码登录的服务器
+    首先将公钥复制到服务器，scp ~/.ssh/id_rsa.pub xxx@host:/home/id_rsa.pub
+    然后，将公钥导入到认证文件(这一步的操作在服务器上进行)
+    cat /home/id_rsa.pub &gt;&gt; ~/.ssh/authorized_keys
+8、在服务器上更改权限 (很重要，如果不这么设置，就是不让你免密登录)
+    chmod 700 ~/.ssh
+    chmod 600 ~/.ssh/authorized_keys
+
+每一台机器：ssh localhost   &gt;&gt; 为了拿到.ssh
+node01~node02:
+		cd /home/god/.ssh
+		ssh-keygen -t rsa -P &#039;&#039; -f  ./id_rsa
+node01:
+		ssh-copy-id -i id_rsa node01
+		ssh-copy-id -i id_rsa node02
+		ssh-copy-id -i id_rsa node03
+		ssh-copy-id -i id_rsa node04
+node02
+		cd /home/god/.ssh
+		ssh-copy-id -i id_rsa node01
+		ssh-copy-id -i id_rsa node02
+		ssh-copy-id -i id_rsa node03
+		ssh-copy-id -i id_rsa node04
+node03
+		cd /home/god/.ssh
+		ssh-copy-id -i id_rsa node01
+		ssh-copy-id -i id_rsa node02
+		ssh-copy-id -i id_rsa node03
+		ssh-copy-id -i id_rsa node04
+node04
+		cd /home/god/.ssh
+		ssh-copy-id -i id_rsa node01
+		ssh-copy-id -i id_rsa node02
+		ssh-copy-id -i id_rsa node03
+		ssh-copy-id -i id_rsa node04</code></pre>
+        </div>
+      </article>
+
+      <aside class="article-side">
+        <div class="side-panel reveal">
+          <p class="side-panel-title">标签</p>
+          <div class="tag-list"><a class="tag-pill" href="../../posts.html?tag=Centos">Centos</a><a class="tag-pill" href="../../posts.html?tag=linux">linux</a><a class="tag-pill" href="../../posts.html?tag=%E8%8A%82%E7%82%B9%E6%90%AD%E5%BB%BA">节点搭建</a></div>
+        </div>
+      </aside>
+
+      <footer class="article-footer reveal">
+        <a class="button" href="../../posts.html">返回文章列表</a>
+        <button class="button" type="button" data-share="https://begc.github.io/posts/centos-init-config/">复制链接</button>
+      </footer>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <span>© 2026 RuiJie Notes</span>
+      <div class="footer-links">
+        <a href="../../index.html">首页</a>
+        <a href="../../posts.html">文章</a>
+        <a href="../../tags.html">专题</a>
+      </div>
+    </div>
+  </footer>
+  <div class="toast" id="toast" role="status"></div>
+  <script src="../../assets/js/site.js?v=20260619-11"></script>
+</body>
+</html>
