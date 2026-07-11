@@ -81,7 +81,9 @@
   function iconSvg(name) {
     var icons = {
       "arrow-left": '<path d="m12 19-7-7 7-7"></path><path d="M19 12H5"></path>',
+      "arrow-right": '<path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path>',
       "book-open": '<path d="M12 7v14"></path><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"></path>',
+      "chevron-down": '<path d="m6 9 6 6 6-6"></path>',
       github: '<path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.1-1.3-.3-2.6-1.2-3.6.2-1.2.2-2.4-.1-3.6 0 0-1-.3-3.5 1.3a12.3 12.3 0 0 0-6.4 0C6.3 1.1 5.3 1.4 5.3 1.4c-.3 1.2-.3 2.4-.1 3.6A5.4 5.4 0 0 0 4 8.6C4 12 7 14 10 14.1a4.8 4.8 0 0 0-1 3.5v4"></path><path d="M9 18c-4.5 2-5-2-7-2"></path>',
       "layers-3": '<path d="m12 2 10 5-10 5L2 7z"></path><path d="m2 17 10 5 10-5"></path><path d="m2 12 10 5 10-5"></path>',
       menu: '<path d="M4 12h16"></path><path d="M4 6h16"></path><path d="M4 18h16"></path>',
@@ -128,11 +130,73 @@
 
   function setupNav() {
     var toggle = $("[data-nav-toggle]");
+    var panel = $(".nav-panel");
+    var mobileNav = window.matchMedia ? window.matchMedia("(max-width: 760px)") : null;
+
+    if (toggle && panel) {
+      if (!panel.id) panel.id = "site-menu";
+      toggle.setAttribute("aria-controls", panel.id);
+    }
+
+    function navFocusables() {
+      if (!panel) return toggle ? [toggle] : [];
+      var items = $all('a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])', panel).filter(function (item) {
+        return item.getClientRects().length > 0;
+      });
+      return toggle ? [toggle].concat(items) : items;
+    }
+
+    function setOpen(open, restoreFocus) {
+      document.body.classList.toggle("nav-open", open);
+      if (toggle) {
+        toggle.setAttribute("aria-expanded", String(open));
+        toggle.setAttribute("aria-label", open ? "关闭菜单" : "打开菜单");
+      }
+      if (open && panel && (!mobileNav || mobileNav.matches)) {
+        window.requestAnimationFrame(function () {
+          var first = $("a[href], button:not([disabled])", panel);
+          if (first) first.focus();
+        });
+      } else if (restoreFocus && toggle) {
+        toggle.focus();
+      }
+    }
+
     if (toggle) {
       toggle.addEventListener("click", function () {
-        var open = !document.body.classList.contains("nav-open");
-        document.body.classList.toggle("nav-open", open);
-        toggle.setAttribute("aria-expanded", String(open));
+        setOpen(!document.body.classList.contains("nav-open"));
+      });
+    }
+
+    $all(".nav-panel a").forEach(function (link) {
+      link.addEventListener("click", function () { setOpen(false); });
+    });
+
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape" && document.body.classList.contains("nav-open")) {
+        setOpen(false, true);
+        return;
+      }
+      if (event.key !== "Tab" || !document.body.classList.contains("nav-open") || (mobileNav && !mobileNav.matches)) return;
+      var items = navFocusables();
+      if (!items.length) return;
+      var first = items[0];
+      var last = items[items.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      } else if (items.indexOf(document.activeElement) === -1) {
+        event.preventDefault();
+        first.focus();
+      }
+    });
+
+    if (mobileNav && mobileNav.addEventListener) {
+      mobileNav.addEventListener("change", function (event) {
+        if (!event.matches) setOpen(false);
       });
     }
 
@@ -142,12 +206,26 @@
     });
   }
 
-  function setupReveal() {
-    setupMotionSurfaces();
-    var nodes = $all(".reveal");
+  function setupReveal(root) {
+    var scope = root || document;
+    setupMotionSurfaces(scope);
+    var nodes = $all(".reveal", scope).filter(function (node) {
+      return !node.dataset.revealReady;
+    });
     if (!nodes.length) return;
+    var reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduceMotion) {
+      nodes.forEach(function (node) {
+        node.dataset.revealReady = "true";
+        node.classList.add("is-visible");
+      });
+      return;
+    }
     if (!("IntersectionObserver" in window)) {
-      nodes.forEach(function (node) { node.classList.add("is-visible"); });
+      nodes.forEach(function (node) {
+        node.dataset.revealReady = "true";
+        node.classList.add("is-visible");
+      });
       return;
     }
     var observer = new IntersectionObserver(function (entries) {
@@ -158,7 +236,8 @@
       });
     }, { threshold: 0.12 });
     nodes.forEach(function (node, index) {
-      node.style.transitionDelay = Math.min(index * 35, 180) + "ms";
+      node.dataset.revealReady = "true";
+      node.style.setProperty("--reveal-delay", Math.min(index * 32, 160) + "ms");
       observer.observe(node);
     });
   }
@@ -167,23 +246,6 @@
     var scope = root || document;
     $all(".section-head, .page-hero, .filter-bar, .timeline-item, .about-panel .signal-item, .post-nav-item", scope).forEach(function (node) {
       node.classList.add("reveal");
-    });
-  }
-
-  function setupPointerGlow(root) {
-    var scope = root || document;
-    $all(".post-card, .post-row, .topic-item, .signal-item, .about-panel, .timeline, .side-panel, .post-nav-item", scope).forEach(function (node) {
-      if (node.dataset.pointerGlowReady) return;
-      node.dataset.pointerGlowReady = "true";
-      node.addEventListener("pointermove", function (event) {
-        var rect = node.getBoundingClientRect();
-        node.style.setProperty("--mx", (event.clientX - rect.left) + "px");
-        node.style.setProperty("--my", (event.clientY - rect.top) + "px");
-      });
-      node.addEventListener("pointerleave", function () {
-        node.style.removeProperty("--mx");
-        node.style.removeProperty("--my");
-      });
     });
   }
 
@@ -196,39 +258,6 @@
     state.toastTimer = setTimeout(function () {
       toast.classList.remove("show");
     }, 1800);
-  }
-
-  function setupHeroMotion() {
-    var hero = $(".hero-hit-area");
-    if (!hero) return;
-    var leaveTimer = null;
-
-    function openHero() {
-      clearTimeout(leaveTimer);
-      hero.classList.add("is-opening");
-    }
-
-    function closeHero() {
-      clearTimeout(leaveTimer);
-      leaveTimer = setTimeout(function () {
-        hero.classList.remove("is-opening");
-      }, 900);
-    }
-
-    function moveHero(event) {
-      var rect = hero.getBoundingClientRect();
-      var x = Math.max(0, Math.min(100, (event.clientX - rect.left) / rect.width * 100));
-      var y = Math.max(0, Math.min(100, (event.clientY - rect.top) / rect.height * 100));
-      hero.style.setProperty("--hero-x", x.toFixed(2));
-      hero.style.setProperty("--hero-y", y.toFixed(2));
-      openHero();
-    }
-
-    hero.addEventListener("pointerenter", openHero);
-    hero.addEventListener("pointermove", moveHero);
-    hero.addEventListener("focus", openHero);
-    hero.addEventListener("pointerleave", closeHero);
-    hero.addEventListener("blur", closeHero);
   }
 
   function setupShare() {
@@ -252,13 +281,44 @@
     var bar = $(".read-progress");
     var body = $(".article-body");
     if (!bar || !body) return;
-    function update() {
-      var total = Math.max(1, body.offsetHeight - window.innerHeight + 160);
-      var pct = Math.max(0, Math.min(100, -body.getBoundingClientRect().top / total * 100));
-      bar.style.width = pct + "%";
+    var frame = 0;
+    var measureFrame = 0;
+    var start = 0;
+    var end = 1;
+
+    function measure() {
+      measureFrame = 0;
+      var nav = $(".site-nav");
+      var navHeight = nav ? nav.getBoundingClientRect().height : 0;
+      var articleTop = body.getBoundingClientRect().top + window.scrollY;
+      var readableHeight = Math.max(1, window.innerHeight - navHeight - 16);
+      start = Math.max(0, articleTop - navHeight - 16);
+      end = Math.max(start + 1, articleTop + body.offsetHeight - readableHeight);
+      update();
     }
-    window.addEventListener("scroll", update, { passive: true });
-    update();
+
+    function update() {
+      frame = 0;
+      var ratio = Math.max(0, Math.min(1, (window.scrollY - start) / (end - start)));
+      bar.style.transform = "scaleX(" + ratio.toFixed(4) + ")";
+    }
+
+    function schedule() {
+      if (frame) return;
+      frame = window.requestAnimationFrame(update);
+    }
+
+    function scheduleMeasure() {
+      if (measureFrame) return;
+      measureFrame = window.requestAnimationFrame(measure);
+    }
+
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", scheduleMeasure, { passive: true });
+    if ("ResizeObserver" in window) {
+      new ResizeObserver(scheduleMeasure).observe(body);
+    }
+    measure();
   }
 
   function updateLucide() {
@@ -274,6 +334,8 @@
 
   function setupImageStates(root) {
     $all("img", root || document).forEach(function (img) {
+      if (img.dataset.imageStateReady) return;
+      img.dataset.imageStateReady = "true";
       function markLoaded() {
         img.classList.add("is-loaded");
       }
@@ -334,7 +396,10 @@
     if (statPosts) statPosts.textContent = posts.length;
     if (statTags) statTags.textContent = allTags().length;
     if (statCategories) statCategories.textContent = groupByCategory().length;
-    setupPointerGlow();
+    var heroPostCount = $("#heroPostCount");
+    var heroTopicCount = $("#heroTopicCount");
+    if (heroPostCount) heroPostCount.textContent = posts.length;
+    if (heroTopicCount) heroTopicCount.textContent = groupByCategory().length;
   }
 
   function renderPostsPage() {
@@ -371,8 +436,8 @@
       list.innerHTML = filtered.length
         ? filtered.map(renderPostCard).join("")
         : '<div class="empty-state">没有匹配的文章</div>';
-      setupPointerGlow(list);
-      setupReveal();
+      setupImageStates(list);
+      setupReveal(list);
       updateLucide();
     }
 
@@ -400,11 +465,10 @@
         return '<a class="tag-pill reveal" href="' + tagUrl(tag.name) + '">' + escapeHtml(tag.name) + ' · ' + tag.count + '</a>';
       }).join("");
     }
-    setupPointerGlow();
   }
 
   function stripFrontmatter(markdown) {
-    return markdown.replace(/^\s*---\n[\s\S]*?\n---\n?/, "");
+    return markdown.replace(/^\s*---\r?\n[\s\S]*?\r?\n---\r?\n?/, "");
   }
 
   function normalizeHeading(value) {
@@ -661,18 +725,58 @@
       return '<a class="depth-' + depth + '" href="#' + heading.id + '">' + escapeHtml(heading.textContent) + '</a>';
     }).join("");
     var links = $all("a", toc);
-    function update() {
-      var y = window.scrollY + 96;
-      var active = "";
-      headings.forEach(function (heading) {
-        if (heading.offsetTop <= y) active = heading.id;
-      });
+    function setActive(active) {
       links.forEach(function (link) {
         link.classList.toggle("is-active", link.getAttribute("href") === "#" + active);
       });
     }
-    window.addEventListener("scroll", update, { passive: true });
-    update();
+    setActive(headings[0].id);
+
+    if ("IntersectionObserver" in window) {
+      var observer = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) setActive(entry.target.id);
+        });
+      }, { rootMargin: "-96px 0px -72% 0px", threshold: 0 });
+      headings.forEach(function (heading) { observer.observe(heading); });
+      return;
+    }
+
+    var frame = 0;
+    function updateFallback() {
+      frame = 0;
+      var active = headings[0].id;
+      headings.forEach(function (heading) {
+        if (heading.getBoundingClientRect().top <= 108) active = heading.id;
+      });
+      setActive(active);
+    }
+    window.addEventListener("scroll", function () {
+      if (!frame) frame = window.requestAnimationFrame(updateFallback);
+    }, { passive: true });
+  }
+
+  function setupTocDisclosure() {
+    var wrap = $(".toc-wrap");
+    var toc = $("#toc");
+    if (!wrap || !toc || wrap.querySelector(".toc-toggle")) return;
+    var button = document.createElement("button");
+    button.className = "toc-toggle";
+    button.type = "button";
+    button.setAttribute("aria-expanded", "false");
+    button.innerHTML = "<span>文章目录 · " + $all("a", toc).length + " 节</span>" + renderIcon("chevron-down");
+    wrap.insertBefore(button, toc);
+    button.addEventListener("click", function () {
+      var open = !wrap.classList.contains("is-open");
+      wrap.classList.toggle("is-open", open);
+      button.setAttribute("aria-expanded", String(open));
+    });
+    $all("a", toc).forEach(function (link) {
+      link.addEventListener("click", function () {
+        wrap.classList.remove("is-open");
+        button.setAttribute("aria-expanded", "false");
+      });
+    });
   }
 
   function renderArticleMeta(post) {
@@ -744,8 +848,8 @@
         : simpleMarkdown(markdown);
       enhanceMarkdown(root);
       buildToc(root);
+      setupTocDisclosure();
       setupReadProgress();
-      setupPointerGlow();
       setupReveal();
       updateLucide();
     } catch (error) {
@@ -758,20 +862,28 @@
     var tags = $("#aboutTagCount");
     if (count) count.textContent = posts.length;
     if (tags) tags.textContent = allTags().length;
-    setupPointerGlow();
+  }
+
+  function setupStaticPostPage() {
+    var root = $(".article-body");
+    if (!root) return;
+    buildToc(root);
+    setupTocDisclosure();
+    setupReadProgress();
   }
 
   function boot() {
     setupNav();
-    setupHeroMotion();
     setupShare();
     var page = document.body.getAttribute("data-page");
     if (page === "home") renderHome();
     if (page === "posts") renderPostsPage();
     if (page === "tags") renderTagsPage();
-    if (page === "post") renderPostPage();
+    if (page === "post") {
+      if ($("#articleBody")) renderPostPage();
+      else setupStaticPostPage();
+    }
     if (page === "about") renderAboutPage();
-    setupPointerGlow();
     setupReveal();
     setupImageStates(document);
     updateLucide();

@@ -81,9 +81,9 @@ featured: true
 如果线上页面还在读旧内容，把 HTML 里的资源版本号往上加一版，例如：
 
 ```html
-assets/js/posts-data.js?v=20260619-11
-assets/js/site.js?v=20260619-11
-assets/css/site.css?v=20260619-11
+assets/js/posts-data.js?v=20260711-4
+assets/js/site.js?v=20260711-4
+assets/css/site.css?v=20260711-4
 ```
 
 当前项目没有自动打包工具，所以这个版本号就是最直接的缓存刷新方式。

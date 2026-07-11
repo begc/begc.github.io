@@ -6,7 +6,7 @@ const { execFileSync } = require("child_process");
 const root = path.resolve(__dirname, "..");
 const siteOrigin = (process.env.SITE_ORIGIN || "https://begc.github.io").replace(/\/+$/, "");
 const siteName = process.env.SITE_NAME || "RuiJie Notes";
-const version = "20260619-11";
+const version = "20260711-4";
 
 execFileSync(process.execPath, [path.join(root, "scripts/build-posts-data.js")], {
   cwd: root,
@@ -52,7 +52,7 @@ function loadWindowData(file, key) {
 }
 
 function stripFrontmatter(markdown) {
-  return markdown.replace(/^\s*---\n[\s\S]*?\n---\n?/, "");
+  return markdown.replace(/^\s*---\r?\n[\s\S]*?\r?\n---\r?\n?/, "");
 }
 
 function normalizeHeading(value) {
@@ -439,8 +439,12 @@ function withSeoHead(file, options) {
   html = html.replace(/content="begc\.(?:dev|github\.io) /g, 'content="' + siteName + " ");
   html = html.replace(/content="([^"]*) · begc\.(?:dev|github\.io)"/g, 'content="$1 · ' + siteName + '"');
   html = html.replace(/content="begc\.(?:dev|github\.io) · /g, 'content="' + siteName + " · ");
-  html = html.replace(/20260619-10/g, version);
+  html = replaceAssetVersion(html);
   write(file, html);
+}
+
+function replaceAssetVersion(html) {
+  return html.replace(/((?:assets\/css\/site\.css|assets\/js\/(?:site|posts-data|posts-content)\.js)\?v=)[^"'&<>\s]+/g, "$1" + version);
 }
 
 const posts = loadWindowData("assets/js/posts-data.js", "BLOG_POSTS");
@@ -487,7 +491,7 @@ const staticPages = [
 
 staticPages.forEach((page) => withSeoHead(page.file, page));
 
-let redirect = read("blog-post-detail-complete.html").replace(/begc\.(?:dev|github\.io)/g, siteName).replace(/20260619-10/g, version);
+let redirect = replaceAssetVersion(read("blog-post-detail-complete.html").replace(/begc\.(?:dev|github\.io)/g, siteName));
 write("blog-post-detail-complete.html", redirect);
 
 const sitemapUrls = [

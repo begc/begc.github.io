@@ -16,9 +16,12 @@
   <meta name="twitter:title" content="RuiJie Notes · 技术博客"/>
   <meta name="twitter:description" content="RuiJie Notes 是个人技术博客，记录大数据工程、Linux 运维、源码阅读和长期学习沉淀。"/>
   <!-- PUBLIC SEO END -->
+
   <title>RuiJie Notes · 技术博客</title>
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin/>
-  <link rel="stylesheet" href="assets/css/site.css?v=20260619-11"/>
+  <link rel="preconnect" href="https://images.unsplash.com" crossorigin/>
+  <link rel="preload" as="image" href="https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&amp;fit=crop&amp;w=1920&amp;q=82" fetchpriority="high"/>
+  <link rel="stylesheet" href="assets/css/site.css?v=20260711-4"/>
 </head>
 <body data-page="home">
   <a class="skip-link" href="#main">跳到正文</a>
@@ -48,49 +51,37 @@
 
   <main class="page-main" id="main">
     <section class="immersive-hero" aria-labelledby="homeTitle">
-      <a class="hero-hit-area" href="posts.html" aria-label="进入博客文章列表">
-        <span class="hero-bg hero-bg-default" aria-hidden="true"></span>
-        <span class="hero-bg hero-bg-hover" aria-hidden="true"></span>
-        <span class="hero-gridlines" aria-hidden="true"></span>
-        <span class="hero-scanline" aria-hidden="true"></span>
+      <div class="hero-hit-area">
+        <span class="hero-reveal-bg" aria-hidden="true"></span>
+        <span class="hero-curtain hero-curtain-left" aria-hidden="true">
+          <span class="hero-curtain-image"></span>
+        </span>
+        <span class="hero-curtain hero-curtain-right" aria-hidden="true">
+          <span class="hero-curtain-image"></span>
+        </span>
         <span class="hero-vignette" aria-hidden="true"></span>
-        <span class="hero-navline" aria-hidden="true">
-          <span>Journal</span>
-          <span>Notes</span>
-          <span class="star-mark">✦</span>
-          <span>Archive</span>
-          <span>About</span>
-        </span>
-        <span class="hero-center">
+        <div class="hero-topline" aria-hidden="true">
+          <span>Personal technology journal</span>
+          <span>RuiJie Notes · 2026</span>
+        </div>
+        <div class="hero-center">
           <span class="eyebrow hero-kicker">RuiJie Notes</span>
-          <h1 class="hero-title" id="homeTitle">
-            <span class="title-main">我的博客</span>
-            <span class="title-hover">向内记录，向外生长</span>
-          </h1>
-          <span class="hero-lede">
-            <span class="lede-main">这里收集我的学习、项目、思考和长期沉淀。</span>
-            <span class="lede-hover">从一篇文章开始，进入我的技术世界。</span>
-          </span>
-        </span>
-        <span class="hero-reels" aria-hidden="true">
-          <span class="reel-card reel-one">
-            <span class="reel-play"><i data-lucide="book-open"></i></span>
-            <span>Read Notes</span>
-          </span>
-          <span class="reel-card reel-two">
-            <strong id="heroPostCount">14</strong>
-            <span>Saved Posts</span>
-          </span>
-          <span class="reel-card reel-three">
-            <span class="reel-play"><i data-lucide="layers-3"></i></span>
-            <span>Explore Topics</span>
-          </span>
-        </span>
-        <span class="hero-descend">
-          <span>Enter</span>
+          <h1 class="hero-title" id="homeTitle">我的博客</h1>
+          <p class="hero-lede" id="homeLede">向内记录，向外生长。这里收集我的学习、项目、思考和长期沉淀。</p>
+          <div class="hero-actions">
+            <a class="button primary hero-primary" href="posts.html">浏览文章 <i data-lucide="arrow-right"></i></a>
+            <a class="hero-secondary" href="about.html">关于这个博客</a>
+          </div>
+        </div>
+        <div class="hero-stats" aria-label="博客概览">
+          <span><strong id="heroPostCount">14</strong><small>篇文章</small></span>
+          <span><strong id="heroTopicCount">4</strong><small>个专题</small></span>
+        </div>
+        <span class="hero-descend" aria-hidden="true">
+          <span>Scroll</span>
           <span class="descend-dot"></span>
         </span>
-      </a>
+      </div>
     </section>
 
     <section class="container section">
@@ -157,7 +148,7 @@
     </div>
   </footer>
   <div class="toast" id="toast" role="status"></div>
-  <script src="assets/js/posts-data.js?v=20260619-11"></script>
-  <script src="assets/js/site.js?v=20260619-11"></script>
+  <script src="assets/js/posts-data.js?v=20260711-4"></script>
+  <script src="assets/js/site.js?v=20260711-4"></script>
 </body>
 </html>

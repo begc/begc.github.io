@@ -47,7 +47,7 @@ function stableCover(slug, cover) {
 }
 
 function stableMarkdownImages(markdown) {
-  return String(markdown || "").replace(
+  return String(markdown || "").replace(/\r\n?/g, "\n").replace(
     /https:\/\/(?:(?:p\.ipic\.vip|s2\.loli\.net|pic\.lookcos\.cn)\/|www\.apple\.com\.cn\/newsroom\/)[^\s)'"<>]+/g,
     "assets/img/article-image-unavailable.svg"
   );
@@ -70,7 +70,7 @@ function clean(value) {
 }
 
 function parseFrontmatter(text) {
-  const match = text.match(/^\s*---\n([\s\S]*?)\n---\n?/);
+  const match = text.match(/^\s*---\r?\n([\s\S]*?)\r?\n---\r?\n?/);
   if (!match) return [{}, text];
   const raw = match[1];
   const body = text.slice(match[0].length);
