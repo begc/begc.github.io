@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="description" content="记录我在 Cline、阿里云百炼和代码中接入 MCP 的几种方式。"/>
+  <meta name="author" content="begc"/>
+  <meta name="robots" content="index,follow,max-image-preview:large"/>
+  <link rel="canonical" href="https://begc.github.io/posts/langgraph-03-mcp/"/>
+  <meta property="og:type" content="article"/>
+  <meta property="og:site_name" content="RuiJie Notes"/>
+  <meta property="og:title" content="LangGraph 第三课：接入 MCP"/>
+  <meta property="og:description" content="记录我在 Cline、阿里云百炼和代码中接入 MCP 的几种方式。"/>
+  <meta property="og:url" content="https://begc.github.io/posts/langgraph-03-mcp/"/>
+  <meta property="og:image" content="https://begc.github.io/assets/img/posts/langgraph-03-mcp/image_r.png"/>
+  <meta property="article:published_time" content="2026-06-12"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="LangGraph 第三课：接入 MCP"/>
+  <meta name="twitter:description" content="记录我在 Cline、阿里云百炼和代码中接入 MCP 的几种方式。"/>
+  <meta name="twitter:image" content="https://begc.github.io/assets/img/posts/langgraph-03-mcp/image_r.png"/>
+  <title>LangGraph 第三课：接入 MCP · RuiJie Notes</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin/>
+  <link rel="stylesheet" href="../../assets/css/site.css?v=20260711-4"/>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"LangGraph 第三课：接入 MCP","description":"记录我在 Cline、阿里云百炼和代码中接入 MCP 的几种方式。","datePublished":"2026-06-12","dateModified":"2026-06-12","author":{"@type":"Person","name":"begc"},"publisher":{"@type":"Person","name":"begc"},"mainEntityOfPage":"https://begc.github.io/posts/langgraph-03-mcp/","image":"https://begc.github.io/assets/img/posts/langgraph-03-mcp/image_r.png"}</script>
+</head>
+<body data-page="post">
+  <a class="skip-link" href="#main">跳到正文</a>
+  <div class="read-progress" aria-hidden="true"></div>
+  <nav class="site-nav" aria-label="主导航">
+    <div class="nav-inner">
+      <a class="brand" href="../../index.html" aria-label="RuiJie Notes 首页">
+        <span class="brand-mark">bg</span>
+        <span class="brand-text">
+          <span class="brand-name">RuiJie Notes</span>
+          <span class="brand-sub">Big Data · Linux · Source</span>
+        </span>
+      </a>
+      <button class="icon-button nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-label="打开菜单"><i data-lucide="menu"></i></button>
+      <div class="nav-panel">
+        <div class="nav-links">
+          <a class="nav-link" data-page="home" href="../../index.html">首页</a>
+          <a class="nav-link" data-page="posts" href="../../posts.html">文章</a>
+          <a class="nav-link" data-page="tags" href="../../tags.html">专题</a>
+          <a class="nav-link" data-page="about" href="../../about.html">关于</a>
+        </div>
+        <div class="nav-actions">
+          <a class="icon-link" href="https://github.com/begc" target="_blank" rel="noopener" aria-label="GitHub"><i data-lucide="github"></i></a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="page-main" id="main">
+    <div class="detail-shell">
+      <aside class="toc-wrap">
+        <span class="toc-label">目录</span>
+        <nav class="toc" id="toc" aria-label="文章目录"><a class="depth-2" href="#一-下载插件">一、下载插件</a><a class="depth-2" href="#二-通过阿里云百炼简单查看">二、通过阿里云百炼简单查看</a><a class="depth-2" href="#三-详细梳理mcp整体工作流程">三、详细梳理MCP整体工作流程</a><a class="depth-3" href="#两种实现形式-sse和stdio">两种实现形式：SSE和STDIO</a><a class="depth-4" href="#sse">SSE：</a><a class="depth-2" href="#四-langgraph连接agent">四、LangGraph连接Agent</a><a class="depth-2" href="#五-手写实现一个mcp服务">五、手写实现一个mcp服务</a></nav>
+      </aside>
+
+      <article class="article">
+        <header class="article-header reveal">
+          <span class="eyebrow">LangGraph · MCP</span>
+          <h1 class="article-title">LangGraph 第三课：接入 MCP</h1>
+          <p class="article-description">记录我在 Cline、阿里云百炼和代码中接入 MCP 的几种方式。</p>
+          <div class="post-meta-line">
+            <span>begc</span>
+            <span class="dot"></span>
+            <span>2026.06.12</span>
+            <span class="dot"></span>
+            <span>2 min read</span>
+            <span class="dot"></span>
+            <span>大模型学习</span>
+          </div>
+          <figure class="article-cover">
+            <img src="../../assets/img/posts/langgraph-03-mcp/image_r.png" alt="LangGraph 第三课：接入 MCP" loading="eager" decoding="async"/>
+          </figure>
+        </header>
+
+        <div class="markdown-body article-body reveal">
+<h2 id="一-下载插件">一、下载插件</h2>
+<p>下载IDEA插件Cline，通过插件接入MCP</p>
+<p><img src="../../assets/img/posts/langgraph-03-mcp/image_r.png" alt="文章配图" loading="lazy" decoding="async"/></p>
+<p><img src="../../assets/img/posts/langgraph-03-mcp/image_1c.png" alt="文章配图" loading="lazy" decoding="async"/></p>
+<h2 id="二-通过阿里云百炼简单查看">二、通过阿里云百炼简单查看</h2>
+<p><img src="../../assets/img/posts/langgraph-03-mcp/image_1j.png" alt="文章配图" loading="lazy" decoding="async"/></p>
+<p>开通高德地图的MCP服务</p>
+<p><img src="../../assets/img/posts/langgraph-03-mcp/image_9.png" alt="文章配图" loading="lazy" decoding="async"/></p>
+<h2 id="三-详细梳理mcp整体工作流程">三、详细梳理MCP整体工作流程</h2>
+<h3 id="两种实现形式-sse和stdio">两种实现形式：SSE和STDIO</h3>
+<h4 id="sse">SSE：</h4>
+<pre data-lang="json"><code>{
+&quot;mcpServers&quot;: {
+	&quot;amap-amap-sse&quot;: {
+		 &quot;url&quot;: &quot;https://mcp.amap.com/sse?key=APIkey&quot;
+		}
+	}
+}</code></pre>
+<p>这种方式是在本地安装NodeJs。很显然是通过本地执行npx指令，执行应用程序，从而获得高的地图数据。 我们能够看出SSE和STUDIO的工作机制</p>
+<ul><li>SSE：是一种基于HTTP协议实现的长链接，只不过SSE协议是一种从服务端向客户端单项推送数据的长链接协议。也就是高德地图需要提供一个HTTP服务，客户端与HTTP服务建立一个长连接，客户端可以不断的访问高德地图的HTTP服务，获得高的地图的服务数据，这时候的工作机制和以往HTTP服务很像，只是服务端压力会比较大。</li><li>STDIO：这种工作机制的本质是在客户端本地执行一个应用程序。通过应用程序获得结果。MCP的服务是由MCP服务社记者设计的，但是执行却是在客户端的机器执行。这个服务提供者提供了一种操作客户端机器的机会。</li></ul>
+<h2 id="四-langgraph连接agent">四、LangGraph连接Agent</h2>
+<p>langraph中提供了新的功能模块，langchain-mcp-adapters</p>
+<pre data-lang="python"><code>import asyncio
+from langchain_mcp_adapters.client import MultiServerMCPClient
+from langgraph.prebuilt import create_react_agent
+from config.load_key import load_key
+from langchain_community.chat_models import ChatTongyi
+from langchain_mcp_adapters.tools import load_mcp_tools
+
+async def main():
+    # 构建阿里云百炼大模型客户端
+    llm = ChatTongyi(
+        model=&quot;qwen-plus&quot;,
+        api_key=load_key(&quot;API-KEY&quot;)
+    )
+    client = MultiServerMCPClient(
+        {
+            # &quot;amap-amap-sse&quot;: {
+        #     &quot;url&quot;: &quot;https://mcp.amap.com/v1/streaming&quot;,
+        #     &quot;transport&quot;: &quot;streamable_http&quot;
+        # },
+            &quot;amap-maps&quot;: {
+                &quot;command&quot;: &quot;npx&quot;,
+                &quot;args&quot;: [
+                    &quot;-y&quot;,
+                    &quot;@amap/amap-maps-mcp-server&quot;
+                ],
+                &quot;env&quot;: {
+                    &quot;AMAP_MAPS_API_KEY&quot;: &quot;YOUR_AMAP_API_KEY&quot;
+                },
+                &quot;transport&quot;: &quot;stdio&quot;
+            }
+        }
+    )
+    async with client.session(&quot;amap-maps&quot;) as session:
+        tools = await load_mcp_tools(session)
+
+    agent = create_react_agent(
+        model=llm,
+        tools=tools
+    )
+    response = await agent.invoke(
+        {
+            &quot;messages&quot;: [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;帮我查一下北京到上海的航班&quot;}]
+        }
+    )
+    print(response)
+
+# 执行异步主函数
+asyncio.run(main())
+</code></pre>
+<h2 id="五-手写实现一个mcp服务">五、手写实现一个mcp服务</h2>
+<p><a href="https://modelcontextprotocol.github.io/python-sdk/" target="_blank" rel="noopener">https://modelcontextprotocol.github.io/python-sdk/</a> 手写一个python文件，mcp_server.py</p>
+<pre data-lang="python"><code>from mcp.server.fastmcp import FastMCP
+
+mcp = FastMCP(&quot;roymcpdemo&quot;)
+
+@mcp.tool()
+def add(a: int, b: int) -&gt; int:
+    &quot;&quot;&quot;Add two numbers.&quot;&quot;&quot;
+    print(f&quot;roy mcp demo called : add({a}, {b})&quot;)
+    return a + b
+
+@mcp.tool()
+def weather(city: str) -&gt; str:
+    &quot;&quot;&quot;Get the weather for a city.&quot;&quot;&quot;
+    print(f&quot;roy mcp demo called : weather({city})&quot;)
+    return f&quot;The weather in {city} is sunny.&quot;
+
+@mcp.resource(&quot;greeting://{name}&quot;)
+def greeting(name: str) -&gt; str:
+    &quot;&quot;&quot;Get a greeting for a name.&quot;&quot;&quot;
+    print(f&quot;roy mcp demo called : greeting({name})&quot;)
+    return f&quot;Hello, {name}!&quot;
+
+if __name__ == &quot;__main__&quot;:
+    mcp.run(transport=&quot;sse&quot;)
+
+    #mcp.run(transport=&quot;stdio&quot;)</code></pre>
+<p><img src="../../assets/img/posts/langgraph-03-mcp/image_u.png" alt="文章配图" loading="lazy" decoding="async"/></p>
+<p><img src="../../assets/img/posts/langgraph-03-mcp/image_3n.png" alt="文章配图" loading="lazy" decoding="async"/></p>
+<p>以上是通过sse方式，接下来查看通过stdio的方式</p>
+<pre data-lang="python"><code>from mcp import StdioServerParameters,stdio_client,ClientSession
+import mcp.types as types
+
+
+server_params = StdioServerParameters(
+    command=&quot;python&quot;,
+    args=[&quot;/path/to/mcp_server.py&quot;],
+    env=None
+)
+async def handle_sampling_message(message: types.CreateMessageRequestParams) -&gt; types.CreateMessageResult:
+    print(f&quot;Received sampling message: {message}&quot;)
+    return types.CreateMessageResult(
+        role=&quot;assistant&quot;,
+        content=types.TextContent(
+            type=&quot;text&quot;,
+            text=&quot;This is a response from the client.&quot;
+        ),
+        model=&quot;gpt-3.5-turbo&quot;,
+        stopReason=&quot;endTurn&quot;
+    )
+
+async def run():
+    async with stdio_client(server_params) as (read, write):
+        async with ClientSession(read,write,sampling_callback=handle_sampling_message) as session:
+            await session.initialize()
+
+            prompts = await session.list_prompts()
+            print(f&quot;prompts: {prompts}&quot;)
+
+            tools = await session.list_tools()
+            print(f&quot;tools: {tools}&quot;)
+
+            resources = await session.list_resources()
+            print(f&quot;resources: {resources}&quot;)
+
+            result = await session.call_tool(&quot;weather&quot;, {&quot;city&quot;: &quot;New York&quot;})
+            print(f&quot;result: {result}&quot;)
+
+if __name__ == &quot;__main__&quot;:
+    import asyncio
+    asyncio.run(run())</code></pre>
+<p>通过调用刚刚写的server.py来实现</p>
+<pre data-lang="text"><code>python /path/to/mcp_client.py
+prompts: meta=None nextCursor=None prompts=[]
+tools: meta=None nextCursor=None tools=[Tool(name=&#039;add&#039;, title=None, description=&#039;Add two numbers.&#039;, inputSchema={&#039;properties&#039;: {&#039;a&#039;: {&#039;title&#039;: &#039;A&#039;, &#039;type&#039;: &#039;integer&#039;}, &#039;b&#039;: {&#039;title&#039;: &#039;B&#039;, &#039;type&#039;: &#039;integer&#039;}}, &#039;required&#039;: [&#039;a&#039;, &#039;b&#039;], &#039;title&#039;: &#039;addArguments&#039;, &#039;type&#039;: &#039;object&#039;}, outputSchema={&#039;properties&#039;: {&#039;result&#039;: {&#039;title&#039;: &#039;Result&#039;, &#039;type&#039;: &#039;integer&#039;}}, &#039;required&#039;: [&#039;result&#039;], &#039;title&#039;: &#039;addOutput&#039;, &#039;type&#039;: &#039;object&#039;}, icons=None, annotations=None, meta=None), Tool(name=&#039;weather&#039;, title=None, description=&#039;Get the weather for a city.&#039;, inputSchema={&#039;properties&#039;: {&#039;city&#039;: {&#039;title&#039;: &#039;City&#039;, &#039;type&#039;: &#039;string&#039;}}, &#039;required&#039;: [&#039;city&#039;], &#039;title&#039;: &#039;weatherArguments&#039;, &#039;type&#039;: &#039;object&#039;}, outputSchema={&#039;properties&#039;: {&#039;result&#039;: {&#039;title&#039;: &#039;Result&#039;, &#039;type&#039;: &#039;string&#039;}}, &#039;required&#039;: [&#039;result&#039;], &#039;title&#039;: &#039;weatherOutput&#039;, &#039;type&#039;: &#039;object&#039;}, icons=None, annotations=None, meta=None)]
+resources: meta=None nextCursor=None resources=[]
+result: meta=None content=[TextContent(type=&#039;text&#039;, text=&#039;The weather in New York is sunny.&#039;, annotations=None, meta=None)] structuredContent={&#039;result&#039;: &#039;The weather in New York is sunny.&#039;} isError=False
+[10/13/25 21:21:16] INFO     Processing request of type            server.py:664
+                             ListPromptsRequest
+                    INFO     Processing request of type            server.py:664
+                             ListToolsRequest
+                    INFO     Processing request of type            server.py:664
+                             ListResourcesRequest
+                    INFO     Processing request of type            server.py:664
+                             CallToolRequest
+
+Process finished with exit code 0
+</code></pre>
+<p>注意需要将文件改变为stdio模式</p>
+        </div>
+      </article>
+
+      <aside class="article-side">
+        <div class="side-panel reveal">
+          <p class="side-panel-title">标签</p>
+          <div class="tag-list"><a class="tag-pill" href="../../posts.html?tag=LangGraph">LangGraph</a><a class="tag-pill" href="../../posts.html?tag=MCP">MCP</a><a class="tag-pill" href="../../posts.html?tag=%E5%B7%A5%E5%85%B7%E8%B0%83%E7%94%A8">工具调用</a></div>
+        </div>
+      </aside>
+
+      <footer class="article-footer reveal">
+        <a class="button" href="../../posts.html">返回文章列表</a>
+        <button class="button" type="button" data-share="https://begc.github.io/posts/langgraph-03-mcp/">复制链接</button>
+      </footer>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <span>© 2026 RuiJie Notes</span>
+      <div class="footer-links">
+        <a href="../../index.html">首页</a>
+        <a href="../../posts.html">文章</a>
+        <a href="../../tags.html">专题</a>
+      </div>
+    </div>
+  </footer>
+  <div class="toast" id="toast" role="status"></div>
+  <script src="../../assets/js/site.js?v=20260711-4"></script>
+</body>
+</html>

@@ -21,8 +21,56 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://begc.github.io/posts/langgraph-06-multi-agent/</loc>
+    <lastmod>2026-07-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://begc.github.io/posts/langgraph-05-agent-workflow/</loc>
+    <lastmod>2026-07-02</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://begc.github.io/posts/langgraph-04-graph/</loc>
+    <lastmod>2026-06-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://begc.github.io/posts/langgraph-03-mcp/</loc>
+    <lastmod>2026-06-12</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://begc.github.io/posts/kafka-build/</loc>
     <lastmod>2026-06-10</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://begc.github.io/posts/langgraph-02-memory/</loc>
+    <lastmod>2026-06-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://begc.github.io/posts/langgraph-01-introduction/</loc>
+    <lastmod>2026-05-21</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://begc.github.io/posts/langchain-04-fastgpt-rag-service/</loc>
+    <lastmod>2026-05-10</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://begc.github.io/posts/langchain-03-local-models/</loc>
+    <lastmod>2026-04-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
@@ -33,8 +81,38 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://begc.github.io/posts/langchain-02-rag-practice/</loc>
+    <lastmod>2026-04-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://begc.github.io/posts/langchain-01-basics-and-embedding/</loc>
+    <lastmod>2026-04-07</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://begc.github.io/posts/flink-performance-tuning/</loc>
+    <lastmod>2026-03-27</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://begc.github.io/posts/docker-mysql8/</loc>
+    <lastmod>2026-03-16</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://begc.github.io/posts/memoryOverflowTroubleshooting/</loc>
     <lastmod>2026-03-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://begc.github.io/posts/qingdao-three-day-trip/</loc>
+    <lastmod>2026-03-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>

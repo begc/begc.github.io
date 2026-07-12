@@ -39,7 +39,9 @@ const coverBySlug = {
 };
 
 function stableCover(slug, cover) {
-  if (cover && /^https:\/\/images\.unsplash\.com\//.test(cover)) return cover;
+  if (cover && (/^https:\/\/images\.unsplash\.com\//.test(cover) || /^\/?assets\/img\//.test(cover))) {
+    return cover.replace(/^\/+/, "");
+  }
   if (coverBySlug[slug]) return coverBySlug[slug];
   let hash = 0;
   for (const char of slug) hash = (hash * 31 + char.charCodeAt(0)) >>> 0;
@@ -121,7 +123,9 @@ function estimateReadMinutes(markdown) {
 
 function categoryFor(tags, title) {
   const value = `${title} ${(tags || []).join(" ")}`.toLowerCase();
-  if (/hadoop|mapreduce|hive|kafka|大数据/.test(value)) return "大数据工程";
+  if (/langchain|langgraph|fastgpt|embedding|rag|mcp|multi-agent|agent|大模型|智能体/.test(value)) return "大模型学习";
+  if (/flink|hadoop|mapreduce|hive|kafka|大数据/.test(value)) return "大数据工程";
+  if (/青岛|旅行|游玩|生活记录/.test(value)) return "生活记录";
   if (/centos|linux|mysql|iptables|nacos/.test(value)) return "Linux 运维";
   if (/golang|go|源码/.test(value)) return "源码阅读";
   if (/apple|homepod|新闻稿/.test(value)) return "观察记录";

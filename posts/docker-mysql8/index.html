@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="description" content="记录我用 Docker 搭建 MySQL 8 的步骤，包括网络、数据卷、连接验证和常见问题。"/>
+  <meta name="author" content="begc"/>
+  <meta name="robots" content="index,follow,max-image-preview:large"/>
+  <link rel="canonical" href="https://begc.github.io/posts/docker-mysql8/"/>
+  <meta property="og:type" content="article"/>
+  <meta property="og:site_name" content="RuiJie Notes"/>
+  <meta property="og:title" content="Docker 搭建 MySQL 8"/>
+  <meta property="og:description" content="记录我用 Docker 搭建 MySQL 8 的步骤，包括网络、数据卷、连接验证和常见问题。"/>
+  <meta property="og:url" content="https://begc.github.io/posts/docker-mysql8/"/>
+  <meta property="og:image" content="https://images.unsplash.com/photo-1425913397330-cf8af2ff40a1?auto=format&amp;fit=crop&amp;w=1200&amp;q=80"/>
+  <meta property="article:published_time" content="2026-03-16"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="Docker 搭建 MySQL 8"/>
+  <meta name="twitter:description" content="记录我用 Docker 搭建 MySQL 8 的步骤，包括网络、数据卷、连接验证和常见问题。"/>
+  <meta name="twitter:image" content="https://images.unsplash.com/photo-1425913397330-cf8af2ff40a1?auto=format&amp;fit=crop&amp;w=1200&amp;q=80"/>
+  <title>Docker 搭建 MySQL 8 · RuiJie Notes</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin/>
+  <link rel="stylesheet" href="../../assets/css/site.css?v=20260711-4"/>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"Docker 搭建 MySQL 8","description":"记录我用 Docker 搭建 MySQL 8 的步骤，包括网络、数据卷、连接验证和常见问题。","datePublished":"2026-03-16","dateModified":"2026-03-16","author":{"@type":"Person","name":"begc"},"publisher":{"@type":"Person","name":"begc"},"mainEntityOfPage":"https://begc.github.io/posts/docker-mysql8/","image":"https://images.unsplash.com/photo-1425913397330-cf8af2ff40a1?auto=format&fit=crop&w=1200&q=80"}</script>
+</head>
+<body data-page="post">
+  <a class="skip-link" href="#main">跳到正文</a>
+  <div class="read-progress" aria-hidden="true"></div>
+  <nav class="site-nav" aria-label="主导航">
+    <div class="nav-inner">
+      <a class="brand" href="../../index.html" aria-label="RuiJie Notes 首页">
+        <span class="brand-mark">bg</span>
+        <span class="brand-text">
+          <span class="brand-name">RuiJie Notes</span>
+          <span class="brand-sub">Big Data · Linux · Source</span>
+        </span>
+      </a>
+      <button class="icon-button nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-label="打开菜单"><i data-lucide="menu"></i></button>
+      <div class="nav-panel">
+        <div class="nav-links">
+          <a class="nav-link" data-page="home" href="../../index.html">首页</a>
+          <a class="nav-link" data-page="posts" href="../../posts.html">文章</a>
+          <a class="nav-link" data-page="tags" href="../../tags.html">专题</a>
+          <a class="nav-link" data-page="about" href="../../about.html">关于</a>
+        </div>
+        <div class="nav-actions">
+          <a class="icon-link" href="https://github.com/begc" target="_blank" rel="noopener" aria-label="GitHub"><i data-lucide="github"></i></a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="page-main" id="main">
+    <div class="detail-shell">
+      <aside class="toc-wrap">
+        <span class="toc-label">目录</span>
+        <nav class="toc" id="toc" aria-label="文章目录"><a class="depth-2" href="#计划">计划</a></nav>
+      </aside>
+
+      <article class="article">
+        <header class="article-header reveal">
+          <span class="eyebrow">Docker · MySQL</span>
+          <h1 class="article-title">Docker 搭建 MySQL 8</h1>
+          <p class="article-description">记录我用 Docker 搭建 MySQL 8 的步骤，包括网络、数据卷、连接验证和常见问题。</p>
+          <div class="post-meta-line">
+            <span>begc</span>
+            <span class="dot"></span>
+            <span>2026.03.16</span>
+            <span class="dot"></span>
+            <span>2 min read</span>
+            <span class="dot"></span>
+            <span>Linux 运维</span>
+          </div>
+          <figure class="article-cover">
+            <img src="https://images.unsplash.com/photo-1425913397330-cf8af2ff40a1?auto=format&amp;fit=crop&amp;w=1200&amp;q=80" alt="Docker 搭建 MySQL 8" loading="eager" decoding="async"/>
+          </figure>
+        </header>
+
+        <div class="markdown-body article-body reveal">
+<h2 id="计划">计划</h2>
+<ol><li>拉取镜像与创建网络：准备一个独立 Docker 网络，方便后续扩展与隔离。</li><li>启动容器：映射端口、设置根密码、选择字符集/时区、配置数据卷持久化。</li><li>验证容器与初始化数据库：用 docker exec 或本机客户端测试连接。</li><li>外部客户端连接说明：提供主机、端口、用户、常见连接错误的排查。</li><li>安全和常见问题：密码、端口占用、版本兼容、时区与字符集。</li></ol>
+<pre data-lang="bash"><code># 创建一个专用网络（可选但推荐）
+docker network create mynet
+
+# 拉取 MySQL 8.0（推荐）
+docker pull mysql:8.0
+
+# 如需 MySQL 5.7（兼容旧系统/驱动）
+docker pull mysql:5.7
+</code></pre>
+<p>步骤 2：启动容器（持久化数据、开放 3306、设置密码/字符集/时区） 下面命令会：</p>
+<ul><li>将宿主机的 ./mysql-data 作为数据卷挂载，数据持久化</li><li>设置 root 密码为 CHANGE_ME_STRONG_PASSWORD （请改成你自己的强密码）</li><li>开放 3306 端口到宿主机，供外部客户端连接</li><li>设置时区为 Asia/Shanghai</li><li>设置默认字符集为 utf8mb4 与相应排序规则</li></ul>
+<pre data-lang="bash"><code># MySQL 8.0 推荐启动方式
+docker run -d \
+  --name mysql8 \
+  --hostname mysql8 \
+  --network mynet \
+  -p 3306:3306 \
+  -v $(pwd)/mysql-data:/var/lib/mysql \
+  -e MYSQL_ROOT_PASSWORD=&quot;CHANGE_ME_STRONG_PASSWORD&quot; \
+  -e TZ=&quot;Asia/Shanghai&quot; \
+  mysql:8.0 \
+  --character-set-server=utf8mb4 \
+  --collation-server=utf8mb4_0900_ai_ci \
+  --default-time-zone=&quot;+08:00&quot;
+</code></pre>
+<p>如果你使用 MySQL 5.7，请用下面命令（5.7 的 utf8mb4 排序规则用 utf8mb4_general_ci）：</p>
+<pre data-lang="bash"><code># MySQL 5.7 启动方式
+docker run -d \
+  --name mysql57 \
+  --hostname mysql57 \
+  --network mynet \
+  -p 3306:3306 \
+  -v $(pwd)/mysql-data:/var/lib/mysql \
+  -e MYSQL_ROOT_PASSWORD=&quot;CHANGE_ME_STRONG_PASSWORD&quot; \
+  -e TZ=&quot;Asia/Shanghai&quot; \
+  mysql:5.7 \
+  --character-set-server=utf8mb4 \
+  --collation-server=utf8mb4_general_ci \
+  --default-time-zone=&quot;+08:00&quot;
+</code></pre>
+<p>步骤 3：验证容器运行与初始化数据库</p>
+<pre data-lang="bash"><code># 查看日志直到出现 &quot;port: 3306  MySQL Community Server - GPL&quot;
+docker logs -f mysql8
+
+# 在容器内用 root 登录测试
+docker exec -it mysql8 mysql -uroot -p
+# 输入你设置的密码：CHANGE_ME_STRONG_PASSWORD
+
+# 创建一个测试数据库与用户（外部客户端更安全地使用非 root 用户）
+# 在 mysql 提示符中执行：
+CREATE DATABASE demo DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+CREATE USER &#039;demo_user&#039;@&#039;%&#039; IDENTIFIED BY &#039;DemoUserPass!&#039;;
+GRANT ALL PRIVILEGES ON demo.* TO &#039;demo_user&#039;@&#039;%&#039;;
+FLUSH PRIVILEGES;
+</code></pre>
+<p>步骤 5：常见问题与安全建议</p>
+<ul><li>端口占用：</li><li>如果本机已有 MySQL 服务占用了 3306，改用其他端口映射，例如‎\<code>-p 13306:3306\</code>，连接时端口填 13306。</li><li>防火墙：</li><li>云服务器需开放 3306（或你映射的端口）。本地 macOS/Windows/Linux 通常本机连接无障碍；跨网络连接需检查防火墙与安全组。</li><li>用户权限：</li><li>避免在外部客户端使用 root；为每个应用创建最小权限用户。示例已创建 demo_user 并授权到 demo 库。</li><li>密码安全：</li><li>使用强密码；不要把密码硬编码在代码仓库或共享文档中。生产环境可用环境变量管理或秘密管理服务（如 Vault）。</li><li>•版本兼容：</li><li>老项目/驱动可能与 MySQL 8.0 的默认认证插件不兼容（caching_sha2_password）。可将用户改为 mysql_native_password：</li><li>或改用 MySQL 5.7。</li><li>字符集与 Emoji：</li><li>utf8mb4 支持 Emoji；确保你的表/列也使用 utf8mb4。</li><li>持久化位置：</li><li>数据卷挂载到‎\<code>./mysql-data\</code>，如需改路径请调整‎\<code>-v\</code>。备份时直接备份该目录或用‎\<code>mysqldump\</code>。</li></ul>
+        </div>
+      </article>
+
+      <aside class="article-side">
+        <div class="side-panel reveal">
+          <p class="side-panel-title">标签</p>
+          <div class="tag-list"><a class="tag-pill" href="../../posts.html?tag=Docker">Docker</a><a class="tag-pill" href="../../posts.html?tag=MySQL">MySQL</a><a class="tag-pill" href="../../posts.html?tag=Linux">Linux</a></div>
+        </div>
+      </aside>
+
+      <footer class="article-footer reveal">
+        <a class="button" href="../../posts.html">返回文章列表</a>
+        <button class="button" type="button" data-share="https://begc.github.io/posts/docker-mysql8/">复制链接</button>
+      </footer>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <span>© 2026 RuiJie Notes</span>
+      <div class="footer-links">
+        <a href="../../index.html">首页</a>
+        <a href="../../posts.html">文章</a>
+        <a href="../../tags.html">专题</a>
+      </div>
+    </div>
+  </footer>
+  <div class="toast" id="toast" role="status"></div>
+  <script src="../../assets/js/site.js?v=20260711-4"></script>
+</body>
+</html>

@@ -1,0 +1,623 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="description" content="用实际资料跑一遍 RAG，从文档切分、向量化到检索问答。"/>
+  <meta name="author" content="begc"/>
+  <meta name="robots" content="index,follow,max-image-preview:large"/>
+  <link rel="canonical" href="https://begc.github.io/posts/langchain-02-rag-practice/"/>
+  <meta property="og:type" content="article"/>
+  <meta property="og:site_name" content="RuiJie Notes"/>
+  <meta property="og:title" content="LangChain 第二课：大模型 RAG 实战"/>
+  <meta property="og:description" content="用实际资料跑一遍 RAG，从文档切分、向量化到检索问答。"/>
+  <meta property="og:url" content="https://begc.github.io/posts/langchain-02-rag-practice/"/>
+  <meta property="og:image" content="https://begc.github.io/assets/img/posts/langchain-02-rag-practice/image_n.png"/>
+  <meta property="article:published_time" content="2026-04-18"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="LangChain 第二课：大模型 RAG 实战"/>
+  <meta name="twitter:description" content="用实际资料跑一遍 RAG，从文档切分、向量化到检索问答。"/>
+  <meta name="twitter:image" content="https://begc.github.io/assets/img/posts/langchain-02-rag-practice/image_n.png"/>
+  <title>LangChain 第二课：大模型 RAG 实战 · RuiJie Notes</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin/>
+  <link rel="stylesheet" href="../../assets/css/site.css?v=20260711-4"/>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"LangChain 第二课：大模型 RAG 实战","description":"用实际资料跑一遍 RAG，从文档切分、向量化到检索问答。","datePublished":"2026-04-18","dateModified":"2026-04-18","author":{"@type":"Person","name":"begc"},"publisher":{"@type":"Person","name":"begc"},"mainEntityOfPage":"https://begc.github.io/posts/langchain-02-rag-practice/","image":"https://begc.github.io/assets/img/posts/langchain-02-rag-practice/image_n.png"}</script>
+</head>
+<body data-page="post">
+  <a class="skip-link" href="#main">跳到正文</a>
+  <div class="read-progress" aria-hidden="true"></div>
+  <nav class="site-nav" aria-label="主导航">
+    <div class="nav-inner">
+      <a class="brand" href="../../index.html" aria-label="RuiJie Notes 首页">
+        <span class="brand-mark">bg</span>
+        <span class="brand-text">
+          <span class="brand-name">RuiJie Notes</span>
+          <span class="brand-sub">Big Data · Linux · Source</span>
+        </span>
+      </a>
+      <button class="icon-button nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-label="打开菜单"><i data-lucide="menu"></i></button>
+      <div class="nav-panel">
+        <div class="nav-links">
+          <a class="nav-link" data-page="home" href="../../index.html">首页</a>
+          <a class="nav-link" data-page="posts" href="../../posts.html">文章</a>
+          <a class="nav-link" data-page="tags" href="../../tags.html">专题</a>
+          <a class="nav-link" data-page="about" href="../../about.html">关于</a>
+        </div>
+        <div class="nav-actions">
+          <a class="icon-link" href="https://github.com/begc" target="_blank" rel="noopener" aria-label="GitHub"><i data-lucide="github"></i></a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="page-main" id="main">
+    <div class="detail-shell">
+      <aside class="toc-wrap">
+        <span class="toc-label">目录</span>
+        <nav class="toc" id="toc" aria-label="文章目录"><a class="depth-2" href="#rag实战">RAG实战</a><a class="depth-3" href="#rag的基础工作一般分为两个阶段-indexing索引阶段和retriever检索阶段">RAG的基础工作一般分为两个阶段，Indexing索引阶段和Retriever检索阶段</a><a class="depth-2" href="#第一步-索引阶段-加载文档数据">第一步，索引阶段：加载文档数据</a><a class="depth-3" href="#在langchain中-有很多的loader可以加载不同格式的文档-如果文件夹中有很多文件-可以使用directoryloader来加载">在langchain中，有很多的loader可以加载不同格式的文档，如果文件夹中有很多文件，可以使用DirectoryLoader来加载</a><a class="depth-2" href="#第二步-拆分文档-形成所需要的格式">第二步，拆分文档，形成所需要的格式</a><a class="depth-2" href="#第三步-将文本向量化并存入向量数据库中">第三步，将文本向量化并存入向量数据库中</a><a class="depth-2" href="#第四步-以上完成了索引阶段-之后就是检索增强阶段">第四步，以上完成了索引阶段，之后就是检索增强阶段</a><a class="depth-2" href="#第五步-构建提示词">第五步，构建提示词</a><a class="depth-2" href="#第六步-调用大语言模型">第六步，调用大语言模型</a><a class="depth-2" href="#第七步-生成链式">第七步，生成链式</a><a class="depth-2" href="#rag系统质量验证笔记">RAG系统质量验证笔记</a><a class="depth-3" href="#一-什么是rag系统">一、什么是RAG系统</a><a class="depth-3" href="#二-rag关键评估指标简介">二、RAG关键评估指标简介</a><a class="depth-4" href="#1-召回率-recall">1. 召回率（Recall）</a><a class="depth-4" href="#2-精确率-precision">2. 精确率（Precision）</a><a class="depth-4" href="#3-f1评分">3. F1评分</a><a class="depth-3" href="#三-rag系统评估步骤">三、RAG系统评估步骤</a><a class="depth-4" href="#1-数据准备">1. 数据准备</a><a class="depth-4" href="#2-检索性能评估">2. 检索性能评估</a><a class="depth-4" href="#3-生成性能评估">3. 生成性能评估</a><a class="depth-3" href="#四-ragas系统简介">四、RAGAS系统简介</a><a class="depth-3" href="#五-示例计算">五、示例计算</a><a class="depth-3" href="#六-小结">六、小结</a><a class="depth-2" href="#如何提升rag回答的质量">如何提升RAG回答的质量</a><a class="depth-3" href="#1-检索知识库质量提升">1. 检索知识库质量提升</a><a class="depth-3" href="#2-prompt设计与上下文管理">2. Prompt设计与上下文管理</a><a class="depth-3" href="#3-生成模型调优">3. 生成模型调优</a><a class="depth-3" href="#4-多轮交互与用户反馈">4. 多轮交互与用户反馈</a><a class="depth-3" href="#5-评估与监控">5. 评估与监控</a><a class="depth-3" href="#6-系统与架构优化">6. 系统与架构优化</a><a class="depth-3" href="#7-先进技术应用">7. 先进技术应用</a><a class="depth-2" href="#总结">总结</a></nav>
+      </aside>
+
+      <article class="article">
+        <header class="article-header reveal">
+          <span class="eyebrow">LangChain · RAG</span>
+          <h1 class="article-title">LangChain 第二课：大模型 RAG 实战</h1>
+          <p class="article-description">用实际资料跑一遍 RAG，从文档切分、向量化到检索问答。</p>
+          <div class="post-meta-line">
+            <span>begc</span>
+            <span class="dot"></span>
+            <span>2026.04.18</span>
+            <span class="dot"></span>
+            <span>6 min read</span>
+            <span class="dot"></span>
+            <span>大模型学习</span>
+          </div>
+          <figure class="article-cover">
+            <img src="../../assets/img/posts/langchain-02-rag-practice/image_n.png" alt="LangChain 第二课：大模型 RAG 实战" loading="eager" decoding="async"/>
+          </figure>
+        </header>
+
+        <div class="markdown-body article-body reveal">
+<h2 id="rag实战">RAG实战</h2>
+<p>通过美团的页面进行测试，问大模型对于退款业务，如果没有rag模型，直接问他关于退款</p>
+<pre data-lang="python"><code>from langchain_openai import ChatOpenAI
+from config.load_key import load_key
+import os
+if not os.environ.get(&quot;OPENAI_API_KEY&quot;):
+    os.environ[&quot;OPENAI_API_KEY&quot;] = load_key(&quot;OPENAI_API_KEY&quot;)
+chat = ChatOpenAI(
+    model=&quot;gpt-4.1-nano&quot;,
+    base_url=&quot;https://api.chatanywhere.tech/v1&quot;,
+    max_retries=3,
+    streaming=True,
+    verbose=True
+)
+
+chat.invoke(&quot;如何退款？&quot;)
+
+
+AIMessage(content=&#039;您好！关于退款，您可以按照以下步骤操作，具体流程可能会因平台或购买渠道而有所不同：\n\n1. 进入支付平台或购买平台的官网或App。\n2. 登录您的账号。\n3. 找到“订单”或“购买记录”页面。\n4. 选择需要退款的订单。\n5. 点击“申请退款”或“退款”按钮。\n6. 按照提示填写退款原因，并提交申请。\n7. 等待平台审核并处理退款。\n\n如果是通过第三方支付（如支付宝、微信支付）支付的，您也可以在相应的支付平台中找到交易记录，申请退款。\n\n建议您查看购买时的退款政策，确认符合退款条件。如果遇到问题，可以联系平台的客服获取帮助。\n\n如果您提供具体的购买渠道或平台，我可以提供更详细的指导！&#039;, additional_kwargs={}, response_metadata={&#039;finish_reason&#039;: &#039;stop&#039;, &#039;model_name&#039;: &#039;gpt-4.1-nano-2025-04-14&#039;, &#039;system_fingerprint&#039;: &#039;fp_38343a2f8f&#039;}, id=&#039;run--2b2d9423-553f-4592-a649-c463a78d1774-0&#039;)
+</code></pre>
+<p>跟美团一点关系没有</p>
+<p><img src="../../assets/img/posts/langchain-02-rag-practice/image_n.png" alt="文章配图" loading="lazy" decoding="async"/></p>
+<h3 id="rag的基础工作一般分为两个阶段-indexing索引阶段和retriever检索阶段">RAG的基础工作一般分为两个阶段，Indexing索引阶段和Retriever检索阶段</h3>
+<ul><li>索引阶段</li></ul>
+<p>这一阶段主要是对相关文档进行处理，形成知识库，便于后续检索，通常需要将各种形式的文档转换为Document，然后将Document转化为Segements，然后将这些Segements进行Embendding向量化处理，并将结果存到向量数据库中，这样后续的结果就可以直接在向量数据库中检索了</p>
+<p><img src="../../assets/img/posts/langchain-02-rag-practice/image_8.png" alt="文章配图" loading="lazy" decoding="async"/></p>
+<ul><li>检索阶段</li></ul>
+<p>这一阶段是检索向量数据库，找到对应的segments，然后将用户的问题和segements拼接在一起，发送给大模型，然后大模型对信息进行整合。</p>
+<p><img src="../../assets/img/posts/langchain-02-rag-practice/image_1r.png" alt="文章配图" loading="lazy" decoding="async"/></p>
+<blockquote><p>我们可以定制一个prompt模版</p></blockquote>
+<p>prompt = “你是一个问答机器人，你的任务是根据下述给定的已知信息回答用户问题。已知信息：{context},就是检索出来的文档信息，用户问 {question},就是用户的问题，如果已知信息不包含用户的问题，或者无法回答用户的问题，请直接回复：我无法回答您的问题”，不要输出已知信息中不包含的信息，请用中文回答用户</p>
+<h2 id="第一步-索引阶段-加载文档数据">第一步，索引阶段：加载文档数据</h2>
+<pre data-lang="python"><code>from langchain_community.document_loaders import TextLoader
+
+loader = TextLoader(&quot;./resources/meituan-questions.txt&quot;)
+docs = loader.load()
+docs
+
+
+[Document(metadata={&#039;source&#039;: &#039;./resources/meituan-questions.txt&#039;}, page_content=&#039;以下是美团外卖常见问题页面主要内容整理成的txt格式文本：\n\n美团外卖常见问题\n\n【在线支付问题】  \nQ：在线支付取消订单后钱怎么返还？  \n订单取消后，款项会在一个工作日内，直接返还到您的美团账户余额。\n\nQ：怎么查看退款是否成功？  \n退款会在一个工作日之内到美团账户余额，可在“账号管理——我的账号”中查看是否到账。\n\nQ：美团账户里的余额怎么提现？  \n余额可到美团网（meituan.com）——“我的美团→美团余额”里提取到您的银行卡或者支付宝账号，余额也可直接用于支付外卖订单（限支持在线支付的商家）。\n\nQ：余额提现到账时间是多久？  \n1-7个工作日内可退回您的支付账户。具体到账时间以银行处理时间为准。\n\nQ：申请退款后，商家拒绝了怎么办？  \n申请退款后，如果商家拒绝，点击订单页面“退款申诉”，美团客服介入处理。\n\nQ：怎么取消退款呢？  \n在订单页点击“不退款了”，商家还会正常送餐。\n\nQ：未付款的在线支付订单取消，是否影响活动次数？  \n不会，未支付订单取消后，您仍可享受活动优惠。\n\nQ：微信订餐为何无法使用在线支付？  \n仅网页版和美团外卖手机App支持在线支付。\n\nQ：美团外卖支持哪些支付方式？  \n美团余额、支付宝、网银（储蓄卡、信用卡）。\n\nQ：在线支付订单如何退款？  \n商家接单前可直接取消并退款到美团余额；接单后申请退款，商家24小时内处理，处理后退款到美团余额。\n\nQ：支付显示未成功，款项被扣怎么办？  \n可能数据未即时传输，稍后刷新页面查看；半小时后仍未收到款项，联系银行/支付宝客服，获取交易号，再联系美团客服解决。\n\n【优惠问题】  \nQ：哪些商家有优惠？  \n商家列表页含有优惠标识。\n\nQ：新用户优惠条件？  \n首次在美团外卖下单用户（同设备、手机号、账户仅享一次）。\n\nQ：满赠、满减优惠为何未享受？  \n优惠以菜品总额计算，不包含配送费与包装费。\n\nQ：超时赔付是什么意思？  \n商家承诺送达时间和折扣，超时送达按折扣价收费，不包含预订单及某些特殊情况。\n\n【订单问题】  \nQ：为何提示“账户存在异常，无法下单”？  \n有虚假交易或恶意下单行为，系统自动封禁。\n\nQ：如何取消订单？  \n商家未接单可在订单详情页取消，已接单需联系商家取消。\n\nQ：订单为何被取消？  \n商家超时未接单或无法配送，如联系不上您或菜品售完。\n\nQ：如何催单？  \n订单页面点击“电话催单”。\n\nQ：信息填错如何处理？  \n商家未接单可取消，已接单联系商家取消再重下单。\n\nQ：如何确认订单被商家确认？  \nApp推送通知，订单状态实时更新；微信及触屏版需刷新订单页查看。\n\nQ：预计送达时间与实际不符？  \n预计时间为系统综合计算，仅供参考，实际受天气及订单量影响。\n\nQ：无法下单原因？  \n可能菜品售完、餐厅未营业等，查看系统提示。\n\nQ：下单次数限制？  \n同一手机号同一设备每天最多成功提交7次订单。\n\n【其他问题】  \nQ：如何投诉商家服务？  \n订单完成评价后点击意见反馈或拨打客服电话400-850-7777投诉。\n\nQ：如何联系客服？  \n拨打客服电话400-850-7777或在“我的”→“意见反馈”提交。\n\nQ：手机客户端无法定位？  \n检查网络及定位权限，尝试户外或wifi环境定位。\n\nQ：如何修改账户信息？  \n美团账号在“我的”页面修改，也可在美团网账号页面修改。\n\nQ：为何有时需要输入短信验证码？  \n保障账号安全，新用户或异常行为提示输入。未收到短信可选择语音验证码。&#039;)]
+</code></pre>
+<h3 id="在langchain中-有很多的loader可以加载不同格式的文档-如果文件夹中有很多文件-可以使用directoryloader来加载">在langchain中，有很多的loader可以加载不同格式的文档，如果文件夹中有很多文件，可以使用DirectoryLoader来加载</h3>
+<pre data-lang="python"><code>from langchain_community.document_loaders import DirectoryLoader
+loader = DirectoryLoader(
+    &quot;./resources&quot;,
+    glob=&quot;*.txt&quot;,
+    loader_cls=TextLoader
+)
+loader.load()</code></pre>
+<p><a href="assets/img/posts/langchain-02-rag-practice/meituan-questions.txt">meituan-questions</a></p>
+<h2 id="第二步-拆分文档-形成所需要的格式">第二步，拆分文档，形成所需要的格式</h2>
+<pre data-lang="python"><code>from langchain.text_splitter import CharacterTextSplitter
+
+text_splitter = CharacterTextSplitter(
+    chunk_size=500,
+    chunk_overlap=0,
+    separator=&quot;\n\n&quot;,
+    keep_separator=True
+)
+segments = text_splitter.split_documents(docs)
+print(len(segments))
+
+for sement in segments:
+    print(sement.page_content)
+    print(&quot;===&quot; * 20)
+
+
+# 以下为结果
+
+3
+以下是美团外卖常见问题页面主要内容整理成的txt格式文本：
+
+美团外卖常见问题
+
+【在线支付问题】
+Q：在线支付取消订单后钱怎么返还？
+订单取消后，款项会在一个工作日内，直接返还到您的美团账户余额。
+
+Q：怎么查看退款是否成功？
+退款会在一个工作日之内到美团账户余额，可在“账号管理——我的账号”中查看是否到账。
+
+Q：美团账户里的余额怎么提现？
+余额可到美团网（meituan.com）——“我的美团→美团余额”里提取到您的银行卡或者支付宝账号，余额也可直接用于支付外卖订单（限支持在线支付的商家）。
+
+Q：余额提现到账时间是多久？
+1-7个工作日内可退回您的支付账户。具体到账时间以银行处理时间为准。
+
+Q：申请退款后，商家拒绝了怎么办？
+申请退款后，如果商家拒绝，点击订单页面“退款申诉”，美团客服介入处理。
+
+Q：怎么取消退款呢？
+在订单页点击“不退款了”，商家还会正常送餐。
+
+Q：未付款的在线支付订单取消，是否影响活动次数？
+不会，未支付订单取消后，您仍可享受活动优惠。
+
+Q：微信订餐为何无法使用在线支付？
+仅网页版和美团外卖手机App支持在线支付。
+============================================================
+Q：美团外卖支持哪些支付方式？
+美团余额、支付宝、网银（储蓄卡、信用卡）。
+
+Q：在线支付订单如何退款？
+商家接单前可直接取消并退款到美团余额；接单后申请退款，商家24小时内处理，处理后退款到美团余额。
+
+Q：支付显示未成功，款项被扣怎么办？
+可能数据未即时传输，稍后刷新页面查看；半小时后仍未收到款项，联系银行/支付宝客服，获取交易号，再联系美团客服解决。
+
+【优惠问题】
+Q：哪些商家有优惠？
+商家列表页含有优惠标识。
+
+Q：新用户优惠条件？
+首次在美团外卖下单用户（同设备、手机号、账户仅享一次）。
+
+Q：满赠、满减优惠为何未享受？
+优惠以菜品总额计算，不包含配送费与包装费。
+
+Q：超时赔付是什么意思？
+商家承诺送达时间和折扣，超时送达按折扣价收费，不包含预订单及某些特殊情况。
+
+【订单问题】
+Q：为何提示“账户存在异常，无法下单”？
+有虚假交易或恶意下单行为，系统自动封禁。
+
+Q：如何取消订单？
+商家未接单可在订单详情页取消，已接单需联系商家取消。
+
+Q：订单为何被取消？
+商家超时未接单或无法配送，如联系不上您或菜品售完。
+============================================================
+Q：如何催单？
+订单页面点击“电话催单”。
+
+Q：信息填错如何处理？
+商家未接单可取消，已接单联系商家取消再重下单。
+
+Q：如何确认订单被商家确认？
+App推送通知，订单状态实时更新；微信及触屏版需刷新订单页查看。
+
+Q：预计送达时间与实际不符？
+预计时间为系统综合计算，仅供参考，实际受天气及订单量影响。
+
+Q：无法下单原因？
+可能菜品售完、餐厅未营业等，查看系统提示。
+
+Q：下单次数限制？
+同一手机号同一设备每天最多成功提交7次订单。
+
+【其他问题】
+Q：如何投诉商家服务？
+订单完成评价后点击意见反馈或拨打客服电话400-850-7777投诉。
+
+Q：如何联系客服？
+拨打客服电话400-850-7777或在“我的”→“意见反馈”提交。
+
+Q：手机客户端无法定位？
+检查网络及定位权限，尝试户外或wifi环境定位。
+
+Q：如何修改账户信息？
+美团账号在“我的”页面修改，也可在美团网账号页面修改。
+
+Q：为何有时需要输入短信验证码？
+保障账号安全，新用户或异常行为提示输入。未收到短信可选择语音验证码。
+============================================================
+</code></pre>
+<pre data-lang="python"><code># 严格的按照正则表达式来拆分
+import re
+texts = re.split(r&quot;\n\n&quot;,docs[0].page_content)
+segments = text_splitter.split_text(docs[0].page_content)
+segments_doc = text_splitter.create_documents(texts)
+print(len(segments_doc))
+for sement in segments_doc:
+    print(sement.page_content)
+    print(&quot;===&quot; * 20)
+
+
+# 以下为结果
+31
+以下是美团外卖常见问题页面主要内容整理成的txt格式文本：
+============================================================
+美团外卖常见问题
+============================================================
+【在线支付问题】
+Q：在线支付取消订单后钱怎么返还？
+订单取消后，款项会在一个工作日内，直接返还到您的美团账户余额。
+============================================================
+Q：怎么查看退款是否成功？
+退款会在一个工作日之内到美团账户余额，可在“账号管理——我的账号”中查看是否到账。
+============================================================
+Q：美团账户里的余额怎么提现？
+余额可到美团网（meituan.com）——“我的美团→美团余额”里提取到您的银行卡或者支付宝账号，余额也可直接用于支付外卖订单（限支持在线支付的商家）。
+============================================================
+Q：余额提现到账时间是多久？
+1-7个工作日内可退回您的支付账户。具体到账时间以银行处理时间为准。
+============================================================
+Q：申请退款后，商家拒绝了怎么办？
+申请退款后，如果商家拒绝，点击订单页面“退款申诉”，美团客服介入处理。
+============================================================
+Q：怎么取消退款呢？
+在订单页点击“不退款了”，商家还会正常送餐。
+============================================================
+Q：未付款的在线支付订单取消，是否影响活动次数？
+不会，未支付订单取消后，您仍可享受活动优惠。
+============================================================
+Q：微信订餐为何无法使用在线支付？
+仅网页版和美团外卖手机App支持在线支付。
+============================================================
+Q：美团外卖支持哪些支付方式？
+美团余额、支付宝、网银（储蓄卡、信用卡）。
+============================================================
+Q：在线支付订单如何退款？
+商家接单前可直接取消并退款到美团余额；接单后申请退款，商家24小时内处理，处理后退款到美团余额。
+============================================================
+Q：支付显示未成功，款项被扣怎么办？
+可能数据未即时传输，稍后刷新页面查看；半小时后仍未收到款项，联系银行/支付宝客服，获取交易号，再联系美团客服解决。
+============================================================
+【优惠问题】
+Q：哪些商家有优惠？
+商家列表页含有优惠标识。
+============================================================
+Q：新用户优惠条件？
+首次在美团外卖下单用户（同设备、手机号、账户仅享一次）。
+============================================================
+Q：满赠、满减优惠为何未享受？
+优惠以菜品总额计算，不包含配送费与包装费。
+============================================================
+Q：超时赔付是什么意思？
+商家承诺送达时间和折扣，超时送达按折扣价收费，不包含预订单及某些特殊情况。
+============================================================
+【订单问题】
+Q：为何提示“账户存在异常，无法下单”？
+有虚假交易或恶意下单行为，系统自动封禁。
+============================================================
+Q：如何取消订单？
+商家未接单可在订单详情页取消，已接单需联系商家取消。
+============================================================
+Q：订单为何被取消？
+商家超时未接单或无法配送，如联系不上您或菜品售完。
+============================================================
+Q：如何催单？
+订单页面点击“电话催单”。
+============================================================
+Q：信息填错如何处理？
+商家未接单可取消，已接单联系商家取消再重下单。
+============================================================
+Q：如何确认订单被商家确认？
+App推送通知，订单状态实时更新；微信及触屏版需刷新订单页查看。
+============================================================
+Q：预计送达时间与实际不符？
+预计时间为系统综合计算，仅供参考，实际受天气及订单量影响。
+============================================================
+Q：无法下单原因？
+可能菜品售完、餐厅未营业等，查看系统提示。
+============================================================
+Q：下单次数限制？
+同一手机号同一设备每天最多成功提交7次订单。
+============================================================
+【其他问题】
+Q：如何投诉商家服务？
+订单完成评价后点击意见反馈或拨打客服电话400-850-7777投诉。
+============================================================
+Q：如何联系客服？
+拨打客服电话400-850-7777或在“我的”→“意见反馈”提交。
+============================================================
+Q：手机客户端无法定位？
+检查网络及定位权限，尝试户外或wifi环境定位。
+============================================================
+Q：如何修改账户信息？
+美团账号在“我的”页面修改，也可在美团网账号页面修改。
+============================================================
+Q：为何有时需要输入短信验证码？
+保障账号安全，新用户或异常行为提示输入。未收到短信可选择语音验证码。
+============================================================
+</code></pre>
+<h2 id="第三步-将文本向量化并存入向量数据库中">第三步，将文本向量化并存入向量数据库中</h2>
+<pre data-lang="python"><code>from langchain_community.embeddings import OpenAIEmbeddings
+embeddings = OpenAIEmbeddings(
+    model=&quot;text-embedding-3-small&quot;,
+    base_url=&quot;https://api.chatanywhere.tech/v1&quot;,
+    max_retries=3,
+    verbose=True
+)
+
+ # 存入向量数据库中
+import redis
+redis_url = &quot;redis://localhost:6379/0&quot;
+
+from langchain_redis import RedisConfig,RedisVectorStore
+
+redis_config = RedisConfig(index_name=&quot;meituan_questions&quot;,
+                           redis_url=redis_url)
+redis_vector = RedisVectorStore(
+    redis_config=redis_config,
+    embeddings=embeddings
+)
+redis_vector.add_documents(segments_doc)</code></pre>
+<h2 id="第四步-以上完成了索引阶段-之后就是检索增强阶段">第四步，以上完成了索引阶段，之后就是检索增强阶段</h2>
+<pre data-lang="text"><code>query = &quot;在线支付取消订单后钱怎么返还&quot;
+
+retriever = redis_vector.as_retriever()
+retriever_segments = retriever.invoke(query,k=5)
+
+retriever_segments
+
+# 以下为结果
+[Document(metadata={}, page_content=&#039;【在线支付问题】  \nQ：在线支付取消订单后钱怎么返还？  \n订单取消后，款项会在一个工作日内，直接返还到您的美团账户余额。&#039;),
+ Document(metadata={}, page_content=&#039;Q：怎么取消退款呢？  \n在订单页点击“不退款了”，商家还会正常送餐。&#039;),
+ Document(metadata={}, page_content=&#039;Q：在线支付订单如何退款？  \n商家接单前可直接取消并退款到美团余额；接单后申请退款，商家24小时内处理，处理后退款到美团余额。&#039;),
+ Document(metadata={}, page_content=&#039;Q：如何取消订单？  \n商家未接单可在订单详情页取消，已接单需联系商家取消。&#039;),
+ Document(metadata={}, page_content=&#039;Q：未付款的在线支付订单取消，是否影响活动次数？  \n不会，未支付订单取消后，您仍可享受活动优惠。&#039;)]
+</code></pre>
+<h2 id="第五步-构建提示词">第五步，构建提示词</h2>
+<pre data-lang="python"><code>from langchain.prompts import ChatPromptTemplate
+
+template = ChatPromptTemplate.from_messages([
+    &quot;user&quot;, &quot;&quot;&quot;
+    你是一个答疑机器人，请根据已有信息回答用户的问题。
+    用户问题：{question}
+    已有信息：{context}
+    如果已有信息中不包含用户问题的答案，请回答“抱歉，我无法回答这个问题。
+    请不要输出与已有信息无关的信息，请用中文回答用户问题”。
+    &quot;&quot;&quot;
+])
+
+text = []
+
+for segment in retriever_segments:
+    text.append(segment.page_content)
+template = template.invoke({&quot;context&quot;: text, &quot;question&quot;: query})
+template
+
+
+# 以下为结果
+ChatPromptValue(messages=[HumanMessage(content=&#039;user&#039;, additional_kwargs={}, response_metadata={}), HumanMessage(content=&quot;\n    你是一个答疑机器人，请根据已有信息回答用户的问题。\n    用户问题：在线支付取消订单后钱怎么返还\n    已有信息：[&#039;【在线支付问题】  \\nQ：在线支付取消订单后钱怎么返还？  \\n订单取消后，款项会在一个工作日内，直接返还到您的美团账户余额。&#039;, &#039;Q：怎么取消退款呢？  \\n在订单页点击“不退款了”，商家还会正常送餐。&#039;, &#039;Q：在线支付订单如何退款？  \\n商家接单前可直接取消并退款到美团余额；接单后申请退款，商家24小时内处理，处理后退款到美团余额。&#039;, &#039;Q：如何取消订单？  \\n商家未接单可在订单详情页取消，已接单需联系商家取消。&#039;, &#039;Q：未付款的在线支付订单取消，是否影响活动次数？  \\n不会，未支付订单取消后，您仍可享受活动优惠。&#039;]\n    如果已有信息中不包含用户问题的答案，请回答“抱歉，我无法回答这个问题。\n    请不要输出与已有信息无关的信息，请用中文回答用户问题”。\n    &quot;, additional_kwargs={}, response_metadata={})])
+</code></pre>
+<h2 id="第六步-调用大语言模型">第六步，调用大语言模型</h2>
+<pre data-lang="python"><code>from langchain_openai import ChatOpenAI
+llm = ChatOpenAI(
+    model=&quot;gpt-4.1-nano&quot;,
+    base_url=&quot;https://api.chatanywhere.tech/v1&quot;,
+    max_retries=3,
+    streaming=True,
+    verbose=True
+)
+
+result = llm.invoke(template)
+result.content
+
+# 以下为结果
+
+&#039;订单取消后，款项会在一个工作日内，直接返还到您的美团账户余额。&#039;
+</code></pre>
+<h2 id="第七步-生成链式">第七步，生成链式</h2>
+<pre data-lang="python"><code># 全流程整合
+from langchain_core.output_parsers import StrOutputParser
+
+query = &quot;在线支付订单如何退款&quot;
+
+from langchain_community.embeddings import OpenAIEmbeddings
+from config.load_key import load_key
+import os
+if not os.environ.get(&quot;OPENAI_API_KEY&quot;):
+    os.environ[&quot;OPENAI_API_KEY&quot;] = load_key(&quot;OPENAI_API_KEY&quot;)
+
+embeddings = OpenAIEmbeddings(
+    model=&quot;text-embedding-3-small&quot;,
+    base_url=&quot;https://api.chatanywhere.tech/v1&quot;
+)
+
+from langchain_redis import RedisConfig, RedisVectorStore
+redis_url = &quot;redis://localhost:6379/0&quot;
+redis_config = RedisConfig(index_name=&quot;meituan_questions&quot;,
+                           redis_url=redis_url)
+redis_vector = RedisVectorStore(
+    redis_config=redis_config,
+    embeddings=embeddings
+)
+# redis_vector.add_documents(segments_doc)
+retriever = redis_vector.as_retriever()
+docs = retriever.get_relevant_documents(query)
+print(f&quot;检索结果数量：{len(docs)}&quot;)
+
+
+from langchain_openai import ChatOpenAI
+llm = ChatOpenAI(
+    model=&quot;gpt-4.1-nano&quot;,
+    base_url=&quot;https://api.chatanywhere.tech/v1&quot;,
+    api_key = load_key(&quot;OPENAI_API_KEY&quot;)
+)
+
+from langchain_core.prompts import ChatPromptTemplate
+prompt_template = ChatPromptTemplate.from_messages([
+    &quot;user&quot;, &quot;&quot;&quot;
+    你是一个答疑机器人，请根据已有信息回答用户的问题。
+    用户问题：{question}
+    已有信息：{context}
+    如果已有信息中不包含用户问题的答案，请回答“抱歉，我无法回答这个问题。
+    请不要输出与已有信息无关的信息，请用中文回答用户问题”。
+    &quot;&quot;&quot;
+])
+
+def collect_text(segments):
+    text = []
+    for segment in segments:
+        text.append(segment.page_content)
+    return text
+
+
+
+from operator import itemgetter
+chain = ({
+    &quot;context&quot;:itemgetter(&quot;question&quot;) | retriever | collect_text,
+    &quot;question&quot;:itemgetter(&quot;question&quot;)
+    }
+    | prompt_template
+    | llm
+    | StrOutputParser()
+)
+response = chain.invoke({&quot;question&quot;: query})
+response</code></pre>
+<h2 id="rag系统质量验证笔记">RAG系统质量验证笔记</h2>
+<h3 id="一-什么是rag系统">一、什么是RAG系统</h3>
+<ul><li><strong>RAG（Retrieval-Augmented Generation）</strong>：结合检索和生成模型的系统。先从大量文本库检索相关上下文，再基于上下文生成回答。</li><li>目的是解决纯生成模型“凭空编造”问题，提高回答准确性和可信度。</li></ul>
+<hr/>
+<h3 id="二-rag关键评估指标简介">二、RAG关键评估指标简介</h3>
+<h4 id="1-召回率-recall">1. 召回率（Recall）</h4>
+<ul><li><strong>定义</strong>：系统成功检索到的相关文档占所有相关文档的比例。</li><li><strong>公式</strong>：</li></ul>
+<p>Recall = （检索到的相关文档数量 ∩ 所有相关文档数量） ÷（所有相关文档数量）</p>
+<ul><li><strong>意义</strong>：衡量系统是否遗漏重要信息。召回越高，相关内容覆盖越全面。</li></ul>
+<h4 id="2-精确率-precision">2. 精确率（Precision）</h4>
+<ul><li><strong>定义</strong>：系统检索出的文档中真正相关的比例。</li><li><strong>公式</strong>：</li></ul>
+<p>Precision = （检索到的相关文档数量 ∩ 检索出的文档数量） ÷（检索出的文档总数）</p>
+<ul><li><strong>意义</strong>：衡量系统返回结果的纯度，精确率越高，错误文档越少。</li></ul>
+<h4 id="3-f1评分">3. F1评分</h4>
+<ul><li><strong>定义</strong>：精确率和召回率的调和平均数，平衡二者关系。</li><li><strong>公式</strong>：</li></ul>
+<p>F1 = 2 × (Precision × Recall) ÷ (Precision + Recall)</p>
+<ul><li><strong>意义</strong>：综合反映系统检索的准确性和覆盖度。</li></ul>
+<hr/>
+<h3 id="三-rag系统评估步骤">三、RAG系统评估步骤</h3>
+<h4 id="1-数据准备">1. 数据准备</h4>
+<ul><li>获取包含问题和相关上下文（文档）对的数据集。</li><li>人工标注哪些文档是真正相关的“黄金标准”。</li></ul>
+<h4 id="2-检索性能评估">2. 检索性能评估</h4>
+<ul><li>根据查询，系统从文档库里检索若干相关文档。</li><li>计算召回率、精确率、F1评分。</li><li>重点关注召回率，评估系统是否能找到足够多的相关内容支持答案生成。</li></ul>
+<h4 id="3-生成性能评估">3. 生成性能评估</h4>
+<ul><li>基于检索到的上下文，生成回答文本。</li><li>通过人工打分或自动评估（如BLEU、ROUGE等）评价回答的正确性、完整性和相关性。</li><li>还可以采用基于LLM的忠实度评价（如RAGAS系统），评估生成内容是否真实基于检索上下文。</li></ul>
+<hr/>
+<h3 id="四-ragas系统简介">四、RAGAS系统简介</h3>
+<ul><li><strong>RAGAS</strong>：一个专门针对RAG系统的综合评估框架。</li><li>包含四大指标轮廓：</li><li><strong>Context Relevancy</strong>（上下文相关性）：检索出的上下文是否与查询匹配。</li><li><strong>Context Recall</strong>（上下文召回率）：检索上下文能覆盖多少查询相关信息。</li><li><strong>Faithfulness</strong>（忠实性）：回答是否忠实于检索到的上下文，避免虚构。</li><li><strong>Answer Relevancy</strong>（回答相关性）：生成的回答是否与查询主题相关。</li></ul>
+<hr/>
+<h3 id="五-示例计算">五、示例计算</h3>
+<p>假设一个查询：</p>
+<ul><li>正确相关文档总数为5</li><li>系统检索出文档8篇，其中包含4篇相关文档</li></ul>
+<p>计算：</p>
+<ul><li>召回率 = 4 / 5 = 0.8</li><li>精确率 = 4 / 8 = 0.5</li><li>F1 = 2 × (0.8 × 0.5) / (0.8 + 0.5) ≈ 0.615</li></ul>
+<hr/>
+<h3 id="六-小结">六、小结</h3>
+<ul><li><strong>召回率</strong>衡量检索到的<em><strong>全面性</strong></em>，防止遗漏重要信息。</li><li><strong>精确率</strong>衡量检索内容的<em><strong>纯度</strong></em>，避免无关文档过多。</li><li><strong>F1评分</strong>综合权衡精确率和召回率，是评估检索性能核心指标。</li><li>RAG系统除了检索效果，还必须对生成回答的<em><strong>忠实度和相关性</strong></em>进行评估，推荐结合RAGAS或基于LLM的自动评测。</li><li>评估是一个多维度过程，检索正确但生成错误、生成好但检索差，都会影响系统整体表现，需综合分析。</li></ul>
+<pre data-lang="python"><code>def calculate_metrics(retrieved_docs, relevant_docs):
+    # 计算交集：检索到的相关文档数量
+    retrieved_relevant = set(retrieved_docs) &amp; set(relevant_docs)
+    num_retrieved_relevant = len(retrieved_relevant)
+
+    # 召回率 = 检索到的相关文档数 / 所有相关文档数
+    recall = num_retrieved_relevant / len(relevant_docs) if relevant_docs else 0
+
+    # 精确率 = 检索到的相关文档数 / 检索出的文档总数
+    precision = num_retrieved_relevant / len(retrieved_docs) if retrieved_docs else 0
+
+    # F1评分 = 2 * (precision * recall) / (precision + recall)
+    if precision + recall == 0:
+        f1 = 0
+    else:
+        f1 = 2 * (precision * recall) / (precision + recall)
+
+    return precision, recall, f1
+
+
+# 测试示例
+relevant_documents = [&#039;doc1&#039;, &#039;doc2&#039;, &#039;doc3&#039;, &#039;doc4&#039;, &#039;doc5&#039;]  # 人工标注的相关文档
+retrieved_documents = [&#039;doc2&#039;, &#039;doc3&#039;, &#039;doc6&#039;, &#039;doc7&#039;, &#039;doc8&#039;, &#039;doc9&#039;, &#039;doc10&#039;, &#039;doc1&#039;]  # 系统检索出的文档
+
+precision, recall, f1 = calculate_metrics(retrieved_documents, relevant_documents)
+print(f&quot;Precision: {precision:.3f}&quot;)
+print(f&quot;Recall: {recall:.3f}&quot;)
+print(f&quot;F1 Score: {f1:.3f}&quot;)
+</code></pre>
+<h2 id="如何提升rag回答的质量">如何提升RAG回答的质量</h2>
+<p>提升RAG（Retrieval-Augmented Generation）系统回答质量，需要从多个维度综合优化，以下详细说明各个关键点：</p>
+<hr/>
+<h3 id="1-检索知识库质量提升">1. 检索知识库质量提升</h3>
+<ul><li><strong>高质量文档内容</strong></li><li><strong>知识库的完整性与更新</strong></li><li><strong>向量嵌入模型选择与微调</strong></li><li><strong>检索策略与参数调整</strong></li></ul>
+<hr/>
+<h3 id="2-prompt设计与上下文管理">2. Prompt设计与上下文管理</h3>
+<ul><li><strong>结构化上下文输入</strong></li><li><strong>明确生成指令</strong></li><li><strong>动态Prompt优化</strong></li></ul>
+<hr/>
+<h3 id="3-生成模型调优">3. 生成模型调优</h3>
+<ul><li><strong>模型选择</strong></li><li><strong>微调与参数设置</strong></li><li><strong>多样本和多轮生成</strong></li></ul>
+<hr/>
+<h3 id="4-多轮交互与用户反馈">4. 多轮交互与用户反馈</h3>
+<ul><li><strong>用户反馈收集</strong></li><li><strong>对话上下文延续</strong></li><li><strong>主动澄清与纠正</strong></li></ul>
+<hr/>
+<h3 id="5-评估与监控">5. 评估与监控</h3>
+<ul><li><strong>多维评估指标</strong></li><li><strong>自动与人工评估结合</strong></li><li><strong>数据分析与监控仪表盘</strong></li></ul>
+<hr/>
+<h3 id="6-系统与架构优化">6. 系统与架构优化</h3>
+<ul><li><strong>知识库增量更新</strong></li><li><strong>多模态支持</strong></li><li><strong>分层检索与融合</strong></li><li><strong>缓存与负载均衡</strong></li></ul>
+<hr/>
+<h3 id="7-先进技术应用">7. 先进技术应用</h3>
+<ul><li><strong>事实校验（Fact-checking）模块</strong></li><li><strong>排名优化（Ranking APIs）</strong></li><li><strong>自我反思与增强（Self-RAG）</strong></li></ul>
+<hr/>
+<h2 id="总结">总结</h2>
+<p>提升RAG回答质量是一个综合工程，需要围绕知识库、检索、生成、交互和评估多方面协同优化。通过高质量知识库构建、精准检索、有效Prompt设计、合适模型调优、持续反馈迭代和系统架构保障，打造既准确又可信的智能问答系统。</p>
+        </div>
+      </article>
+
+      <aside class="article-side">
+        <div class="side-panel reveal">
+          <p class="side-panel-title">标签</p>
+          <div class="tag-list"><a class="tag-pill" href="../../posts.html?tag=LangChain">LangChain</a><a class="tag-pill" href="../../posts.html?tag=RAG">RAG</a><a class="tag-pill" href="../../posts.html?tag=%E5%90%91%E9%87%8F%E6%A3%80%E7%B4%A2">向量检索</a></div>
+        </div>
+      </aside>
+
+      <footer class="article-footer reveal">
+        <a class="button" href="../../posts.html">返回文章列表</a>
+        <button class="button" type="button" data-share="https://begc.github.io/posts/langchain-02-rag-practice/">复制链接</button>
+      </footer>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <span>© 2026 RuiJie Notes</span>
+      <div class="footer-links">
+        <a href="../../index.html">首页</a>
+        <a href="../../posts.html">文章</a>
+        <a href="../../tags.html">专题</a>
+      </div>
+    </div>
+  </footer>
+  <div class="toast" id="toast" role="status"></div>
+  <script src="../../assets/js/site.js?v=20260711-4"></script>
+</body>
+</html>

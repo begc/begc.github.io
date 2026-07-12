@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="description" content="记录一个由 supervisor 分发任务、多个 Agent 协作处理的智能体结构。"/>
+  <meta name="author" content="begc"/>
+  <meta name="robots" content="index,follow,max-image-preview:large"/>
+  <link rel="canonical" href="https://begc.github.io/posts/langgraph-06-multi-agent/"/>
+  <meta property="og:type" content="article"/>
+  <meta property="og:site_name" content="RuiJie Notes"/>
+  <meta property="og:title" content="LangGraph 第六课：构建多 Agent 智能体"/>
+  <meta property="og:description" content="记录一个由 supervisor 分发任务、多个 Agent 协作处理的智能体结构。"/>
+  <meta property="og:url" content="https://begc.github.io/posts/langgraph-06-multi-agent/"/>
+  <meta property="og:image" content="https://begc.github.io/assets/img/posts/langgraph-06-multi-agent/image_2o.png"/>
+  <meta property="article:published_time" content="2026-07-11"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="LangGraph 第六课：构建多 Agent 智能体"/>
+  <meta name="twitter:description" content="记录一个由 supervisor 分发任务、多个 Agent 协作处理的智能体结构。"/>
+  <meta name="twitter:image" content="https://begc.github.io/assets/img/posts/langgraph-06-multi-agent/image_2o.png"/>
+  <title>LangGraph 第六课：构建多 Agent 智能体 · RuiJie Notes</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin/>
+  <link rel="stylesheet" href="../../assets/css/site.css?v=20260711-4"/>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"LangGraph 第六课：构建多 Agent 智能体","description":"记录一个由 supervisor 分发任务、多个 Agent 协作处理的智能体结构。","datePublished":"2026-07-11","dateModified":"2026-07-11","author":{"@type":"Person","name":"begc"},"publisher":{"@type":"Person","name":"begc"},"mainEntityOfPage":"https://begc.github.io/posts/langgraph-06-multi-agent/","image":"https://begc.github.io/assets/img/posts/langgraph-06-multi-agent/image_2o.png"}</script>
+</head>
+<body data-page="post">
+  <a class="skip-link" href="#main">跳到正文</a>
+  <div class="read-progress" aria-hidden="true"></div>
+  <nav class="site-nav" aria-label="主导航">
+    <div class="nav-inner">
+      <a class="brand" href="../../index.html" aria-label="RuiJie Notes 首页">
+        <span class="brand-mark">bg</span>
+        <span class="brand-text">
+          <span class="brand-name">RuiJie Notes</span>
+          <span class="brand-sub">Big Data · Linux · Source</span>
+        </span>
+      </a>
+      <button class="icon-button nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-label="打开菜单"><i data-lucide="menu"></i></button>
+      <div class="nav-panel">
+        <div class="nav-links">
+          <a class="nav-link" data-page="home" href="../../index.html">首页</a>
+          <a class="nav-link" data-page="posts" href="../../posts.html">文章</a>
+          <a class="nav-link" data-page="tags" href="../../tags.html">专题</a>
+          <a class="nav-link" data-page="about" href="../../about.html">关于</a>
+        </div>
+        <div class="nav-actions">
+          <a class="icon-link" href="https://github.com/begc" target="_blank" rel="noopener" aria-label="GitHub"><i data-lucide="github"></i></a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="page-main" id="main">
+    <div class="detail-shell">
+      <aside class="toc-wrap">
+        <span class="toc-label">目录</span>
+        <nav class="toc" id="toc" aria-label="文章目录"><a class="depth-2" href="#通过langgraph构建智能体">通过LangGraph构建智能体</a></nav>
+      </aside>
+
+      <article class="article">
+        <header class="article-header reveal">
+          <span class="eyebrow">LangGraph · Multi-Agent</span>
+          <h1 class="article-title">LangGraph 第六课：构建多 Agent 智能体</h1>
+          <p class="article-description">记录一个由 supervisor 分发任务、多个 Agent 协作处理的智能体结构。</p>
+          <div class="post-meta-line">
+            <span>begc</span>
+            <span class="dot"></span>
+            <span>2026.07.11</span>
+            <span class="dot"></span>
+            <span>1 min read</span>
+            <span class="dot"></span>
+            <span>大模型学习</span>
+          </div>
+          <figure class="article-cover">
+            <img src="../../assets/img/posts/langgraph-06-multi-agent/image_2o.png" alt="LangGraph 第六课：构建多 Agent 智能体" loading="eager" decoding="async"/>
+          </figure>
+        </header>
+
+        <div class="markdown-body article-body reveal">
+<h2 id="通过langgraph构建智能体">通过LangGraph构建智能体</h2>
+<ul><li>这个机器人可以通过一个supervisor节点，对用户的输入进行分类，然后根据分类结果，选择不同Agent节点进行处理。</li><li>接下来每个Agent节点，都可以选择不同的工具进行处理，最后将处理结果汇总，返回给supervisor节点。</li><li>supervisor节点再将结果返回给用户。</li></ul>
+<p><img src="../../assets/img/posts/langgraph-06-multi-agent/image_2o.png" alt="文章配图" loading="lazy" decoding="async"/></p>
+        </div>
+      </article>
+
+      <aside class="article-side">
+        <div class="side-panel reveal">
+          <p class="side-panel-title">标签</p>
+          <div class="tag-list"><a class="tag-pill" href="../../posts.html?tag=LangGraph">LangGraph</a><a class="tag-pill" href="../../posts.html?tag=Multi-Agent">Multi-Agent</a><a class="tag-pill" href="../../posts.html?tag=%E6%99%BA%E8%83%BD%E4%BD%93">智能体</a></div>
+        </div>
+      </aside>
+
+      <footer class="article-footer reveal">
+        <a class="button" href="../../posts.html">返回文章列表</a>
+        <button class="button" type="button" data-share="https://begc.github.io/posts/langgraph-06-multi-agent/">复制链接</button>
+      </footer>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <span>© 2026 RuiJie Notes</span>
+      <div class="footer-links">
+        <a href="../../index.html">首页</a>
+        <a href="../../posts.html">文章</a>
+        <a href="../../tags.html">专题</a>
+      </div>
+    </div>
+  </footer>
+  <div class="toast" id="toast" role="status"></div>
+  <script src="../../assets/js/site.js?v=20260711-4"></script>
+</body>
+</html>

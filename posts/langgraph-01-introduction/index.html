@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="description" content="从 State、Node 和 Edge 开始，记录我第一次搭建 LangGraph 工作流的过程。"/>
+  <meta name="author" content="begc"/>
+  <meta name="robots" content="index,follow,max-image-preview:large"/>
+  <link rel="canonical" href="https://begc.github.io/posts/langgraph-01-introduction/"/>
+  <meta property="og:type" content="article"/>
+  <meta property="og:site_name" content="RuiJie Notes"/>
+  <meta property="og:title" content="LangGraph 第一课：初识 LangGraph"/>
+  <meta property="og:description" content="从 State、Node 和 Edge 开始，记录我第一次搭建 LangGraph 工作流的过程。"/>
+  <meta property="og:url" content="https://begc.github.io/posts/langgraph-01-introduction/"/>
+  <meta property="og:image" content="https://images.unsplash.com/photo-1493246507139-91e8fad9978e?auto=format&amp;fit=crop&amp;w=1200&amp;q=80"/>
+  <meta property="article:published_time" content="2026-05-21"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="LangGraph 第一课：初识 LangGraph"/>
+  <meta name="twitter:description" content="从 State、Node 和 Edge 开始，记录我第一次搭建 LangGraph 工作流的过程。"/>
+  <meta name="twitter:image" content="https://images.unsplash.com/photo-1493246507139-91e8fad9978e?auto=format&amp;fit=crop&amp;w=1200&amp;q=80"/>
+  <title>LangGraph 第一课：初识 LangGraph · RuiJie Notes</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin/>
+  <link rel="stylesheet" href="../../assets/css/site.css?v=20260711-4"/>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"LangGraph 第一课：初识 LangGraph","description":"从 State、Node 和 Edge 开始，记录我第一次搭建 LangGraph 工作流的过程。","datePublished":"2026-05-21","dateModified":"2026-05-21","author":{"@type":"Person","name":"begc"},"publisher":{"@type":"Person","name":"begc"},"mainEntityOfPage":"https://begc.github.io/posts/langgraph-01-introduction/","image":"https://images.unsplash.com/photo-1493246507139-91e8fad9978e?auto=format&fit=crop&w=1200&q=80"}</script>
+</head>
+<body data-page="post">
+  <a class="skip-link" href="#main">跳到正文</a>
+  <div class="read-progress" aria-hidden="true"></div>
+  <nav class="site-nav" aria-label="主导航">
+    <div class="nav-inner">
+      <a class="brand" href="../../index.html" aria-label="RuiJie Notes 首页">
+        <span class="brand-mark">bg</span>
+        <span class="brand-text">
+          <span class="brand-name">RuiJie Notes</span>
+          <span class="brand-sub">Big Data · Linux · Source</span>
+        </span>
+      </a>
+      <button class="icon-button nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-label="打开菜单"><i data-lucide="menu"></i></button>
+      <div class="nav-panel">
+        <div class="nav-links">
+          <a class="nav-link" data-page="home" href="../../index.html">首页</a>
+          <a class="nav-link" data-page="posts" href="../../posts.html">文章</a>
+          <a class="nav-link" data-page="tags" href="../../tags.html">专题</a>
+          <a class="nav-link" data-page="about" href="../../about.html">关于</a>
+        </div>
+        <div class="nav-actions">
+          <a class="icon-link" href="https://github.com/begc" target="_blank" rel="noopener" aria-label="GitHub"><i data-lucide="github"></i></a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="page-main" id="main">
+    <div class="detail-shell">
+      <aside class="toc-wrap">
+        <span class="toc-label">目录</span>
+        <nav class="toc" id="toc" aria-label="文章目录"><a class="depth-2" href="#1-初步认识langgraph">1、初步认识LangGraph</a><a class="depth-3" href="#langchain利用model">Langchain利用model</a><a class="depth-3" href="#langgraph生成model">LangGraph生成model</a><a class="depth-3" href="#langgraph调用工具">LangGraph调用工具</a><a class="depth-3" href="#langgraph通过chatopenai调用">LangGraph通过ChatOpenAI调用</a><a class="depth-3" href="#langgraph工具调用">LangGraph工具调用</a></nav>
+      </aside>
+
+      <article class="article">
+        <header class="article-header reveal">
+          <span class="eyebrow">LangGraph · 工作流</span>
+          <h1 class="article-title">LangGraph 第一课：初识 LangGraph</h1>
+          <p class="article-description">从 State、Node 和 Edge 开始，记录我第一次搭建 LangGraph 工作流的过程。</p>
+          <div class="post-meta-line">
+            <span>begc</span>
+            <span class="dot"></span>
+            <span>2026.05.21</span>
+            <span class="dot"></span>
+            <span>1 min read</span>
+            <span class="dot"></span>
+            <span>大模型学习</span>
+          </div>
+          <figure class="article-cover">
+            <img src="https://images.unsplash.com/photo-1493246507139-91e8fad9978e?auto=format&amp;fit=crop&amp;w=1200&amp;q=80" alt="LangGraph 第一课：初识 LangGraph" loading="eager" decoding="async"/>
+          </figure>
+        </header>
+
+        <div class="markdown-body article-body reveal">
+<p>langraph学习</p>
+<h2 id="1-初步认识langgraph">1、初步认识LangGraph</h2>
+<h3 id="langchain利用model">Langchain利用model</h3>
+<pre data-lang="python"><code># 将OpenAI的key拿到
+import os
+from config.load_key import load_key
+
+if not os.environ.get(&quot;OPENAI_API_KEY&quot;):
+    os.environ[&quot;OPENAI_API_KEY&quot;] = load_key(&quot;OPENAI_API_KEY&quot;)
+from langchain.chat_models import init_chat_model
+
+model = init_chat_model(&quot;gpt-3.5-turbo-ca&quot;, model_provider=&quot;openai&quot;, base_url=&quot;https://api.chatanywhere.tech/v1&quot;)
+model.invoke(&quot;你是谁？你能帮我解决什么问题？&quot;)</code></pre>
+<h3 id="langgraph生成model">LangGraph生成model</h3>
+<pre data-lang="python"><code>from langgraph.prebuilt import create_react_agent
+
+agent = create_react_agent(
+    model=model,
+    tools = [],
+    prompt = &quot;You are a helpful assistant.&quot;)
+agent.invoke({&quot;message&quot;: [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;你是谁？你能帮我解决什么问题？&quot;}]})</code></pre>
+<h3 id="langgraph调用工具">LangGraph调用工具</h3>
+<pre data-lang="python"><code>from langchain.tools import tool
+@tool
+def get_current_time():
+    &quot;&quot;&quot;获取当前时间&quot;&quot;&quot;
+    from datetime import datetime
+    return datetime.today().strftime(&quot;%Y-%m-%d %H:%M:%S&quot;)
+
+agent = create_react_agent(
+    model=model,
+    tools=[get_current_time],
+    prompt=&quot;You are a helpful assistant.&quot;
+)
+
+response = agent.invoke({&quot;message&quot;: [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;现在几点了？&quot;}]})
+print(response)
+</code></pre>
+<h3 id="langgraph通过chatopenai调用">LangGraph通过ChatOpenAI调用</h3>
+<pre data-lang="python"><code>from langchain_community.chat_models import ChatOpenAI
+
+llm = ChatOpenAI(
+    model=&quot;gpt-3.5-turbo-ca&quot;,
+    base_url=&quot;https://api.chatanywhere.tech/v1&quot;
+)
+result = llm.invoke(&quot;你是谁？你能帮我解决什么问题？&quot;)
+print(result)
+
+
+agent = create_react_agent(
+    model=llm,
+    tools=[],
+    prompt=&quot;You are a helpful assistant.&quot;
+)
+agent.invoke({&quot;message&quot;: [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;你是谁？你能帮我解决什么问题？&quot;}]})
+
+
+for chunk in agent.stream({&quot;message&quot;: [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;你是谁？你能帮我解决什么问题？&quot;}]},
+                          stream_mode=&quot;messages&quot;
+                          ):
+    print(chunk)
+    print(&quot;\n&quot;)
+
+(AIMessageChunk(content=&#039;&#039;, additional_kwargs={}, response_metadata={}, id=&#039;run--6153b8f7-d26f-4b99-89e3-7054aebff14b&#039;), {&#039;langgraph_step&#039;: 1, &#039;langgraph_node&#039;: &#039;agent&#039;, &#039;langgraph_triggers&#039;: (&#039;branch:to:agent&#039;,), &#039;langgraph_path&#039;: (&#039;__pregel_pull&#039;, &#039;agent&#039;), &#039;langgraph_checkpoint_ns&#039;: &#039;agent:79181662-b465-3ef4-0cbc-c562e79a4b22&#039;, &#039;checkpoint_ns&#039;: &#039;agent:79181662-b465-3ef4-0cbc-c562e79a4b22&#039;, &#039;ls_provider&#039;: &#039;openai&#039;, &#039;ls_model_type&#039;: &#039;chat&#039;, &#039;ls_model_name&#039;: &#039;gpt-3.5-turbo-ca&#039;, &#039;ls_temperature&#039;: 0.7})
+
+
+(AIMessageChunk(content=&#039;Hello&#039;, additional_kwargs={}, response_metadata={}, id=&#039;run--6153b8f7-d26f-4b99-89e3-7054aebff14b&#039;), {&#039;langgraph_step&#039;: 1, &#039;langgraph_node&#039;: &#039;agent&#039;, &#039;langgraph_triggers&#039;: (&#039;branch:to:agent&#039;,), &#039;langgraph_path&#039;: (&#039;__pregel_pull&#039;, &#039;agent&#039;), &#039;langgraph_checkpoint_ns&#039;: &#039;agent:79181662-b465-3ef4-0cbc-c562e79a4b22&#039;, &#039;checkpoint_ns&#039;: &#039;agent:79181662-b465-3ef4-0cbc-c562e79a4b22&#039;, &#039;ls_provider&#039;: &#039;openai&#039;, &#039;ls_model_type&#039;: &#039;chat&#039;, &#039;ls_model_name&#039;: &#039;gpt-3.5-turbo-ca&#039;, &#039;ls_temperature&#039;: 0.7})
+
+
+(AIMessageChunk(content=&#039;!&#039;, additional_kwargs={}, response_metadata={}, id=&#039;run--6153b8f7-d26f-4b99-89e3-7054aebff14b&#039;), {&#039;langgraph_step&#039;: 1, &#039;langgraph_node&#039;: &#039;agent&#039;, &#039;langgraph_triggers&#039;: (&#039;branch:to:agent&#039;,), &#039;langgraph_path&#039;: (&#039;__pregel_pull&#039;, &#039;agent&#039;), &#039;langgraph_checkpoint_ns&#039;: &#039;agent:79181662-b465-3ef4-0cbc-c562e79a4b22&#039;, &#039;checkpoint_ns&#039;: &#039;agent:79181662-b465-3ef4-0cbc-c562e79a4b22&#039;, &#039;ls_provider&#039;: &#039;openai&#039;, &#039;ls_model_type&#039;: &#039;chat&#039;, &#039;ls_model_name&#039;: &#039;gpt-3.5-turbo-ca&#039;, &#039;ls_temperature&#039;: 0.7})
+
+
+(AIMessageChunk(content=&#039; How&#039;, additional_kwargs={}, response_metadata={}, id=&#039;run--6153b8f7-d26f-4b99-89e3-7054aebff14b&#039;), {&#039;langgraph_step&#039;: 1, &#039;langgraph_node&#039;: &#039;agent&#039;, &#039;langgraph_triggers&#039;: (&#039;branch:to:agent&#039;,), &#039;langgraph_path&#039;: (&#039;__pregel_pull&#039;, &#039;agent&#039;), &#039;langgraph_checkpoint_ns&#039;: &#039;agent:79181662-b465-3ef4-0cbc-c562e79a4b22&#039;, &#039;checkpoint_ns&#039;: &#039;agent:79181662-b465-3ef4-0cbc-c562e79a4b22&#039;, &#039;ls_provider&#039;: &#039;openai&#039;, &#039;ls_model_type&#039;: &#039;chat&#039;, &#039;ls_model_name&#039;: &#039;gpt-3.5-turbo-ca&#039;, &#039;ls_temperature&#039;: 0.7})
+
+
+(AIMessageChunk(content=&#039; can&#039;, additional_kwargs={}, response_metadata={}, id=&#039;run--6153b8f7-d26f-4b99-89e3-7054aebff14b&#039;), {&#039;langgraph_step&#039;: 1, &#039;langgraph_node&#039;: &#039;agent&#039;, &#039;langgraph_triggers&#039;: (&#039;branch:to:agent&#039;,), &#039;langgraph_path&#039;: (&#039;__pregel_pull&#039;, &#039;agent&#039;), &#039;langgraph_checkpoint_ns&#039;: &#039;agent:79181662-b465-3ef4-0cbc-c562e79a4b22&#039;, &#039;checkpoint_ns&#039;: &#039;agent:79181662-b465-3ef4-0cbc-c562e79a4b22&#039;, &#039;ls_provider&#039;: &#039;openai&#039;, &#039;ls_model_type&#039;: &#039;chat&#039;, &#039;ls_model_name&#039;: &#039;gpt-3.5-turbo-ca&#039;, &#039;ls_temperature&#039;: 0.7})
+
+
+(AIMessageChunk(content=&#039; I&#039;, additional_kwargs={}, response_metadata={}, id=&#039;run--6153b8f7-d26f-4b99-89e3-7054aebff14b&#039;), {&#039;langgraph_step&#039;: 1, &#039;langgraph_node&#039;: &#039;agent&#039;, &#039;langgraph_triggers&#039;: (&#039;branch:to:agent&#039;,), &#039;langgraph_path&#039;: (&#039;__pregel_pull&#039;, &#039;agent&#039;), &#039;langgraph_checkpoint_ns&#039;: &#039;agent:79181662-b465-3ef4-0cbc-c562e79a4b22&#039;, &#039;checkpoint_ns&#039;: &#039;agent:79181662-b465-3ef4-0cbc-c562e79a4b22&#039;, &#039;ls_provider&#039;: &#039;openai&#039;, &#039;ls_model_type&#039;: &#039;chat&#039;, &#039;ls_model_name&#039;: &#039;gpt-3.5-turbo-ca&#039;, &#039;ls_temperature&#039;: 0.7})
+
+
+(AIMessageChunk(content=&#039; assist&#039;, additional_kwargs={}, response_metadata={}, id=&#039;run--6153b8f7-d26f-4b99-89e3-7054aebff14b&#039;), {&#039;langgraph_step&#039;: 1, &#039;langgraph_node&#039;: &#039;agent&#039;, &#039;langgraph_triggers&#039;: (&#039;branch:to:agent&#039;,), &#039;langgraph_path&#039;: (&#039;__pregel_pull&#039;, &#039;agent&#039;), &#039;langgraph_checkpoint_ns&#039;: &#039;agent:79181662-b465-3ef4-0cbc-c562e79a4b22&#039;, &#039;checkpoint_ns&#039;: &#039;agent:79181662-b465-3ef4-0cbc-c562e79a4b22&#039;, &#039;ls_provider&#039;: &#039;openai&#039;, &#039;ls_model_type&#039;: &#039;chat&#039;, &#039;ls_model_name&#039;: &#039;gpt-3.5-turbo-ca&#039;, &#039;ls_temperature&#039;: 0.7})
+
+
+(AIMessageChunk(content=&#039; you&#039;, additional_kwargs={}, response_metadata={}, id=&#039;run--6153b8f7-d26f-4b99-89e3-7054aebff14b&#039;), {&#039;langgraph_step&#039;: 1, &#039;langgraph_node&#039;: &#039;agent&#039;, &#039;langgraph_triggers&#039;: (&#039;branch:to:agent&#039;,), &#039;langgraph_path&#039;: (&#039;__pregel_pull&#039;, &#039;agent&#039;), &#039;langgraph_checkpoint_ns&#039;: &#039;agent:79181662-b465-3ef4-0cbc-c562e79a4b22&#039;, &#039;checkpoint_ns&#039;: &#039;agent:79181662-b465-3ef4-0cbc-c562e79a4b22&#039;, &#039;ls_provider&#039;: &#039;openai&#039;, &#039;ls_model_type&#039;: &#039;chat&#039;, &#039;ls_model_name&#039;: &#039;gpt-3.5-turbo-ca&#039;, &#039;ls_temperature&#039;: 0.7})
+
+
+(AIMessageChunk(content=&#039; today&#039;, additional_kwargs={}, response_metadata={}, id=&#039;run--6153b8f7-d26f-4b99-89e3-7054aebff14b&#039;), {&#039;langgraph_step&#039;: 1, &#039;langgraph_node&#039;: &#039;agent&#039;, &#039;langgraph_triggers&#039;: (&#039;branch:to:agent&#039;,), &#039;langgraph_path&#039;: (&#039;__pregel_pull&#039;, &#039;agent&#039;), &#039;langgraph_checkpoint_ns&#039;: &#039;agent:79181662-b465-3ef4-0cbc-c562e79a4b22&#039;, &#039;checkpoint_ns&#039;: &#039;agent:79181662-b465-3ef4-0cbc-c562e79a4b22&#039;, &#039;ls_provider&#039;: &#039;openai&#039;, &#039;ls_model_type&#039;: &#039;chat&#039;, &#039;ls_model_name&#039;: &#039;gpt-3.5-turbo-ca&#039;, &#039;ls_temperature&#039;: 0.7})
+
+
+(AIMessageChunk(content=&#039;?&#039;, additional_kwargs={}, response_metadata={}, id=&#039;run--6153b8f7-d26f-4b99-89e3-7054aebff14b&#039;), {&#039;langgraph_step&#039;: 1, &#039;langgraph_node&#039;: &#039;agent&#039;, &#039;langgraph_triggers&#039;: (&#039;branch:to:agent&#039;,), &#039;langgraph_path&#039;: (&#039;__pregel_pull&#039;, &#039;agent&#039;), &#039;langgraph_checkpoint_ns&#039;: &#039;agent:79181662-b465-3ef4-0cbc-c562e79a4b22&#039;, &#039;checkpoint_ns&#039;: &#039;agent:79181662-b465-3ef4-0cbc-c562e79a4b22&#039;, &#039;ls_provider&#039;: &#039;openai&#039;, &#039;ls_model_type&#039;: &#039;chat&#039;, &#039;ls_model_name&#039;: &#039;gpt-3.5-turbo-ca&#039;, &#039;ls_temperature&#039;: 0.7})
+
+
+(AIMessageChunk(content=&#039;&#039;, additional_kwargs={}, response_metadata={&#039;finish_reason&#039;: &#039;stop&#039;}, id=&#039;run--6153b8f7-d26f-4b99-89e3-7054aebff14b&#039;), {&#039;langgraph_step&#039;: 1, &#039;langgraph_node&#039;: &#039;agent&#039;, &#039;langgraph_triggers&#039;: (&#039;branch:to:agent&#039;,), &#039;langgraph_path&#039;: (&#039;__pregel_pull&#039;, &#039;agent&#039;), &#039;langgraph_checkpoint_ns&#039;: &#039;agent:79181662-b465-3ef4-0cbc-c562e79a4b22&#039;, &#039;checkpoint_ns&#039;: &#039;agent:79181662-b465-3ef4-0cbc-c562e79a4b22&#039;, &#039;ls_provider&#039;: &#039;openai&#039;, &#039;ls_model_type&#039;: &#039;chat&#039;, &#039;ls_model_name&#039;: &#039;gpt-3.5-turbo-ca&#039;, &#039;ls_temperature&#039;: 0.7})
+</code></pre>
+<blockquote><p>注意这里的stream_mode一共有三种模式</p></blockquote>
+<p>updates：流式输出每个工具调用的每个步骤 messages：流式输出大语言模型回复的token values：一次性拿到所有的chunk，默认形式 custom：自定义输出，在工具内部使用get_stream_writer获取输入流，添加自定义的内容</p>
+<h3 id="langgraph工具调用">LangGraph工具调用</h3>
+<ol><li>客户端定义工具类，实现工具的功能</li><li>客户端请求大语言模型，带上问题及工具描述</li><li>大语言模型综合判断问题，并决定是否调用工具</li><li>如果大语言模型判断需要使用工具，就会向客户端返回一个带有tool_calls工具调用信息的AiMessage</li><li>客户端根据工具调用信息，调用工具，并将结果返回给语言大模型</li><li>大语言模型根据工具调用的结果，生成最终的回答</li></ol>
+        </div>
+      </article>
+
+      <aside class="article-side">
+        <div class="side-panel reveal">
+          <p class="side-panel-title">标签</p>
+          <div class="tag-list"><a class="tag-pill" href="../../posts.html?tag=LangGraph">LangGraph</a><a class="tag-pill" href="../../posts.html?tag=%E5%B7%A5%E4%BD%9C%E6%B5%81">工作流</a><a class="tag-pill" href="../../posts.html?tag=%E5%A4%A7%E6%A8%A1%E5%9E%8B">大模型</a></div>
+        </div>
+      </aside>
+
+      <footer class="article-footer reveal">
+        <a class="button" href="../../posts.html">返回文章列表</a>
+        <button class="button" type="button" data-share="https://begc.github.io/posts/langgraph-01-introduction/">复制链接</button>
+      </footer>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <span>© 2026 RuiJie Notes</span>
+      <div class="footer-links">
+        <a href="../../index.html">首页</a>
+        <a href="../../posts.html">文章</a>
+        <a href="../../tags.html">专题</a>
+      </div>
+    </div>
+  </footer>
+  <div class="toast" id="toast" role="status"></div>
+  <script src="../../assets/js/site.js?v=20260711-4"></script>
+</body>
+</html>

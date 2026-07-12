@@ -277,7 +277,9 @@ function renderPostPage(post, markdown) {
   const description = post.description || "begc.github.io 技术文章";
   const title = post.title + " · " + siteName;
   const url = postUrl(post);
-  const image = post.cover || absoluteUrl("assets/img/article-image-unavailable.svg");
+  const cover = post.cover || "assets/img/article-image-unavailable.svg";
+  const image = /^https?:\/\//.test(cover) ? cover : absoluteUrl(cover);
+  const coverSrc = stableImageSrc(cover, depth);
   const articleHtml = simpleMarkdown(stripDuplicateTitle(stripFrontmatter(markdown), post.title), depth);
   const tocHtml = renderToc(articleHtml);
   const jsonLd = {
@@ -367,7 +369,7 @@ function renderPostPage(post, markdown) {
             <span>${escapeHtml(post.category)}</span>
           </div>
           <figure class="article-cover">
-            <img src="${escapeAttr(image)}" alt="${escapeAttr(post.title)}" loading="eager" decoding="async"/>
+            <img src="${escapeAttr(coverSrc)}" alt="${escapeAttr(post.title)}" loading="eager" decoding="async"/>
           </figure>
         </header>
 

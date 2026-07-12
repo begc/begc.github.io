@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <meta name="description" content="整理 LangGraph 的短期记忆、长期存储、消息裁剪和人工干预。"/>
+  <meta name="author" content="begc"/>
+  <meta name="robots" content="index,follow,max-image-preview:large"/>
+  <link rel="canonical" href="https://begc.github.io/posts/langgraph-02-memory/"/>
+  <meta property="og:type" content="article"/>
+  <meta property="og:site_name" content="RuiJie Notes"/>
+  <meta property="og:title" content="LangGraph 第二课：保存历史记录"/>
+  <meta property="og:description" content="整理 LangGraph 的短期记忆、长期存储、消息裁剪和人工干预。"/>
+  <meta property="og:url" content="https://begc.github.io/posts/langgraph-02-memory/"/>
+  <meta property="og:image" content="https://begc.github.io/assets/img/posts/langgraph-02-memory/short-vs-long.png"/>
+  <meta property="article:published_time" content="2026-06-01"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="LangGraph 第二课：保存历史记录"/>
+  <meta name="twitter:description" content="整理 LangGraph 的短期记忆、长期存储、消息裁剪和人工干预。"/>
+  <meta name="twitter:image" content="https://begc.github.io/assets/img/posts/langgraph-02-memory/short-vs-long.png"/>
+  <title>LangGraph 第二课：保存历史记录 · RuiJie Notes</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin/>
+  <link rel="stylesheet" href="../../assets/css/site.css?v=20260711-4"/>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"LangGraph 第二课：保存历史记录","description":"整理 LangGraph 的短期记忆、长期存储、消息裁剪和人工干预。","datePublished":"2026-06-01","dateModified":"2026-06-01","author":{"@type":"Person","name":"begc"},"publisher":{"@type":"Person","name":"begc"},"mainEntityOfPage":"https://begc.github.io/posts/langgraph-02-memory/","image":"https://begc.github.io/assets/img/posts/langgraph-02-memory/short-vs-long.png"}</script>
+</head>
+<body data-page="post">
+  <a class="skip-link" href="#main">跳到正文</a>
+  <div class="read-progress" aria-hidden="true"></div>
+  <nav class="site-nav" aria-label="主导航">
+    <div class="nav-inner">
+      <a class="brand" href="../../index.html" aria-label="RuiJie Notes 首页">
+        <span class="brand-mark">bg</span>
+        <span class="brand-text">
+          <span class="brand-name">RuiJie Notes</span>
+          <span class="brand-sub">Big Data · Linux · Source</span>
+        </span>
+      </a>
+      <button class="icon-button nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-label="打开菜单"><i data-lucide="menu"></i></button>
+      <div class="nav-panel">
+        <div class="nav-links">
+          <a class="nav-link" data-page="home" href="../../index.html">首页</a>
+          <a class="nav-link" data-page="posts" href="../../posts.html">文章</a>
+          <a class="nav-link" data-page="tags" href="../../tags.html">专题</a>
+          <a class="nav-link" data-page="about" href="../../about.html">关于</a>
+        </div>
+        <div class="nav-actions">
+          <a class="icon-link" href="https://github.com/begc" target="_blank" rel="noopener" aria-label="GitHub"><i data-lucide="github"></i></a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="page-main" id="main">
+    <div class="detail-shell">
+      <aside class="toc-wrap">
+        <span class="toc-label">目录</span>
+        <nav class="toc" id="toc" aria-label="文章目录"><a class="depth-2" href="#通过agent保存历史记录">通过Agent保存历史记录</a><a class="depth-3" href="#langchain中-通过chatmessagehistory保存每一轮的信息-调用大模型时-作为参数输入">Langchain中，通过ChatMessageHistory保存每一轮的信息，调用大模型时，作为参数输入</a><a class="depth-3" href="#langgraph中-agent封装了消息记录的流程">LangGraph中，Agent封装了消息记录的流程</a><a class="depth-3" href="#短期记忆">短期记忆</a><a class="depth-2" href="#历史记录消息处理策略">历史记录消息处理策略</a><a class="depth-4" href="#保存长期记忆">保存长期记忆</a><a class="depth-3" href="#human-in-the-look-人类干预监督">human-in-the-look，人类干预监督</a></nav>
+      </aside>
+
+      <article class="article">
+        <header class="article-header reveal">
+          <span class="eyebrow">LangGraph · Memory</span>
+          <h1 class="article-title">LangGraph 第二课：保存历史记录</h1>
+          <p class="article-description">整理 LangGraph 的短期记忆、长期存储、消息裁剪和人工干预。</p>
+          <div class="post-meta-line">
+            <span>begc</span>
+            <span class="dot"></span>
+            <span>2026.06.01</span>
+            <span class="dot"></span>
+            <span>3 min read</span>
+            <span class="dot"></span>
+            <span>大模型学习</span>
+          </div>
+          <figure class="article-cover">
+            <img src="../../assets/img/posts/langgraph-02-memory/short-vs-long.png" alt="LangGraph 第二课：保存历史记录" loading="eager" decoding="async"/>
+          </figure>
+        </header>
+
+        <div class="markdown-body article-body reveal">
+<h2 id="通过agent保存历史记录">通过Agent保存历史记录</h2>
+<h3 id="langchain中-通过chatmessagehistory保存每一轮的信息-调用大模型时-作为参数输入">Langchain中，通过ChatMessageHistory保存每一轮的信息，调用大模型时，作为参数输入</h3>
+<h3 id="langgraph中-agent封装了消息记录的流程">LangGraph中，Agent封装了消息记录的流程</h3>
+<ul><li>短期记忆，例如一个会话中的记忆，langgraph封装成了checkpoint</li><li>长期记忆，指的是外部的记忆，多个会话的记忆，langgraph封装成了Store</li></ul>
+<p><img src="../../assets/img/posts/langgraph-02-memory/short-vs-long.png" alt="短期记忆与长期记忆" loading="lazy" decoding="async"/></p>
+<p>对于记忆管理，LangGraph的管理方式比具体实现或许更有参考价值 在具体实现时，LangGraph都默认提供了InMemorySaver和InMemoryStore，也同样可以转移到外部存储中，不过，短期记忆通常都是代表那些会话级别的小内存，长期记忆通常代表用户级别或者是应用级别的大内存。短期记忆的内存比较紧张，需要更加频繁的清理内存，并对已有消息记录进行总结，从而减少内存占用，而长期记忆的内存比较充足，不太频繁需要清理内存，需要关注的是对已有消息如何检索。</p>
+<h3 id="短期记忆">短期记忆</h3>
+<pre data-lang="python"><code>import os
+
+from langgraph.checkpoint.memory import InMemorySaver
+from langgraph.prebuilt import create_react_agent
+
+from config.load_key import load_key
+from langchain_openai import ChatOpenAI
+
+if not os.environ.get(&quot;OPENAI_API_KEY&quot;):
+    os.environ[&quot;OPENAI_API_KEY&quot;] = load_key(&quot;OPENAI_API_KEY&quot;)
+from langchain.tools import tool
+
+checkpointer = InMemorySaver()
+
+@tool
+def get_weather(city:str) -&gt; str:
+    &quot;&quot;&quot;Get the current weather in city.&quot;&quot;&quot;
+    return f&quot;The current weather in {city} is sunny with a temperature of 25°C.&quot;
+
+
+llm = ChatOpenAI(
+    model=&quot;gpt-4o-mini&quot;,
+    base_url=&quot;https://api.chatanywhere.tech/v1&quot;
+)
+
+agent = create_react_agent(
+    model=llm,
+    tools=[get_weather],
+    checkpointer=checkpointer
+)
+
+config = {
+    &quot;configurable&quot;: {
+        &quot;thread_id&quot;: &quot;1&quot;
+    }
+}
+
+new_york_response = agent.invoke(
+    {&quot;messages&quot;: [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;What is the weather like in New York?&quot;}]},
+    config
+)
+print(new_york_response)
+
+Bei_Jing_response = agent.invoke(
+    {&quot;messages&quot;: [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;What is the weather like in Bei Jing&quot;}]},
+    config
+)
+
+print(Bei_Jing_response)</code></pre>
+<pre data-lang="json"><code>{&#039;messages&#039;: [HumanMessage(content=&#039;What is the weather like in New York?&#039;, additional_kwargs={}, response_metadata={}, id=&#039;17a3a4bf-a276-4798-8fca-37f978a39c5a&#039;), AIMessage(content=&#039;&#039;, additional_kwargs={&#039;tool_calls&#039;: [{&#039;id&#039;: &#039;call_4fTSUEtaxYtcXkhwxvd0nawY&#039;, &#039;function&#039;: {&#039;arguments&#039;: &#039;{&quot;city&quot;:&quot;New York&quot;}&#039;, &#039;name&#039;: &#039;get_weather&#039;}, &#039;type&#039;: &#039;function&#039;}], &#039;refusal&#039;: None}, response_metadata={&#039;token_usage&#039;: {&#039;completion_tokens&#039;: 15, &#039;prompt_tokens&#039;: 53, &#039;total_tokens&#039;: 68, &#039;completion_tokens_details&#039;: {&#039;accepted_prediction_tokens&#039;: None, &#039;audio_tokens&#039;: 0, &#039;reasoning_tokens&#039;: 0, &#039;rejected_prediction_tokens&#039;: None}, &#039;prompt_tokens_details&#039;: {&#039;audio_tokens&#039;: 0, &#039;cached_tokens&#039;: 0}}, &#039;model_name&#039;: &#039;gpt-4o-mini-2024-07-18&#039;, &#039;system_fingerprint&#039;: &#039;fp_560af6e559&#039;, &#039;id&#039;: &#039;chatcmpl-C6z2nWKVqfHUEyeXtEVJM82GWfSwg&#039;, &#039;service_tier&#039;: None, &#039;finish_reason&#039;: &#039;tool_calls&#039;, &#039;logprobs&#039;: None}, id=&#039;run--738950e7-2155-4cda-b8d3-053eb0071462-0&#039;, tool_calls=[{&#039;name&#039;: &#039;get_weather&#039;, &#039;args&#039;: {&#039;city&#039;: &#039;New York&#039;}, &#039;id&#039;: &#039;call_4fTSUEtaxYtcXkhwxvd0nawY&#039;, &#039;type&#039;: &#039;tool_call&#039;}], usage_metadata={&#039;input_tokens&#039;: 53, &#039;output_tokens&#039;: 15, &#039;total_tokens&#039;: 68, &#039;input_token_details&#039;: {&#039;audio&#039;: 0, &#039;cache_read&#039;: 0}, &#039;output_token_details&#039;: {&#039;audio&#039;: 0, &#039;reasoning&#039;: 0}}), ToolMessage(content=&#039;The current weather in New York is sunny with a temperature of 25°C.&#039;, name=&#039;get_weather&#039;, id=&#039;c1679472-9adb-4233-9461-346185ed723a&#039;, tool_call_id=&#039;call_4fTSUEtaxYtcXkhwxvd0nawY&#039;), AIMessage(content=&#039;The current weather in New York is sunny with a temperature of 25°C.&#039;, additional_kwargs={&#039;refusal&#039;: None}, response_metadata={&#039;token_usage&#039;: {&#039;completion_tokens&#039;: 17, &#039;prompt_tokens&#039;: 92, &#039;total_tokens&#039;: 109, &#039;completion_tokens_details&#039;: {&#039;accepted_prediction_tokens&#039;: None, &#039;audio_tokens&#039;: 0, &#039;reasoning_tokens&#039;: 0, &#039;rejected_prediction_tokens&#039;: None}, &#039;prompt_tokens_details&#039;: {&#039;audio_tokens&#039;: 0, &#039;cached_tokens&#039;: 0}}, &#039;model_name&#039;: &#039;gpt-4o-mini-2024-07-18&#039;, &#039;system_fingerprint&#039;: &#039;fp_560af6e559&#039;, &#039;id&#039;: &#039;chatcmpl-C6z2pma7vXbLIx8bwehgKEaADeUGd&#039;, &#039;service_tier&#039;: None, &#039;finish_reason&#039;: &#039;stop&#039;, &#039;logprobs&#039;: None}, id=&#039;run--32456eec-3709-4dfd-8a13-43177179b4dd-0&#039;, usage_metadata={&#039;input_tokens&#039;: 92, &#039;output_tokens&#039;: 17, &#039;total_tokens&#039;: 109, &#039;input_token_details&#039;: {&#039;audio&#039;: 0, &#039;cache_read&#039;: 0}, &#039;output_token_details&#039;: {&#039;audio&#039;: 0, &#039;reasoning&#039;: 0}})]}
+{&#039;messages&#039;: [HumanMessage(content=&#039;What is the weather like in New York?&#039;, additional_kwargs={}, response_metadata={}, id=&#039;17a3a4bf-a276-4798-8fca-37f978a39c5a&#039;), AIMessage(content=&#039;&#039;, additional_kwargs={&#039;tool_calls&#039;: [{&#039;id&#039;: &#039;call_4fTSUEtaxYtcXkhwxvd0nawY&#039;, &#039;function&#039;: {&#039;arguments&#039;: &#039;{&quot;city&quot;:&quot;New York&quot;}&#039;, &#039;name&#039;: &#039;get_weather&#039;}, &#039;type&#039;: &#039;function&#039;}], &#039;refusal&#039;: None}, response_metadata={&#039;token_usage&#039;: {&#039;completion_tokens&#039;: 15, &#039;prompt_tokens&#039;: 53, &#039;total_tokens&#039;: 68, &#039;completion_tokens_details&#039;: {&#039;accepted_prediction_tokens&#039;: None, &#039;audio_tokens&#039;: 0, &#039;reasoning_tokens&#039;: 0, &#039;rejected_prediction_tokens&#039;: None}, &#039;prompt_tokens_details&#039;: {&#039;audio_tokens&#039;: 0, &#039;cached_tokens&#039;: 0}}, &#039;model_name&#039;: &#039;gpt-4o-mini-2024-07-18&#039;, &#039;system_fingerprint&#039;: &#039;fp_560af6e559&#039;, &#039;id&#039;: &#039;chatcmpl-C6z2nWKVqfHUEyeXtEVJM82GWfSwg&#039;, &#039;service_tier&#039;: None, &#039;finish_reason&#039;: &#039;tool_calls&#039;, &#039;logprobs&#039;: None}, id=&#039;run--738950e7-2155-4cda-b8d3-053eb0071462-0&#039;, tool_calls=[{&#039;name&#039;: &#039;get_weather&#039;, &#039;args&#039;: {&#039;city&#039;: &#039;New York&#039;}, &#039;id&#039;: &#039;call_4fTSUEtaxYtcXkhwxvd0nawY&#039;, &#039;type&#039;: &#039;tool_call&#039;}], usage_metadata={&#039;input_tokens&#039;: 53, &#039;output_tokens&#039;: 15, &#039;total_tokens&#039;: 68, &#039;input_token_details&#039;: {&#039;audio&#039;: 0, &#039;cache_read&#039;: 0}, &#039;output_token_details&#039;: {&#039;audio&#039;: 0, &#039;reasoning&#039;: 0}}), ToolMessage(content=&#039;The current weather in New York is sunny with a temperature of 25°C.&#039;, name=&#039;get_weather&#039;, id=&#039;c1679472-9adb-4233-9461-346185ed723a&#039;, tool_call_id=&#039;call_4fTSUEtaxYtcXkhwxvd0nawY&#039;), AIMessage(content=&#039;The current weather in New York is sunny with a temperature of 25°C.&#039;, additional_kwargs={&#039;refusal&#039;: None}, response_metadata={&#039;token_usage&#039;: {&#039;completion_tokens&#039;: 17, &#039;prompt_tokens&#039;: 92, &#039;total_tokens&#039;: 109, &#039;completion_tokens_details&#039;: {&#039;accepted_prediction_tokens&#039;: None, &#039;audio_tokens&#039;: 0, &#039;reasoning_tokens&#039;: 0, &#039;rejected_prediction_tokens&#039;: None}, &#039;prompt_tokens_details&#039;: {&#039;audio_tokens&#039;: 0, &#039;cached_tokens&#039;: 0}}, &#039;model_name&#039;: &#039;gpt-4o-mini-2024-07-18&#039;, &#039;system_fingerprint&#039;: &#039;fp_560af6e559&#039;, &#039;id&#039;: &#039;chatcmpl-C6z2pma7vXbLIx8bwehgKEaADeUGd&#039;, &#039;service_tier&#039;: None, &#039;finish_reason&#039;: &#039;stop&#039;, &#039;logprobs&#039;: None}, id=&#039;run--32456eec-3709-4dfd-8a13-43177179b4dd-0&#039;, usage_metadata={&#039;input_tokens&#039;: 92, &#039;output_tokens&#039;: 17, &#039;total_tokens&#039;: 109, &#039;input_token_details&#039;: {&#039;audio&#039;: 0, &#039;cache_read&#039;: 0}, &#039;output_token_details&#039;: {&#039;audio&#039;: 0, &#039;reasoning&#039;: 0}}), HumanMessage(content=&#039;What is the weather like in Bei Jing&#039;, additional_kwargs={}, response_metadata={}, id=&#039;ce33fe2e-95da-494b-ba35-abcf1332a794&#039;), AIMessage(content=&#039;&#039;, additional_kwargs={&#039;tool_calls&#039;: [{&#039;id&#039;: &#039;call_MvWURggjW263ekoheZo4nXf7&#039;, &#039;function&#039;: {&#039;arguments&#039;: &#039;{&quot;city&quot;:&quot;Bei Jing&quot;}&#039;, &#039;name&#039;: &#039;get_weather&#039;}, &#039;type&#039;: &#039;function&#039;}], &#039;refusal&#039;: None}, response_metadata={&#039;token_usage&#039;: {&#039;completion_tokens&#039;: 15, &#039;prompt_tokens&#039;: 124, &#039;total_tokens&#039;: 139, &#039;completion_tokens_details&#039;: {&#039;accepted_prediction_tokens&#039;: None, &#039;audio_tokens&#039;: 0, &#039;reasoning_tokens&#039;: 0, &#039;rejected_prediction_tokens&#039;: None}, &#039;prompt_tokens_details&#039;: {&#039;audio_tokens&#039;: 0, &#039;cached_tokens&#039;: 0}}, &#039;model_name&#039;: &#039;gpt-4o-mini-2024-07-18&#039;, &#039;system_fingerprint&#039;: &#039;fp_560af6e559&#039;, &#039;id&#039;: &#039;chatcmpl-C6z2rirOQNljCya3GOxM6rSSrTnKv&#039;, &#039;service_tier&#039;: None, &#039;finish_reason&#039;: &#039;tool_calls&#039;, &#039;logprobs&#039;: None}, id=&#039;run--3ef80e70-63bc-43cb-bce5-59a400c98ad7-0&#039;, tool_calls=[{&#039;name&#039;: &#039;get_weather&#039;, &#039;args&#039;: {&#039;city&#039;: &#039;Bei Jing&#039;}, &#039;id&#039;: &#039;call_MvWURggjW263ekoheZo4nXf7&#039;, &#039;type&#039;: &#039;tool_call&#039;}], usage_metadata={&#039;input_tokens&#039;: 124, &#039;output_tokens&#039;: 15, &#039;total_tokens&#039;: 139, &#039;input_token_details&#039;: {&#039;audio&#039;: 0, &#039;cache_read&#039;: 0}, &#039;output_token_details&#039;: {&#039;audio&#039;: 0, &#039;reasoning&#039;: 0}}), ToolMessage(content=&#039;The current weather in Bei Jing is sunny with a temperature of 25°C.&#039;, name=&#039;get_weather&#039;, id=&#039;9a03d150-adfb-4bb0-80f8-e0b24fc988e9&#039;, tool_call_id=&#039;call_MvWURggjW263ekoheZo4nXf7&#039;), AIMessage(content=&#039;The current weather in Beijing is sunny with a temperature of 25°C.&#039;, additional_kwargs={&#039;refusal&#039;: None}, response_metadata={&#039;token_usage&#039;: {&#039;completion_tokens&#039;: 16, &#039;prompt_tokens&#039;: 163, &#039;total_tokens&#039;: 179, &#039;completion_tokens_details&#039;: {&#039;accepted_prediction_tokens&#039;: None, &#039;audio_tokens&#039;: 0, &#039;reasoning_tokens&#039;: 0, &#039;rejected_prediction_tokens&#039;: None}, &#039;prompt_tokens_details&#039;: {&#039;audio_tokens&#039;: 0, &#039;cached_tokens&#039;: 0}}, &#039;model_name&#039;: &#039;gpt-4o-mini-2024-07-18&#039;, &#039;system_fingerprint&#039;: &#039;fp_560af6e559&#039;, &#039;id&#039;: &#039;chatcmpl-C6z2uXatMoYsuqtoNI0ZcyzZOSQ2F&#039;, &#039;service_tier&#039;: None, &#039;finish_reason&#039;: &#039;stop&#039;, &#039;logprobs&#039;: None}, id=&#039;run--dd5e9127-3543-4b2f-bdcb-226cd8012608-0&#039;, usage_metadata={&#039;input_tokens&#039;: 163, &#039;output_tokens&#039;: 16, &#039;total_tokens&#039;: 179, &#039;input_token_details&#039;: {&#039;audio&#039;: 0, &#039;cache_read&#039;: 0}, &#039;output_token_details&#039;: {&#039;audio&#039;: 0, &#039;reasoning&#039;: 0}})]}</code></pre>
+<h2 id="历史记录消息处理策略">历史记录消息处理策略</h2>
+<p>短期记忆被认为是比较紧张的，所以需要定期清理，防止历史消息过多。 LangGraph的Agent中，提供了一个pre_model_hook属性，可以在每次调用大模型触发，通过这个hook，可以定期管理短期记忆。 LangGraph中管理短期记忆的方法主要有两种：</p>
+<ul><li>Summarization总结：用大模型的方式，对短期记忆进行总结，再将总结的结果作为新的短期记忆。</li><li>Trimming删除：直接把短期记忆中最旧的消息删除掉。</li></ul>
+<p>LangGraph提供了SummarizationNode函数，用于是用大模型的方式对短期记忆进行总结。</p>
+<pre data-lang="python"><code>from typing import Any
+from langmem.short_term import SummarizationNode
+from langgraph.prebuilt.chat_agent_executor import AgentState
+from langchain_core.messages.utils import count_tokens_approximately
+
+# Summarization总结
+summarizationNode = SummarizationNode(
+    model = llm,
+    token_counter=count_tokens_approximately,
+    max_tokens=384,
+    max_summary_tokens=128,
+    output_messages_key=&quot;llm_input_messages&quot;
+)
+
+class State(AgentState):
+    # 注意：这个状态管理保存上一次总结的结果，避免每一次调用大模型结果时，都要调用一遍
+    # 这是一个比较常有的优化方式
+    context: dict[str, Any]
+
+
+checkpointer = InMemorySaver()
+
+agent = create_react_agent(
+        model=llm,
+        tools=[get_weather],
+        checkpointer=checkpointer,
+        pre_model_hook=summarizationNode,
+        state_schema=State
+ )</code></pre>
+<p>LangGraph通过trim_messages函数，用于最旧的信息进行删除。</p>
+<pre data-lang="python"><code>from langchain_core.messages.utils import (
+    count_tokens_approximately,
+    trim_messages
+)
+from langgraph.prebuilt import create_react_agent
+
+def pre_model_hook(state):
+    trimmed = trim_messages(
+        state[&quot;messages&quot;],
+        strategy=&quot;last&quot;,
+        token_counter = count_tokens_approximately,
+        max_tokens=384,
+        start_on=&quot;human&quot;,
+        end_on=(&quot;human&quot;,&quot;tool&quot;)
+    )
+    return {&quot;llm_input_messages&quot;: trimmed}
+
+checkpointer = InMemorySaver()
+agent = create_react_agent(
+    model=llm,
+    tools=[],
+    pre_model_hook=pre_model_hook,
+    checkpointer=checkpointer
+)</code></pre>
+<pre data-lang="python"><code>from langgraph.prebuilt import create_react_agent, InjectedState
+from typing import Annotated
+from langgraph.prebuilt.chat_agent_executor import AgentState
+from langchain_core.tools import tool
+class CustomState(AgentState):
+    user_id: str
+
+@tool
+def get_user_info(
+        state: Annotated[CustomState,InjectedState]
+) -&gt; str:
+    &quot;&quot;&quot;Get user information based on user_id in state.&quot;&quot;&quot;
+    user_id = state[&quot;user_id&quot;]
+    # 假设我们有一个函数可以获取用户信息
+    return &quot;12345用户的姓名：楼兰。&quot; if user_id == &quot;12345&quot; else &quot;用户信息未找到。&quot;
+
+agent = create_react_agent(
+    model=llm,
+    tools=[get_user_info],
+    state_schema=CustomState
+)
+
+agent.invoke({
+    &quot;messages&quot;: &quot;查询用户信息&quot;,
+    &quot;user_id&quot;: &quot;12345&quot;
+})</code></pre>
+<pre data-lang="python"><code>{&#039;messages&#039;: [HumanMessage(content=&#039;查询用户信息&#039;, additional_kwargs={}, response_metadata={}, id=&#039;bdb4bd80-87c7-403a-97d1-ab20839f95ad&#039;),
+  AIMessage(content=&#039;&#039;, additional_kwargs={&#039;tool_calls&#039;: [{&#039;id&#039;: &#039;call_QpltehNJA6jxm1t4I2wBFwj0&#039;, &#039;function&#039;: {&#039;arguments&#039;: &#039;{}&#039;, &#039;name&#039;: &#039;get_user_info&#039;}, &#039;type&#039;: &#039;function&#039;}], &#039;refusal&#039;: None}, response_metadata={&#039;token_usage&#039;: {&#039;completion_tokens&#039;: 11, &#039;prompt_tokens&#039;: 45, &#039;total_tokens&#039;: 56, &#039;completion_tokens_details&#039;: {&#039;accepted_prediction_tokens&#039;: None, &#039;audio_tokens&#039;: 0, &#039;reasoning_tokens&#039;: 0, &#039;rejected_prediction_tokens&#039;: None}, &#039;prompt_tokens_details&#039;: {&#039;audio_tokens&#039;: 0, &#039;cached_tokens&#039;: 0}}, &#039;model_name&#039;: &#039;gpt-4o-mini-2024-07-18&#039;, &#039;system_fingerprint&#039;: &#039;fp_560af6e559&#039;, &#039;id&#039;: &#039;chatcmpl-C6zqs94kODscY307jTet17XaTDlZj&#039;, &#039;service_tier&#039;: None, &#039;finish_reason&#039;: &#039;tool_calls&#039;, &#039;logprobs&#039;: None}, id=&#039;run--df886553-8363-4fad-9368-26e837d8b8e5-0&#039;, tool_calls=[{&#039;name&#039;: &#039;get_user_info&#039;, &#039;args&#039;: {}, &#039;id&#039;: &#039;call_QpltehNJA6jxm1t4I2wBFwj0&#039;, &#039;type&#039;: &#039;tool_call&#039;}], usage_metadata={&#039;input_tokens&#039;: 45, &#039;output_tokens&#039;: 11, &#039;total_tokens&#039;: 56, &#039;input_token_details&#039;: {&#039;audio&#039;: 0, &#039;cache_read&#039;: 0}, &#039;output_token_details&#039;: {&#039;audio&#039;: 0, &#039;reasoning&#039;: 0}}),
+  ToolMessage(content=&#039;12345用户的姓名：楼兰。&#039;, name=&#039;get_user_info&#039;, id=&#039;ae656ec2-ddfe-4730-b2f9-f12b55fc460e&#039;, tool_call_id=&#039;call_QpltehNJA6jxm1t4I2wBFwj0&#039;),
+  AIMessage(content=&#039;用户信息如下：  \n- 姓名：楼兰  \n- 用户ID：12345  &#039;, additional_kwargs={&#039;refusal&#039;: None}, response_metadata={&#039;token_usage&#039;: {&#039;completion_tokens&#039;: 21, &#039;prompt_tokens&#039;: 74, &#039;total_tokens&#039;: 95, &#039;completion_tokens_details&#039;: {&#039;accepted_prediction_tokens&#039;: None, &#039;audio_tokens&#039;: 0, &#039;reasoning_tokens&#039;: 0, &#039;rejected_prediction_tokens&#039;: None}, &#039;prompt_tokens_details&#039;: {&#039;audio_tokens&#039;: 0, &#039;cached_tokens&#039;: 0}}, &#039;model_name&#039;: &#039;gpt-4o-mini-2024-07-18&#039;, &#039;system_fingerprint&#039;: &#039;fp_560af6e559&#039;, &#039;id&#039;: &#039;chatcmpl-C6zquJVa1HYOMCjTmUX2vygrIbNbT&#039;, &#039;service_tier&#039;: None, &#039;finish_reason&#039;: &#039;stop&#039;, &#039;logprobs&#039;: None}, id=&#039;run--13f60571-562a-466a-8935-30c3e2574fbf-0&#039;, usage_metadata={&#039;input_tokens&#039;: 74, &#039;output_tokens&#039;: 21, &#039;total_tokens&#039;: 95, &#039;input_token_details&#039;: {&#039;audio&#039;: 0, &#039;cache_read&#039;: 0}, &#039;output_token_details&#039;: {&#039;audio&#039;: 0, &#039;reasoning&#039;: 0}})],
+ &#039;user_id&#039;: &#039;12345&#039;}</code></pre>
+<h4 id="保存长期记忆">保存长期记忆</h4>
+<p>保存长期记忆，通过保存不同的namespace,不太需要关注内存空间。 通过store属性来保存</p>
+<pre data-lang="python"><code>from langchain_core.runnables import RunnableConfig
+from langgraph.prebuilt import create_react_agent
+from langgraph.config import get_store
+from langgraph.store.memory import InMemoryStore
+from langchain_core.tools import tool
+from config.load_key import load_key
+# 定义长期存储
+store = InMemoryStore()
+
+store.put(
+    # 添加测试数据，users是命名空间，user_12345是键,值是用户信息
+    (&quot;users&quot;,),
+    &quot;user_12345&quot;,
+    {
+        &quot;name&quot;: &quot;楼兰&quot;,
+        &quot;age&quot;: 30
+    }
+)
+from langchain_openai import ChatOpenAI
+llm = ChatOpenAI(
+    model=&quot;gpt-4o-mini&quot;,
+    base_url=&quot;https://api.chatanywhere.tech/v1&quot;,
+    api_key=load_key(&quot;OPENAI_API_KEY&quot;)
+)
+
+@tool(return_direct=True)
+def get_user_info(config: RunnableConfig) -&gt; str:
+    &quot;&quot;&quot;查找用户信息&quot;&quot;&quot;
+    store = get_store()
+
+    user_id = config[&quot;configurable&quot;].get(&quot;user_id&quot;)
+    user_info = store.get((&quot;users&quot;,), user_id)
+    return str(user_info.value) if user_info else &quot;Unknow user&quot;
+
+
+agent = create_react_agent(
+    model=llm,
+    tools=[get_user_info],
+    store=store
+)
+
+agent.invoke({
+    &quot;messages&quot;: [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;查询用户12345的信息&quot;}]
+},
+config={&quot;configurable&quot;: {&quot;user_id&quot;: &quot;user_12345&quot;}}
+)
+
+
+
+
+{&#039;messages&#039;: [HumanMessage(content=&#039;查询用户12345的信息&#039;, additional_kwargs={}, response_metadata={}, id=&#039;dc91b4bd-cb7b-4ed4-b496-36327c67c907&#039;),
+  AIMessage(content=&#039;&#039;, additional_kwargs={&#039;tool_calls&#039;: [{&#039;id&#039;: &#039;call_Y7CyLX3SLibhyBRGHeUH7h2E&#039;, &#039;function&#039;: {&#039;arguments&#039;: &#039;{}&#039;, &#039;name&#039;: &#039;get_user_info&#039;}, &#039;type&#039;: &#039;function&#039;}], &#039;refusal&#039;: None}, response_metadata={&#039;token_usage&#039;: {&#039;completion_tokens&#039;: 12, &#039;prompt_tokens&#039;: 42, &#039;total_tokens&#039;: 54, &#039;completion_tokens_details&#039;: {&#039;accepted_prediction_tokens&#039;: None, &#039;audio_tokens&#039;: 0, &#039;reasoning_tokens&#039;: 0, &#039;rejected_prediction_tokens&#039;: None}, &#039;prompt_tokens_details&#039;: {&#039;audio_tokens&#039;: 0, &#039;cached_tokens&#039;: 0}}, &#039;model_name&#039;: &#039;gpt-4o-mini&#039;, &#039;system_fingerprint&#039;: &#039;fp_efad92c60b&#039;, &#039;id&#039;: &#039;chatcmpl-C8ostTtyNq5HruRuerGMMNU9jvDQh&#039;, &#039;service_tier&#039;: None, &#039;finish_reason&#039;: &#039;tool_calls&#039;, &#039;logprobs&#039;: None}, id=&#039;run--c028068e-d78f-46a3-a921-20eb2b7a3361-0&#039;, tool_calls=[{&#039;name&#039;: &#039;get_user_info&#039;, &#039;args&#039;: {}, &#039;id&#039;: &#039;call_Y7CyLX3SLibhyBRGHeUH7h2E&#039;, &#039;type&#039;: &#039;tool_call&#039;}], usage_metadata={&#039;input_tokens&#039;: 42, &#039;output_tokens&#039;: 12, &#039;total_tokens&#039;: 54, &#039;input_token_details&#039;: {&#039;audio&#039;: 0, &#039;cache_read&#039;: 0}, &#039;output_token_details&#039;: {&#039;audio&#039;: 0, &#039;reasoning&#039;: 0}}),
+  ToolMessage(content=&quot;{&#039;name&#039;: &#039;楼兰&#039;, &#039;age&#039;: 30}&quot;, name=&#039;get_user_info&#039;, id=&#039;cc607535-480b-4875-b5e8-ba77d8cde246&#039;, tool_call_id=&#039;call_Y7CyLX3SLibhyBRGHeUH7h2E&#039;)]}
+</code></pre>
+<h3 id="human-in-the-look-人类干预监督">human-in-the-look，人类干预监督</h3>
+<p>Agent工作过程中，添加Tools工具，但是要不要调用，也是Agent来判断，容易产生错误判断，Langgraph引入了Human-in-look功能，允许用户进行监督，中断当前任务，等待用户输入后，重新恢复任务 在具体实现时，通过添加interrupt()方法</p>
+<pre data-lang="python"><code>from langgraph.types import interrupt
+from langgraph.checkpoint.memory import InMemorySaver
+from langgraph.prebuilt import create_react_agent
+from langchain.tools import tool
+
+checkpointer = InMemorySaver()
+
+@tool
+def book_hotel(hotel_name: str):
+    &quot;&quot;&quot;预定宾馆房间&quot;&quot;&quot;
+    response = interrupt(
+        f&quot;正准备执行&#039;&#039;book_hotel&#039;工具，相关参数名：{{&#039;hotel_name&#039;: {hotel_name}}}. &quot;
+        &quot;请选择OK,表示同意，或者选择edit,提出补充意见&quot;
+    )
+    if response[&quot;type&quot;] == &quot;OK&quot;:
+        pass
+    elif response[&quot;type&quot;] == &quot;edit&quot;:
+        hotel_name = response[&quot;args&quot;][&quot;hotel_name&quot;]
+    else:
+        raise ValueError(f&quot;Unknown response type: {response[&#039;type&#039;]}&quot;)
+    return f&quot;已预定房间：{hotel_name}&quot;
+
+agent = create_react_agent(
+    model=llm,
+    tools=[book_hotel],
+    checkpointer=checkpointer
+)
+
+config = {
+    &quot;configurable&quot;: {
+        &quot;thread_id&quot;: &quot;2&quot;
+    }
+}
+
+for chunk in agent.stream(
+    {&quot;messages&quot;: [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;帮我在图灵宾馆预定一个房间&quot;}]},
+    config
+):
+    print(chunk)
+    print(&quot;\n&quot;)</code></pre>
+<pre data-lang="json"><code>{&#039;agent&#039;: {&#039;messages&#039;: [AIMessage(content=&#039;&#039;, additional_kwargs={&#039;tool_calls&#039;: [{&#039;id&#039;: &#039;call_03RArk29bxrthQnKfXbKcI5Z&#039;, &#039;function&#039;: {&#039;arguments&#039;: &#039;{&quot;hotel_name&quot;:&quot;图灵宾馆&quot;}&#039;, &#039;name&#039;: &#039;book_hotel&#039;}, &#039;type&#039;: &#039;function&#039;}], &#039;refusal&#039;: None}, response_metadata={&#039;token_usage&#039;: {&#039;completion_tokens&#039;: 20, &#039;prompt_tokens&#039;: 59, &#039;total_tokens&#039;: 79, &#039;completion_tokens_details&#039;: {&#039;accepted_prediction_tokens&#039;: None, &#039;audio_tokens&#039;: 0, &#039;reasoning_tokens&#039;: 0, &#039;rejected_prediction_tokens&#039;: None}, &#039;prompt_tokens_details&#039;: {&#039;audio_tokens&#039;: 0, &#039;cached_tokens&#039;: 0}}, &#039;model_name&#039;: &#039;gpt-4o-mini&#039;, &#039;system_fingerprint&#039;: &#039;fp_efad92c60b&#039;, &#039;id&#039;: &#039;chatcmpl-C9A2Yrf4VMv5CyRnaA11Snyen1jaa&#039;, &#039;service_tier&#039;: None, &#039;finish_reason&#039;: &#039;tool_calls&#039;, &#039;logprobs&#039;: None}, id=&#039;run--ca348be1-6873-4afa-b63e-3f4b8baa2642-0&#039;, tool_calls=[{&#039;name&#039;: &#039;book_hotel&#039;, &#039;args&#039;: {&#039;hotel_name&#039;: &#039;图灵宾馆&#039;}, &#039;id&#039;: &#039;call_03RArk29bxrthQnKfXbKcI5Z&#039;, &#039;type&#039;: &#039;tool_call&#039;}], usage_metadata={&#039;input_tokens&#039;: 59, &#039;output_tokens&#039;: 20, &#039;total_tokens&#039;: 79, &#039;input_token_details&#039;: {&#039;audio&#039;: 0, &#039;cache_read&#039;: 0}, &#039;output_token_details&#039;: {&#039;audio&#039;: 0, &#039;reasoning&#039;: 0}})]}}
+
+
+{&#039;__interrupt__&#039;: (Interrupt(value=&quot;正准备执行&#039;&#039;book_hotel&#039;工具，相关参数名：{&#039;hotel_name&#039;: 图灵宾馆}. 请选择OK,表示同意，或者选择edit,提出补充意见&quot;, id=&#039;8f005066f72b9147c972c92d61aa8789&#039;),)}
+
+</code></pre>
+<p>执行完成后，在book_hotel执行过程中，输入一个interrupt相应，表示等待当前用户输入。 接下来可以通过Agent提交一个Command请求， 完成之前任务</p>
+<pre data-lang="python"><code>from langgraph.types import Command
+
+
+for chunk in agent.stream(
+    Command(resume={&quot;type&quot;: &quot;OK&quot;}),
+    config
+):
+    print(chunk)
+    print(chunk[&#039;tools&#039;][&#039;messages&#039;][-1].content)
+    print(&quot;\n&quot;)
+
+{&#039;tools&#039;: {&#039;messages&#039;: [ToolMessage(content=&#039;已预定房间：图灵宾馆&#039;, name=&#039;book_hotel&#039;, id=&#039;5cba8589-aee5-4b72-8107-b139fae9f9cf&#039;, tool_call_id=&#039;call_be4TcuUcDXBTqu5vyBZNBHbU&#039;)]}}
+已预定房间：图灵宾馆
+
+</code></pre>
+        </div>
+      </article>
+
+      <aside class="article-side">
+        <div class="side-panel reveal">
+          <p class="side-panel-title">标签</p>
+          <div class="tag-list"><a class="tag-pill" href="../../posts.html?tag=LangGraph">LangGraph</a><a class="tag-pill" href="../../posts.html?tag=Memory">Memory</a><a class="tag-pill" href="../../posts.html?tag=Checkpoint">Checkpoint</a></div>
+        </div>
+      </aside>
+
+      <footer class="article-footer reveal">
+        <a class="button" href="../../posts.html">返回文章列表</a>
+        <button class="button" type="button" data-share="https://begc.github.io/posts/langgraph-02-memory/">复制链接</button>
+      </footer>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <span>© 2026 RuiJie Notes</span>
+      <div class="footer-links">
+        <a href="../../index.html">首页</a>
+        <a href="../../posts.html">文章</a>
+        <a href="../../tags.html">专题</a>
+      </div>
+    </div>
+  </footer>
+  <div class="toast" id="toast" role="status"></div>
+  <script src="../../assets/js/site.js?v=20260711-4"></script>
+</body>
+</html>
