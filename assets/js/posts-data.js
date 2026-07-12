@@ -12,7 +12,7 @@ window.BLOG_POSTS = [
       "智能体"
     ],
     "category": "大模型学习",
-    "cover": "assets/img/posts/langgraph-06-multi-agent/image_2o.png",
+    "cover": "assets/img/covers/langgraph-06-multi-agent.jpg",
     "featured": false,
     "readMinutes": 1
   },
@@ -29,7 +29,7 @@ window.BLOG_POSTS = [
       "智能体"
     ],
     "category": "大模型学习",
-    "cover": "assets/img/posts/langgraph-05-agent-workflow/approve-or-reject-png-filename-utf-8approve-or.png",
+    "cover": "assets/img/covers/langgraph-05-agent-workflow.jpg",
     "featured": false,
     "readMinutes": 3
   },
@@ -46,7 +46,7 @@ window.BLOG_POSTS = [
       "状态管理"
     ],
     "category": "大模型学习",
-    "cover": "assets/img/posts/langgraph-04-graph/image_7.png",
+    "cover": "assets/img/covers/langgraph-04-graph.jpg",
     "featured": false,
     "readMinutes": 6
   },
@@ -63,7 +63,7 @@ window.BLOG_POSTS = [
       "工具调用"
     ],
     "category": "大模型学习",
-    "cover": "assets/img/posts/langgraph-03-mcp/image_r.png",
+    "cover": "assets/img/covers/langgraph-03-mcp.jpg",
     "featured": false,
     "readMinutes": 2
   },
@@ -79,7 +79,7 @@ window.BLOG_POSTS = [
       "节点搭建"
     ],
     "category": "大数据工程",
-    "cover": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=80",
+    "cover": "assets/img/covers/kafka-build.jpg",
     "featured": false,
     "readMinutes": 1
   },
@@ -96,7 +96,7 @@ window.BLOG_POSTS = [
       "Checkpoint"
     ],
     "category": "大模型学习",
-    "cover": "assets/img/posts/langgraph-02-memory/short-vs-long.png",
+    "cover": "assets/img/covers/langgraph-02-memory.jpg",
     "featured": false,
     "readMinutes": 3
   },
@@ -113,7 +113,7 @@ window.BLOG_POSTS = [
       "大模型"
     ],
     "category": "大模型学习",
-    "cover": "https://images.unsplash.com/photo-1493246507139-91e8fad9978e?auto=format&fit=crop&w=1200&q=80",
+    "cover": "assets/img/covers/langgraph-01-introduction.jpg",
     "featured": false,
     "readMinutes": 1
   },
@@ -130,7 +130,7 @@ window.BLOG_POSTS = [
       "RAG"
     ],
     "category": "大模型学习",
-    "cover": "assets/img/posts/langchain-04-fastgpt-rag-service/image_d.png",
+    "cover": "assets/img/covers/langchain-04-fastgpt-rag-service.jpg",
     "featured": false,
     "readMinutes": 2
   },
@@ -147,7 +147,7 @@ window.BLOG_POSTS = [
       "本地模型"
     ],
     "category": "大模型学习",
-    "cover": "assets/img/posts/langchain-03-local-models/image_g.png",
+    "cover": "assets/img/covers/langchain-03-local-models.jpg",
     "featured": false,
     "readMinutes": 1
   },
@@ -164,7 +164,7 @@ window.BLOG_POSTS = [
       "节点搭建"
     ],
     "category": "Linux 运维",
-    "cover": "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=80",
+    "cover": "assets/img/covers/nacosAccessPolicy.jpg",
     "featured": true,
     "readMinutes": 3
   },
@@ -181,7 +181,7 @@ window.BLOG_POSTS = [
       "向量检索"
     ],
     "category": "大模型学习",
-    "cover": "assets/img/posts/langchain-02-rag-practice/image_n.png",
+    "cover": "assets/img/covers/langchain-02-rag-practice.jpg",
     "featured": false,
     "readMinutes": 6
   },
@@ -198,7 +198,7 @@ window.BLOG_POSTS = [
       "大模型"
     ],
     "category": "大模型学习",
-    "cover": "assets/img/posts/langchain-01-basics-and-embedding/image_l.png",
+    "cover": "assets/img/covers/langchain-01-basics-and-embedding.jpg",
     "featured": false,
     "readMinutes": 3
   },
@@ -215,7 +215,7 @@ window.BLOG_POSTS = [
       "性能调优"
     ],
     "category": "大数据工程",
-    "cover": "assets/img/posts/flink-performance-tuning/image_p.png",
+    "cover": "assets/img/covers/flink-performance-tuning.jpg",
     "featured": false,
     "readMinutes": 48
   },
@@ -232,7 +232,7 @@ window.BLOG_POSTS = [
       "Linux"
     ],
     "category": "Linux 运维",
-    "cover": "https://images.unsplash.com/photo-1425913397330-cf8af2ff40a1?auto=format&fit=crop&w=1200&q=80",
+    "cover": "assets/img/covers/docker-mysql8.jpg",
     "featured": false,
     "readMinutes": 2
   },
@@ -249,7 +249,7 @@ window.BLOG_POSTS = [
       "理论研究"
     ],
     "category": "Linux 运维",
-    "cover": "https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=1200&q=80",
+    "cover": "assets/img/covers/memoryOverflowTroubleshooting.jpg",
     "featured": true,
     "readMinutes": 2
   },
@@ -266,7 +266,7 @@ window.BLOG_POSTS = [
       "生活记录"
     ],
     "category": "生活记录",
-    "cover": "assets/img/posts/qingdao-three-day-trip/e5af06f0-8e2a-44a9-b7ff-0e11653f5dcd_1_105_c.jpeg",
+    "cover": "assets/img/covers/qingdao-three-day-trip.jpg",
     "featured": false,
     "readMinutes": 2
   },
@@ -283,7 +283,7 @@ window.BLOG_POSTS = [
       "理论学习"
     ],
     "category": "大数据工程",
-    "cover": "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1200&q=80",
+    "cover": "assets/img/covers/hivetheorystudy.jpg",
     "featured": true,
     "readMinutes": 55
   },
@@ -300,7 +300,7 @@ window.BLOG_POSTS = [
       "节点搭建"
     ],
     "category": "大数据工程",
-    "cover": "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1200&q=80",
+    "cover": "assets/img/covers/Hive-build.jpg",
     "featured": true,
     "readMinutes": 2
   },
@@ -316,7 +316,7 @@ window.BLOG_POSTS = [
       "节点搭建"
     ],
     "category": "大数据工程",
-    "cover": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80",
+    "cover": "assets/img/covers/install-mysql8-arch.jpg",
     "featured": false,
     "readMinutes": 1
   },
@@ -333,7 +333,7 @@ window.BLOG_POSTS = [
       "源码研究"
     ],
     "category": "大数据工程",
-    "cover": "https://images.unsplash.com/photo-1425913397330-cf8af2ff40a1?auto=format&fit=crop&w=1200&q=80",
+    "cover": "assets/img/covers/hadoopMapReduceTheoryStudy.jpg",
     "featured": false,
     "readMinutes": 3
   },
@@ -349,7 +349,7 @@ window.BLOG_POSTS = [
       "节点搭建"
     ],
     "category": "大数据工程",
-    "cover": "https://images.unsplash.com/photo-1493246507139-91e8fad9978e?auto=format&fit=crop&w=1200&q=80",
+    "cover": "assets/img/covers/mapreduce-build.jpg",
     "featured": false,
     "readMinutes": 3
   },
@@ -366,7 +366,7 @@ window.BLOG_POSTS = [
       "linux"
     ],
     "category": "Linux 运维",
-    "cover": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=1200&q=80",
+    "cover": "assets/img/covers/centos-iptablesconfig.jpg",
     "featured": true,
     "readMinutes": 1
   },
@@ -383,7 +383,7 @@ window.BLOG_POSTS = [
       "理论学习"
     ],
     "category": "大数据工程",
-    "cover": "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80",
+    "cover": "assets/img/covers/hadoopTheoryStudy.jpg",
     "featured": false,
     "readMinutes": 14
   },
@@ -399,7 +399,7 @@ window.BLOG_POSTS = [
       "节点搭建"
     ],
     "category": "大数据工程",
-    "cover": "https://images.unsplash.com/photo-1518779578993-ec3579fee39f?auto=format&fit=crop&w=1200&q=80",
+    "cover": "assets/img/covers/hadoop-build.jpg",
     "featured": false,
     "readMinutes": 5
   },
@@ -416,7 +416,7 @@ window.BLOG_POSTS = [
       "节点搭建"
     ],
     "category": "Linux 运维",
-    "cover": "https://images.unsplash.com/photo-1510915361894-db8b60106cb1?auto=format&fit=crop&w=1200&q=80",
+    "cover": "assets/img/covers/centos-init-config.jpg",
     "featured": true,
     "readMinutes": 1
   },
@@ -434,7 +434,7 @@ window.BLOG_POSTS = [
       "gin"
     ],
     "category": "源码阅读",
-    "cover": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=1200&q=80",
+    "cover": "assets/img/covers/golang.jpg",
     "featured": false,
     "readMinutes": 7
   }

@@ -39,6 +39,8 @@ const coverBySlug = {
 };
 
 function stableCover(slug, cover) {
+  const localLandscapeCover = `assets/img/covers/${slug}.jpg`;
+  if (fs.existsSync(path.join(root, localLandscapeCover))) return localLandscapeCover;
   if (cover && (/^https:\/\/images\.unsplash\.com\//.test(cover) || /^\/?assets\/img\//.test(cover))) {
     return cover.replace(/^\/+/, "");
   }
