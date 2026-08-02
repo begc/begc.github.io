@@ -84,6 +84,8 @@
       "arrow-right": '<path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path>',
       "book-open": '<path d="M12 7v14"></path><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"></path>',
       "chevron-down": '<path d="m6 9 6 6 6-6"></path>',
+      check: '<path d="M20 6 9 17l-5-5"></path>',
+      copy: '<rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path>',
       github: '<path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.1-1.3-.3-2.6-1.2-3.6.2-1.2.2-2.4-.1-3.6 0 0-1-.3-3.5 1.3a12.3 12.3 0 0 0-6.4 0C6.3 1.1 5.3 1.4 5.3 1.4c-.3 1.2-.3 2.4-.1 3.6A5.4 5.4 0 0 0 4 8.6C4 12 7 14 10 14.1a4.8 4.8 0 0 0-1 3.5v4"></path><path d="M9 18c-4.5 2-5-2-7-2"></path>',
       "layers-3": '<path d="m12 2 10 5-10 5L2 7z"></path><path d="m2 17 10 5 10-5"></path><path d="m2 12 10 5 10-5"></path>',
       menu: '<path d="M4 12h16"></path><path d="M4 6h16"></path><path d="M4 18h16"></path>',
@@ -275,6 +277,80 @@
         showToast("当前浏览器不支持自动复制");
       });
     });
+  }
+
+  function copyText(value) {
+    if (navigator.clipboard && navigator.clipboard.writeText && window.isSecureContext) {
+      return navigator.clipboard.writeText(value);
+    }
+    return new Promise(function (resolve, reject) {
+      var input = document.createElement("textarea");
+      input.value = value;
+      input.setAttribute("readonly", "");
+      input.style.position = "fixed";
+      input.style.top = "-9999px";
+      input.style.opacity = "0";
+      document.body.appendChild(input);
+      input.select();
+      input.setSelectionRange(0, input.value.length);
+      try {
+        if (!document.execCommand("copy")) throw new Error("Copy command failed");
+        resolve();
+      } catch (error) {
+        reject(error);
+      } finally {
+        input.remove();
+      }
+    });
+  }
+
+  function setupCodeCopy(root) {
+    $all(".markdown-body pre", root || document).forEach(function (pre) {
+      if (pre.dataset.copyReady) return;
+      var code = $("code", pre);
+      if (!code || !pre.parentNode) return;
+      pre.dataset.copyReady = "true";
+
+      var wrap = document.createElement("div");
+      wrap.className = "code-block";
+      pre.parentNode.insertBefore(wrap, pre);
+      wrap.appendChild(pre);
+
+      var toolbar = document.createElement("div");
+      toolbar.className = "code-toolbar";
+
+      var language = document.createElement("span");
+      language.className = "code-language";
+      language.textContent = pre.getAttribute("data-lang") || "code";
+
+      var button = document.createElement("button");
+      button.className = "code-copy-button";
+      button.type = "button";
+      button.title = "复制代码";
+      button.setAttribute("aria-label", "复制代码");
+
+      function paintButton(copied, refreshIcons) {
+        button.classList.toggle("is-copied", copied);
+        button.innerHTML = renderIcon(copied ? "check" : "copy") + "<span>" + (copied ? "已复制" : "复制") + "</span>";
+        if (refreshIcons) updateLucide();
+      }
+
+      button.addEventListener("click", function () {
+        copyText(code.textContent || "").then(function () {
+          paintButton(true, true);
+          clearTimeout(button.copyResetTimer);
+          button.copyResetTimer = setTimeout(function () { paintButton(false, true); }, 1800);
+        }).catch(function () {
+          showToast("复制失败，请手动复制");
+        });
+      });
+
+      paintButton(false, false);
+      toolbar.appendChild(language);
+      toolbar.appendChild(button);
+      wrap.insertBefore(toolbar, pre);
+    });
+    updateLucide();
   }
 
   function setupReadProgress() {
@@ -847,6 +923,7 @@
         ? window.marked.parse(markdown, { gfm: true, breaks: false })
         : simpleMarkdown(markdown);
       enhanceMarkdown(root);
+      setupCodeCopy(root);
       buildToc(root);
       setupTocDisclosure();
       setupReadProgress();
@@ -867,6 +944,7 @@
   function setupStaticPostPage() {
     var root = $(".article-body");
     if (!root) return;
+    setupCodeCopy(root);
     buildToc(root);
     setupTocDisclosure();
     setupReadProgress();

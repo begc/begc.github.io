@@ -6,7 +6,7 @@ const { execFileSync } = require("child_process");
 const root = path.resolve(__dirname, "..");
 const siteOrigin = (process.env.SITE_ORIGIN || "https://begc.github.io").replace(/\/+$/, "");
 const siteName = process.env.SITE_NAME || "RuiJie Notes";
-const version = "20260711-4";
+const version = "20260802-1";
 
 execFileSync(process.execPath, [path.join(root, "scripts/build-posts-data.js")], {
   cwd: root,

@@ -25,6 +25,14 @@ featured: false
 正文内容写在这里。
 ```
 
+正文中的 Markdown 代码块会自动显示语言名称和“复制”按钮，不需要在文章里额外写 HTML：
+
+````md
+```python
+print("Hello, RuiJie Notes")
+```
+````
+
 ## 2. 图片放哪里
 
 优先用可靠的远程图片地址：
@@ -81,9 +89,9 @@ featured: true
 如果线上页面还在读旧内容，把 HTML 里的资源版本号往上加一版，例如：
 
 ```html
-assets/js/posts-data.js?v=20260711-4
-assets/js/site.js?v=20260711-4
-assets/css/site.css?v=20260711-4
+assets/js/posts-data.js?v=20260802-1
+assets/js/site.js?v=20260802-1
+assets/css/site.css?v=20260802-1
 ```
 
 当前项目没有自动打包工具，所以这个版本号就是最直接的缓存刷新方式。
