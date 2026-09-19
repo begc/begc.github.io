@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /learn/
 
 Sitemap: https://begc.github.io/sitemap.xml
